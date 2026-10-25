@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0e1a">
-<title>StreamVault-Next</title>
+<title>StreamVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
 <style>
@@ -76,31 +76,22 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 let tt;const toast=m=>{const t=$('#toast');t.textContent=m;clearTimeout(tt);tt=setTimeout(()=>t.textContent='',3500)};
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch{toast('Browser storage is full or blocked. Changes will not be kept.');return false}}};
 const S={key:ls.get('sv_key',''),tpl:ls.get('sv_tpl',''),lang:ls.get('sv_lang','en-US')};
-let L=ls.get('sv_lib',null)||{watch:[],plan:[],done:[],cw:{},pos:{},hist:[]};const saveL=()=>{ls.set('sv_lib',L);push()};
-let retry=()=>route(),PT=0,ac,D={},P=null,libTab='cw',SRV=null,syncT;
-const hasProv=()=>!!(S.tpl||(SRV?.user&&SRV.provider));
-const J=(m,p,b)=>fetch(p,{method:m,headers:{'Content-Type':'application/json'},body:b&&JSON.stringify(b)});
-function push(){if(!SRV?.user)return;clearTimeout(syncT);syncT=setTimeout(()=>J('PUT','/api/library',{data:L}).catch(()=>toast('Could not sync your library. It is still saved on this device.')),1500)}
-const mkey=x=>x.type+x.id;
-function mergeL(a,b){const u=(x,y)=>{const m=new Map();[...x,...y].forEach(i=>m.has(mkey(i))||m.set(mkey(i),i));return[...m.values()]};
- const cw={...b.cw};for(const[k,c]of Object.entries(a.cw||{}))if(!cw[k]||c.at>cw[k].at)cw[k]=c;
- return{watch:u(a.watch||[],b.watch||[]),plan:u(a.plan||[],b.plan||[]),done:u(a.done||[],b.done||[]),cw,pos:{...b.pos,...a.pos},hist:[...(a.hist||[]),...(b.hist||[])].sort((x,y)=>y.at-x.at).filter((x,i,r)=>r.findIndex(z=>z.at===x.at)===i).slice(0,100)}}
-async function pull(){try{const r=await fetch('/api/library');if(!r.ok)return;const j=await r.json();L=j.data?mergeL(L,j.data):L;ls.set('sv_lib',L);push()}catch{}}
-async function refreshMe(){try{const r=await fetch('/api/me');const j=await r.json();SRV=j&&'user' in j?j:null}catch{SRV=null}}
+let L=ls.get('sv_lib',null)||{watch:[],plan:[],done:[],cw:{},pos:{},hist:[]};const saveL=()=>ls.set('sv_lib',L);
+let retry=()=>route(),PT=0,ac,D={},P=null,libTab='cw';
 /* ---------- TMDB ---------- */
 const cache=new Map(),IMG='https://image.tmdb.org/t/p/';
 async function api(path,params={},signal){
- const srv=!!SRV?.user;if(!S.key&&!srv)throw{code:'nokey'};
- const u=new URL(srv?'/api/tmdb'+path:'https://api.themoviedb.org/3'+path,location.href),h={};
- if(!srv){if(S.key.length>40)h.Authorization='Bearer '+S.key;else u.searchParams.set('api_key',S.key)}
+ if(!S.key)throw{code:'nokey'};
+ const u=new URL('https://api.themoviedb.org/3'+path),h={};
+ if(S.key.length>40)h.Authorization='Bearer '+S.key;else u.searchParams.set('api_key',S.key);
  u.searchParams.set('language',S.lang);
  for(const[k,v]of Object.entries(params))if(v!==''&&v!=null)u.searchParams.set(k,v);
  const ck=u.toString();if(cache.has(ck))return cache.get(ck);
  let r;try{r=await fetch(u,{headers:h,signal})}catch(e){if(e.name==='AbortError')throw e;throw{code:'net'}}
- if(r.status===401)throw srv?{code:'login'}:{code:'auth'};if(r.status===429)throw{code:'rate'};if(!r.ok)throw{code:'http',status:r.status};
+ if(r.status===401)throw{code:'auth'};if(r.status===429)throw{code:'rate'};if(!r.ok)throw{code:'http',status:r.status};
  const j=await r.json();cache.set(ck,j);return j}
-const errMsg=e=>({login:'Your session ended. Log in again in Settings.',nokey:'Add your TMDB key in Settings to load titles.',auth:'TMDB rejected the key. Check it in Settings.',rate:'TMDB rate limit reached. Wait a moment, then retry.',net:'Network problem. Check your connection, then retry.'}[e.code]||'TMDB returned an error ('+(e.status||'unknown')+').');
-const errBox=e=>`<div class="empty"><p>${esc(errMsg(e))}</p>${e.code==='nokey'||e.code==='auth'||e.code==='login'?'<a class="btn pri" href="#/settings">Open settings</a>':'<button class="btn retry">Retry</button>'}</div>`;
+const errMsg=e=>({nokey:'Add your TMDB key in Settings to load titles.',auth:'TMDB rejected the key. Check it in Settings.',rate:'TMDB rate limit reached. Wait a moment, then retry.',net:'Network problem. Check your connection, then retry.'}[e.code]||'TMDB returned an error ('+(e.status||'unknown')+').');
+const errBox=e=>`<div class="empty"><p>${esc(errMsg(e))}</p>${e.code==='nokey'||e.code==='auth'?'<a class="btn pri" href="#/settings">Open settings</a>':'<button class="btn retry">Retry</button>'}</div>`;
 const norm=(x,t)=>({id:x.id,type:x.media_type||t||(x.title?'movie':'tv'),title:x.title||x.name||'Untitled',poster:x.poster_path,bd:x.backdrop_path,ov:x.overview,year:(x.release_date||x.first_air_date||'').slice(0,4),vote:x.vote_average||0});
 const img=(p,w)=>p?IMG+w+p:'';
 function fb(i){const s=document.createElement('span');s.className='ph';s.textContent=i.dataset.n;i.replaceWith(s)}
@@ -157,9 +148,126 @@ function search(sig){
   pager(async p=>{const d=await api('/search/multi',{query:v,page:p,include_adult:'false'},sig);return{items:d.results.filter(x=>x.media_type!=='person').map(x=>norm(x)),total:d.total_pages}},$('#grid'),$('#more'),`No results for “${esc(v)}”. Check the spelling or try a shorter title.`)};
  q.oninput=()=>{clearTimeout(t);t=setTimeout(run,350)};$('#sf').onreset=()=>{clearTimeout(t);setTimeout(()=>{run();q.focus()})}}
 function library(){
- const T=[['cw','Continue'],['watch','Watchlist'],['plan','Planned'],['done','Watched'],['hist','History']];if(SRV?.user&&SRV.mal?.connected)T.push(['mal','MyAnimeList']);
+ const T=[['cw','Continue'],['watch','Watchlist'],['plan','Planned'],['done','Watched'],['hist','History']];
  let h='';
  if(libTab==='cw'){const e=Object.entries(L.cw).sort((a,b)=>b[1].at-a[1].at);h=e.map(([k,c])=>lcard(c.item,`data-resume="${k}"`,'cw|'+k,`<div class="pg"><i style="width:${Math.min(100,c.t/c.d*100)}%"></i></div>`)).join('')}
  else if(libTab==='hist')h=L.hist.map((x,i)=>lcard(x.item,`data-t="${x.item.type}" data-id="${x.item.id}"`,'hist|'+i)).join('');
- else if(libTab!=='mal')h=L[libTab].map((x,i)=>lcard(x,'',libTab+'|'+i)).join('');
- $('#app').innerHTML=`<h1 class="pt">Library</h1><div class="tabs" role="tablist">${T.map(([k,n])=>`<button class="btn ${k===libTab?'on':''}" role="tab" aria-selected="${k===libTab}" data-tab="${k}">${n}</button>`).join('')}${libTab==='hist'&&L.hist.length?'<button class="btn" data-clear="hist">Clear history</button>':''}</div><div class="grid" id="lg">${libTab==='mal'?'':h||'<p class="empty">Nothing here yet. Open a title and save it to a list, or start watching.</p>'}</div>`
+ else h=L[libTab].map((x,i)=>lcard(x,'',libTab+'|'+i)).join('');
+ $('#app').innerHTML=`<h1 class="pt">Library</h1><div class="tabs" role="tablist">${T.map(([k,n])=>`<button class="btn ${k===libTab?'on':''}" role="tab" aria-selected="${k===libTab}" data-tab="${k}">${n}</button>`).join('')}${libTab==='hist'&&L.hist.length?'<button class="btn" data-clear="hist">Clear history</button>':''}</div><div class="grid">${h||'<p class="empty">Nothing here yet. Open a title and save it to a list, or start watching.</p>'}</div>`}
+function settings(){
+ $('#app').innerHTML=`<h1 class="pt">Settings</h1><div class="set">
+ <section><b>TMDB key</b><small>Free at themoviedb.org/settings/api. Paste the v3 API key or the v4 read access token. It stays in this browser.</small><input id="k" type="password" autocomplete="off" value="${esc(S.key)}" aria-label="TMDB key"><button class="btn pri" id="sk">Test and save</button></section>
+ <section><b>Metadata language</b><select id="lg">${['en-US','ja-JP','ko-KR','hi-IN','es-ES','fr-FR','de-DE'].map(l=>`<option ${l===S.lang?'selected':''}>${l}</option>`).join('')}</select></section>
+ <section><b>Playback provider</b><small>URL of a service you run or are licensed to use. The app calls it per title and plays only what it returns.</small><input id="tp" type="url" placeholder="https://your-server/resolve?type={type}&id={id}&s={season}&e={episode}" value="${esc(S.tpl)}" aria-label="Provider URL"><button class="btn pri" id="st">Save provider</button>
+ <details><summary>Response format</summary><pre>{"sources":[{"url":"https://…/movie.mp4","type":"mp4","label":"1080p"},{"url":"https://…/index.m3u8","type":"hls"}],
+"subtitles":[{"url":"https://…/en.vtt","lang":"en","label":"English"}]}</pre><small>Placeholders: {type} movie or tv, {id} TMDB id, {season}, {episode}. Return 404 when nothing is available. Needs CORS headers for this page. Subtitles must be WebVTT. Formats: MP4/WebM, plus HLS through hls.js.</small></details></section>
+ <section><b>MyAnimeList</b><small>Not available in this single-file build. MAL sign-in needs a server for OAuth, and MAL’s API blocks calls from browsers. It stays disconnected until a backend exists.</small><button class="btn" disabled>Connect MyAnimeList (needs server)</button></section>
+ <section><b>Your data</b><small>Guest mode: your library, progress and key are saved in this browser’s storage. It is not encrypted, not an account, and does not sync across devices.</small><button class="btn" data-clear="all">Erase library and history</button></section></div>`;
+ $('#sk').onclick=async()=>{const old=S.key,v=$('#k').value.trim();S.key=v;cache.clear();try{await api('/configuration');ls.set('sv_key',v);toast('TMDB key works and is saved.')}catch(e){S.key=old;toast(errMsg(e))}};
+ $('#lg').onchange=e=>{S.lang=e.target.value;ls.set('sv_lang',S.lang);cache.clear()};
+ $('#st').onclick=()=>{const v=$('#tp').value.trim();if(v&&!/^https?:\/\//.test(v))return toast('Provider URL must start with http:// or https://');S.tpl=v;ls.set('sv_tpl',v);toast(v?'Provider saved.':'Provider removed.')}}
+const R={home,movie:s=>browse('movie',s),tv:s=>browse('tv',s),anime:s=>browse('anime',s),search,library,settings};
+function route(){retry=route;PT++;ac?.abort();ac=new AbortController();const h=location.hash.slice(2)||'home';
+ $$('.bot a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#/'+h?'page':'false'));scrollTo(0,0);(R[h]||home)(ac.signal)}
+addEventListener('hashchange',route);
+$('#bs').onclick=()=>location.hash='#/search';$('#bg').onclick=()=>location.hash='#/settings';
+/* ---------- details ---------- */
+async function openTitle(t,id){
+ const m=$('#mDet');m.innerHTML='<div class="sheet"><button class="x" onclick="history.back()">Close</button><div class="db"><i class="sk wide"></i></div></div>';pushModal(m);
+ try{const d=await api(`/${t}/${id}`,{append_to_response:'credits,similar'});D={t,id,d,s:null,eps:[]};if(stack.at(-1)?.el===m)renderDet()}
+ catch(e){m.innerHTML=`<div class="sheet"><button class="x" onclick="history.back()">Close</button><div class="db">${errBox(e)}</div></div>`;retry=()=>{history.back();setTimeout(()=>openTitle(t,id),50)}}}
+function renderDet(){const{t,d}=D,it=norm(d,t),cr=d.credits||{};
+ const dir=(t==='movie'?(cr.crew||[]).filter(x=>x.job==='Director'):(d.created_by||[])).map(x=>x.name).join(', ');
+ const run=t==='movie'?(d.runtime?d.runtime+' min':''):`${d.number_of_seasons||0} season${d.number_of_seasons===1?'':'s'}`;
+ const inL=k=>L[k].some(x=>x.id==it.id&&x.type===t),sim=(d.similar?.results||[]).map(x=>norm(x,t));
+ $('#mDet').innerHTML=`<div class="sheet"><button class="x" onclick="history.back()">Close</button><div class="dh" style="${d.backdrop_path?`background-image:url(${img(d.backdrop_path,'w780')})`:''}"></div><div class="db"><h1>${esc(it.title)}</h1>
+ <div class="meta mu">${[it.year,run,d.vote_average?'★ '+d.vote_average.toFixed(1):'',(d.genres||[]).map(g=>g.name).join(', ')].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+ ${d.tagline?`<i class="mu">${esc(d.tagline)}</i>`:''}
+ <div class="acts">${S.tpl&&t==='movie'?'<button class="btn pri" data-play>Watch</button>':''}${[['watch','Watchlist'],['plan','Planned'],['done','Watched']].map(([k,n])=>`<button class="btn ${inL(k)?'on':''}" data-save="${k}" aria-pressed="${inL(k)}">${inL(k)?'✓ ':''}${n}</button>`).join('')}</div>
+ ${S.tpl?'':'<small class="mu">Playback needs a provider. <a href="#/settings" data-closeall>Set one up in Settings</a>.</small>'}
+ <p>${esc(d.overview)||'<span class="mu">TMDB has no synopsis for this title yet.</span>'}</p>
+ ${dir?`<small>${t==='movie'?'Director':'Created by'}: ${esc(dir)}</small>`:''}
+ ${(cr.cast||[]).length?`<small>Cast: ${(cr.cast).slice(0,12).map(c=>esc(c.name)+(c.character?' as '+esc(c.character):'')).join(', ')}</small>`:''}
+ <div id="eps"></div>${sim.length?`<h2 style="padding:8px 0 0">Similar titles</h2><div class="rail" style="padding:0;margin:0 -16px;padding:0 16px">${sim.map(i=>card(i)).join('')}</div>`:''}</div></div>`;
+ if(t==='tv'){const ss=(d.seasons||[]).filter(s=>s.season_number>0);if(!ss.length)return;const cur=L.cw['tv'+D.id]?.s,first=ss.some(s=>s.season_number===cur)?cur:ss[0].season_number;
+  $('#eps').innerHTML=`<label>Season<select id="ssel">${ss.map(s=>`<option value="${s.season_number}" ${s.season_number===first?'selected':''}>${esc(s.name||'Season '+s.season_number)}</option>`).join('')}</select></label><div id="el"></div>`;
+  $('#ssel').onchange=e=>loadSeason(+e.target.value);loadSeason(first)}}
+async function loadSeason(n){const el=$('#el');if(!el)return;D.s=n;el.innerHTML='<i class="sk wide"></i>';
+ try{const s=await api(`/tv/${D.id}/season/${n}`);if(D.s!==n)return;D.eps=s.episodes||[];
+  el.innerHTML=D.eps.length?D.eps.map(e=>`<div class="ep"><div><b>${e.episode_number}. ${esc(e.name)}</b><br><small>${[e.air_date,e.runtime?e.runtime+' min':''].filter(Boolean).join('   ')}</small><p>${esc(e.overview)}</p></div>${S.tpl?`<button class="btn" data-play data-s="${n}" data-e="${e.episode_number}" aria-label="Play episode ${e.episode_number}">Play</button>`:''}</div>`).join(''):'<p class="mu">TMDB has no episode details for this season yet.</p>'}
+ catch(e){if(e.name!=='AbortError'){el.innerHTML=errBox(e);retry=()=>loadSeason(n)}}}
+function save(b){const k=b.dataset.save,it=norm(D.d,D.t),i=L[k].findIndex(x=>x.id==it.id&&x.type===D.t);
+ if(i>=0)L[k].splice(i,1);else L[k].unshift({id:it.id,type:it.type,title:it.title,poster:it.poster,bd:it.bd,year:it.year,vote:it.vote});
+ const on=i<0;saveL();b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.textContent=(on?'✓ ':'')+{watch:'Watchlist',plan:'Planned',done:'Watched'}[k]}
+function rm(v){const[k,x]=v.split('|');if(k==='cw')delete L.cw[x];else L[k].splice(+x,1);saveL();library()}
+/* ---------- player ---------- */
+const PM={noprov:'No playback provider is set up. Add one in Settings.',unavail:'The provider has no playable source for this title or episode.',net:'Could not reach the provider or the stream. Check your connection and the provider URL.',bad:'The provider’s response could not be read. Check its format in Settings.',fmt:'This browser cannot play this format, or the file blocks cross-origin playback (CORS).'};
+function status(k){const el=$('#vst');el.innerHTML=!k?'':k==='load'?'<i class="spin"></i><span>Loading source…</span>':`<span>${esc(PM[k]||PM.net)}</span>${k==='noprov'?'<a class="btn pri" href="#/settings" data-closeall>Open settings</a>':''}`}
+async function resolve(t,id,s,e){
+ if(!S.tpl)throw'noprov';
+ const vals={type:t,id,season:s??'',episode:e??''},u=S.tpl.replace(/\{(type|id|season|episode)\}/g,(_,k)=>encodeURIComponent(vals[k]));
+ let r;try{r=await fetch(u,{headers:{Accept:'application/json'}})}catch{throw'net'}
+ if(r.status===404)throw'unavail';if(!r.ok)throw'net';
+ let j;try{j=await r.json()}catch{throw'bad'}
+ const ok=a=>(Array.isArray(a)?a:[]).filter(x=>x&&/^https?:\/\//.test(x.url)),sources=ok(j.sources);
+ if(!sources.length)throw'unavail';return{sources,subtitles:ok(j.subtitles)}}
+const pk=()=>`${P.t}${P.id}:${P.s??0}:${P.e??0}`;
+const stepT=d=>{if(P.t!=='tv'||!P.eps)return null;const i=P.eps.findIndex(x=>x.episode_number===P.e);return i<0?null:P.eps[i+d]||null};
+const loadHls=()=>window.Hls?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';s.onload=ok;s.onerror=no;document.head.append(s)});
+function cleanMedia(){const v=$('#vid');v.pause();P?.hls?.destroy();if(P)P.hls=null;$$('track',v).forEach(t=>t.remove());v.removeAttribute('src');v.removeAttribute('crossorigin');v.load()}
+async function play(t,id,item,s,e,eps){
+ if(P)closePlayer();
+ P={t,id,item,s,e,eps,srcs:[],subs:[],hls:null,last:0,ac:new AbortController()};const my=P;
+ $('#ptl').textContent=item.title+(t==='tv'?`  S${s} E${e}`:'');$('#pctl').innerHTML='';status('load');
+ pushModal($('#mPlay'),closePlayer);
+ const last=L.hist[0];if(!(last&&last.item.id===id&&last.item.type===t&&last.s===s&&last.e===e)){L.hist.unshift({item:{id,type:t,title:item.title,poster:item.poster,year:item.year,vote:item.vote},s,e,at:Date.now()});L.hist=L.hist.slice(0,100);saveL()}
+ try{if(t==='tv'&&!eps)api(`/tv/${id}/season/${s}`).then(r=>{if(P===my){P.eps=r.episodes;buildCtl()}}).catch(()=>{});
+  const r=await resolve(t,id,s,e);if(P!==my)return;P.srcs=r.sources;P.subs=r.subtitles;bind();buildCtl();loadSrc(0)}
+ catch(er){if(P===my)status(typeof er==='string'?er:'net')}}
+function bind(){const v=$('#vid'),o={signal:P.ac.signal};
+ v.addEventListener('loadedmetadata',()=>{status();const p=L.pos[pk()];if(p>10&&p<v.duration-30)v.currentTime=p;v.playbackRate=+($('#sspd')?.value||1);applySub()},o);
+ v.addEventListener('waiting',()=>status('load'),o);v.addEventListener('playing',()=>status(),o);
+ v.addEventListener('timeupdate',()=>saveProg(),o);v.addEventListener('pause',()=>saveProg(true),o);
+ v.addEventListener('error',()=>{if(!v.currentSrc&&!P.hls)return;status(v.error?.code===2?'net':'fmt')},o);
+ v.addEventListener('ended',()=>{delete L.pos[pk()];const n=stepT(1),k=P.t+P.id;
+  if(n)L.cw[k]={item:P.item,s:P.s,e:n.episode_number,t:0,d:1,at:Date.now()};else delete L.cw[k];saveL();
+  if(n){$('#vst').innerHTML='<button class="btn pri" id="nx2">Play next episode</button>';$('#nx2').onclick=()=>step(1)}},o)}
+function saveProg(force){const v=$('#vid');if(!P||!v.duration||!isFinite(v.duration)||v.ended)return;const n=Date.now();if(!force&&n-P.last<5000)return;P.last=n;
+ L.pos[pk()]=v.currentTime;L.cw[P.t+P.id]={item:P.item,s:P.s,e:P.e,t:v.currentTime,d:v.duration,at:n};saveL()}
+function applySub(){const v=$('#vid'),i=+($('#ssub')?.value??-1);[...v.textTracks].forEach((tr,j)=>tr.mode=j===i?'showing':'disabled')}
+async function loadSrc(i){const v=$('#vid'),src=P.srcs[i];cleanMedia();status('load');
+ if(P.subs.length)v.crossOrigin='anonymous';
+ P.subs.forEach(s=>{const t=document.createElement('track');t.kind='subtitles';t.src=s.url;t.label=s.label||s.lang||'Subtitles';t.srclang=s.lang||'und';v.append(t)});
+ const hls=/\.m3u8(\?|$)/i.test(src.url)||/hls|m3u8/i.test(src.type||'');
+ if(hls&&!v.canPlayType('application/vnd.apple.mpegurl')){
+  try{await loadHls()}catch{return status('fmt')}
+  if(!window.Hls?.isSupported())return status('fmt');
+  const h=P.hls=new Hls();h.loadSource(src.url);h.attachMedia(v);h.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)status(d.type==='networkError'?'net':'fmt')})}
+ else v.src=src.url}
+function buildCtl(){const v=$('#vid'),pv=stepT(-1),nx=stepT(1),pref=P.subs.findIndex(s=>(s.lang||'').toLowerCase().startsWith(S.lang.slice(0,2)));
+ $('#pctl').innerHTML=[P.srcs.length>1?`<label>Source<select id="ssrc">${P.srcs.map((s,i)=>`<option value="${i}">${esc(s.label||'Source '+(i+1))}</option>`).join('')}</select></label>`:'',
+ P.subs.length?`<label>Subtitles<select id="ssub"><option value="-1">Off</option>${P.subs.map((s,i)=>`<option value="${i}" ${i===pref?'selected':''}>${esc(s.label||s.lang||'Track '+(i+1))}</option>`).join('')}</select></label>`:'<small>This source supplies no subtitle tracks.</small>',
+ `<label>Speed<select id="sspd">${[.75,1,1.25,1.5,2].map(x=>`<option ${x===1?'selected':''}>${x}</option>`).join('')}</select></label>`,
+ pv?'<button class="btn" id="bpv">Previous episode</button>':'',nx?'<button class="btn" id="bnx">Next episode</button>':''].join('');
+ $('#ssrc')&&($('#ssrc').onchange=e=>loadSrc(+e.target.value));$('#ssub')&&($('#ssub').onchange=applySub);
+ $('#sspd').onchange=e=>v.playbackRate=+e.target.value;$('#bpv')&&($('#bpv').onclick=()=>step(-1));$('#bnx')&&($('#bnx').onclick=()=>step(1))}
+function step(d){const n=stepT(d);if(!n)return;saveProg(true);const{t,id,item,eps}=P;play(t,id,item,P.s,n.episode_number,eps)}
+function closePlayer(){if(!P)return;saveProg(true);P.ac.abort();cleanMedia();status();P=null}
+function startPlay(b){if(!D.d)return;play(D.t,D.id,norm(D.d,D.t),b.dataset.s?+b.dataset.s:null,b.dataset.e?+b.dataset.e:null,b.dataset.s?D.eps:null)}
+function resume(k){const c=L.cw[k];if(c)play(c.item.type,c.item.id,c.item,c.s,c.e)}
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{const g=s=>e.target.closest(s);let b;
+ if(b=g('[data-play]'))return startPlay(b);
+ if(b=g('[data-resume]'))return resume(b.dataset.resume);
+ if(b=g('[data-id]'))return openTitle(b.dataset.t,b.dataset.id);
+ if(b=g('[data-save]'))return save(b);
+ if(b=g('[data-rm]'))return rm(b.dataset.rm);
+ if(b=g('[data-tab]')){libTab=b.dataset.tab;return library()}
+ if(b=g('[data-clear]')){if(!confirm(b.dataset.clear==='all'?'Erase your whole library, progress and history from this browser?':'Clear your watch history?'))return;
+  if(b.dataset.clear==='all')L={watch:[],plan:[],done:[],cw:{},pos:{},hist:[]};else L.hist=[];saveL();return route()}
+ if(g('[data-closeall]'))return closeAll();
+ if(g('.retry'))return retry()});
+route();
+</script>
+</body>
+</html>
