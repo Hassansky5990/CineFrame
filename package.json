@@ -1,0 +1,9 @@
+{
+  "name": "streamvault-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "StreamVault backend: accounts, synced library, TMDB proxy, MyAnimeList OAuth, provider resolver. Zero npm dependencies.",
+  "main": "server.js",
+  "engines": { "node": ">=22.13" },
+  "scripts": { "start": "node server.js", "test": "node test.js" }
+}
