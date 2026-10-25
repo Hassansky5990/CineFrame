@@ -1,0 +1,43 @@
+'use strict';
+// Run: node test.js  (uses a temporary database; no external network needed)
+const os = require('node:os'), path = require('node:path'), http = require('node:http');
+process.env.SESSION_SECRET = 'x'.repeat(40); process.env.DB_PATH = path.join(os.tmpdir(), 'sv-test-' + Date.now() + '.db');
+process.env.TMDB_KEY = ''; process.env.MAL_CLIENT_ID = '';
+const prov = http.createServer((req, res) => { const u = new URL(req.url, 'http://x'); res.setHeader('Content-Type', 'application/json');
+  if (u.searchParams.get('id') === '404') { res.statusCode = 404; return res.end('{}'); }
+  res.end(JSON.stringify({ sources: [{ url: 'https://cdn.example/a.mp4', label: '720p' }, { url: 'javascript:alert(1)' }], subtitles: [{ url: 'https://cdn.example/en.vtt', lang: 'en' }] })); });
+let results = [];
+const t = (name, ok) => { results.push([name, ok]); console.log((ok ? 'PASS ' : 'FAIL ') + name); };
+(async () => {
+  await new Promise(r => prov.listen(0, r)); process.env.PROVIDER_URL = `http://127.0.0.1:${prov.address().port}/r?type={type}&id={id}&s={season}&e={episode}`;
+  const server = require('./server'); await new Promise(r => server.listen(0, r)); const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (m, p, body, ck, h = {}) => { const r = await fetch(base + p, { method: m, redirect: 'manual', headers: { 'Content-Type': 'application/json', ...(ck && { Cookie: ck }), ...h }, body: body && JSON.stringify(body) }); let j = null; try { j = await r.json(); } catch {} return { s: r.status, j, ck: (r.headers.get('set-cookie') || '').split(';')[0] }; };
+  const pw = 'correct-horse-battery';
+  let a = await call('POST', '/api/register', { email: 'A@Example.com', password: pw }); t('register returns session cookie', a.s === 200 && a.ck.startsWith('sv='));
+  t('duplicate email rejected', (await call('POST', '/api/register', { email: 'a@example.com', password: pw })).s === 409);
+  t('short password rejected', (await call('POST', '/api/register', { email: 'b@example.com', password: 'short' })).s === 400);
+  t('bad email rejected', (await call('POST', '/api/register', { email: 'nope', password: pw })).s === 400);
+  t('wrong password rejected', (await call('POST', '/api/login', { email: 'a@example.com', password: 'wrong-password-1' })).s === 401);
+  const l = await call('POST', '/api/login', { email: 'a@example.com', password: pw }); t('login works (email case-insensitive)', l.s === 200);
+  t('/api/me without cookie is logged out', (await call('GET', '/api/me')).j.user === null);
+  t('/api/me with cookie returns user', (await call('GET', '/api/me', null, a.ck)).j.user?.email === 'a@example.com');
+  t('library requires login', (await call('GET', '/api/library')).s === 401);
+  const lib = { watch: [{ id: 1, type: 'movie', title: 'X' }], plan: [], done: [], hist: [], cw: {}, pos: { k: 5 }, evil: 'dropped' };
+  t('library save', (await call('PUT', '/api/library', { data: lib }, a.ck)).s === 200);
+  const got = await call('GET', '/api/library', null, a.ck); t('library round-trips and strips unknown keys', got.j.data.watch[0].title === 'X' && got.j.data.pos.k === 5 && !('evil' in got.j.data));
+  const b = await call('POST', '/api/register', { email: 'b@example.com', password: pw }); t("another user can't see first user's library", (await call('GET', '/api/library', null, b.ck)).j.data === null);
+  t('cross-site origin blocked', (await call('PUT', '/api/library', { data: lib }, a.ck, { Origin: 'http://evil.example' })).s === 403);
+  t('TMDB proxy reports missing key (501)', (await call('GET', '/api/tmdb/movie/popular', null, a.ck)).s === 501);
+  t('TMDB proxy path allow-list', (await call('GET', '/api/tmdb/account/1', null, a.ck)).s === 404);
+  t('TMDB proxy requires login', (await call('GET', '/api/tmdb/movie/popular')).s === 401);
+  t('MAL reports not configured (501)', (await call('GET', '/api/mal/list', null, a.ck)).s === 501);
+  const r = await call('GET', '/api/resolve?type=tv&id=1399&season=1&episode=2', null, a.ck); t('provider resolve returns only http(s) sources + subtitles', r.s === 200 && r.j.sources.length === 1 && r.j.subtitles[0].lang === 'en');
+  t('provider 404 maps to unavail', (await call('GET', '/api/resolve?type=movie&id=404', null, a.ck)).j?.error === 'unavail');
+  t('resolve rejects bad params', (await call('GET', '/api/resolve?type=movie&id=abc', null, a.ck)).s === 400);
+  t('static index served', (await fetch(base + '/')).status === 200);
+  t('path traversal blocked', (await fetch(base + '/..%2fserver.js')).status === 404);
+  await call('POST', '/api/logout', {}, a.ck); t('logout invalidates session', (await call('GET', '/api/library', null, a.ck)).s === 401);
+  t('delete-account needs password', (await call('POST', '/api/delete-account', { password: 'nope-nope-nope' }, b.ck)).s === 401);
+  await call('POST', '/api/delete-account', { password: pw }, b.ck); t('delete-account removes user', (await call('POST', '/api/login', { email: 'b@example.com', password: pw })).s === 401);
+  const bad = results.filter(x => !x[1]).length; console.log(`\n${results.length - bad}/${results.length} passed`); process.exit(bad ? 1 : 0);
+})();
