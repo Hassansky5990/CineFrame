@@ -1,23 +1,59 @@
+
 export default async function handler(req, res) {
-  const key = process.env.TMDB_API_KEY;
-  if (!key) return res.status(503).json({ error: 'TMDB_API_KEY is not configured in Vercel Environment Variables.' });
-  const segments = req.query.path;
-  const path = Array.isArray(segments) ? segments.join('/') : String(segments || '');
-  if (!path || path.includes('..')) return res.status(400).json({ error: 'Invalid TMDB path.' });
-  const url = new URL(`https://api.themoviedb.org/3/${path}`);
-  for (const [name, value] of Object.entries(req.query)) {
-    if (name === 'path') continue;
-    if (typeof value === 'string') url.searchParams.set(name, value);
-    else if (Array.isArray(value)) value.forEach(v => url.searchParams.append(name, v));
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
   }
-  url.searchParams.set('api_key', key);
+
+  const apiKey = process.env.TMDB_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({
+      error: "TMDB_API_KEY is missing from Vercel environment variables"
+    });
+  }
+
+  const route = req.query.path;
+  const path = Array.isArray(route)
+    ? route.join("/")
+    : typeof route === "string"
+      ? route
+      : "";
+
+  if (!path) {
+    return res.status(400).json({ error: "Missing TMDB endpoint path" });
+  }
+
+  const url = new URL(
+    `https://api.themoviedb.org/3/${path
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/")}`
+  );
+
+  url.searchParams.set("api_key", apiKey);
+
+  for (const [key, value] of Object.entries(req.query)) {
+    if (key === "path" || key === "api_key") continue;
+
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (typeof item === "string") {
+        url.searchParams.append(key, item);
+      }
+    }
+  }
+
   try {
-    const upstream = await fetch(url, { headers: { accept: 'application/json' } });
-    const body = await upstream.text();
-    res.status(upstream.status).setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-    return res.send(body);
-  } catch (error) {
-    return res.status(502).json({ error: 'TMDB upstream request failed', detail: String(error?.message || error) });
+    const response = await fetch(url.toString());
+    const body = await response.text();
+
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Cache-Control", "no-store");
+
+    return res.status(response.status).send(body);
+  } catch {
+    return res.status(502).json({
+      error: "Unable to connect to TMDB"
+    });
   }
 }
