@@ -1,9 +1,13 @@
 {
-  "name": "streamvault-server",
+  "name": "StreamVault-Next",
   "version": "1.0.0",
   "private": true,
-  "description": "StreamVault backend: accounts, synced library, TMDB proxy, MyAnimeList OAuth, provider resolver. Zero npm dependencies.",
-  "main": "server.js",
-  "engines": { "node": ">=22.13" },
-  "scripts": { "start": "node server.js", "test": "node test.js" }
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
 }
