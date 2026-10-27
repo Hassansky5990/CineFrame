@@ -1,164 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0e1a">
-<title>StreamVault</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
-<style>
-:root{--bg:#0b0e1a;--s1:#141a2e;--s2:#1f2845;--tx:#eef1fb;--mu:#9099b8;--ac:#8aa4ff;--gold:#ffc857;--glass:rgba(20,26,46,.64);--r:14px}
-*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
-body{background:var(--bg);color:var(--tx);font:15px/1.5 Sora,system-ui,sans-serif;padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
-body.lock{overflow:hidden}a{color:var(--ac)}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.mu,small{color:var(--mu)}h1{font-size:26px;line-height:1.15;letter-spacing:-.02em}h2{font-size:17px;padding:18px 16px 8px}
-.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px)}
-.logo{font-weight:700;font-size:19px;letter-spacing:-.02em;color:var(--tx);text-decoration:none;margin-right:auto}
-.btn{background:var(--s2);color:var(--tx);border:0;border-radius:999px;padding:10px 18px;font:inherit;font-size:14px;cursor:pointer;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.pri{background:var(--ac);color:#0b0e1a;font-weight:700}.on{outline:2px solid var(--ac)}
-.bot{position:fixed;bottom:0;left:0;right:0;display:flex;z-index:40;background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom)}
-.bot a{flex:1;text-align:center;padding:15px 2px;color:var(--mu);text-decoration:none;font-size:13px}
-.bot a[aria-current=page]{color:var(--tx);box-shadow:inset 0 2px var(--ac)}
-.hero{min-height:58vh;background-size:cover;background-position:center top;display:flex;align-items:flex-end;padding:20px 16px;position:relative}
-.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,var(--bg))}
-.hero>div{position:relative;max-width:560px;display:grid;gap:10px}.hero p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:0 16px 8px;-webkit-overflow-scrolling:touch}
-.rail>*{flex:0 0 130px;scroll-snap-align:start}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px 12px;padding:0 16px}
-.card{background:none;border:0;color:inherit;text-align:left;cursor:pointer;display:block;font:inherit;min-width:0;width:100%}
-.card img,.ph{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:var(--r);background:var(--s1);display:flex;align-items:center;justify-content:center;padding:8px;text-align:center;color:var(--mu);font-size:13px}
-.card b{display:block;font-size:13px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.card small{font-size:12px}
-.lc{position:relative;min-width:0}.rm{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
-.pg{height:3px;background:var(--s2);border-radius:3px;margin-top:4px}.pg i{display:block;height:100%;background:var(--ac);border-radius:3px}
-.sk{display:block;background:linear-gradient(90deg,var(--s1),var(--s2),var(--s1));background-size:200% 100%;animation:sh 1.4s infinite;border-radius:var(--r);aspect-ratio:2/3}.hero.sk{aspect-ratio:auto}.sk.wide{aspect-ratio:auto;height:90px;margin:8px 0}
-@keyframes sh{to{background-position:-200% 0}}
-.pt{padding:18px 16px 4px}.filters,.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px 14px}
-select,input{background:var(--s1);color:var(--tx);border:1px solid var(--s2);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;min-height:44px;max-width:100%}
-label{display:grid;gap:4px;font-size:12px;color:var(--mu)}
-#sf{display:flex;gap:8px;padding:14px 16px}#sf input{flex:1;min-width:0}
-.empty{padding:28px 16px;text-align:center;display:grid;gap:12px;justify-items:center;color:var(--mu);grid-column:1/-1}
-#more{display:grid;justify-items:center;padding:18px}
-.modal{position:fixed;inset:0;z-index:50;background:rgba(5,7,14,.74);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--s1);width:100%;max-width:820px;max-height:94dvh;overflow-y:auto;border-radius:22px 22px 0 0;overscroll-behavior:contain}
-.x{position:sticky;top:8px;display:block;width:max-content;margin:8px 8px -52px auto;z-index:3;background:var(--glass);backdrop-filter:blur(10px);color:var(--tx);border:0;border-radius:999px;padding:10px 16px;min-height:44px;font:inherit;cursor:pointer}
-.dh{height:200px;background:var(--s2) center/cover}.db{padding:16px;display:grid;gap:12px}.db .meta span{margin-right:14px}
-.acts{display:flex;gap:8px;flex-wrap:wrap}.ep{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-top:1px solid var(--s2)}.ep p{font-size:13px;color:var(--mu);margin-top:2px}
-.modal.p{align-items:center}.pl{width:100%;max-width:1000px;background:#000;max-height:100dvh;overflow-y:auto}
-.pbar{display:flex;align-items:center;gap:8px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top))}.pbar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pbar .x{position:static;margin:0}
-.vwrap{position:relative;aspect-ratio:16/9;background:#000}.vwrap video{width:100%;height:100%;object-fit:contain}
-.vst{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:rgba(0,0,0,.55)}.vst:empty{display:none}
-.spin{width:34px;height:34px;border:3px solid var(--s2);border-top-color:var(--ac);border-radius:50%;animation:rot .8s linear infinite}@keyframes rot{to{transform:rotate(1turn)}}
-.pctl{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
-@media(orientation:landscape) and (max-height:520px){.vwrap{aspect-ratio:auto;height:calc(100dvh - 60px)}}
-.set{display:grid;gap:14px;padding:8px 16px;max-width:640px}.set section{background:var(--s1);border-radius:var(--r);padding:16px;display:grid;gap:10px}.set code,pre{background:var(--bg);padding:2px 6px;border-radius:6px;font-size:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
-.foot{padding:24px 16px;font-size:12px;color:var(--mu);text-align:center}
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--s2);padding:10px 16px;border-radius:12px;z-index:99;max-width:90vw}#toast:empty{display:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<title>CineFrame — Movies & Series</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="top"><a class="logo" href="#/home">StreamVault</a><button class="btn" id="bs" aria-label="Search">Search</button><button class="btn" id="bg" aria-label="Settings">Settings</button></header>
-<main id="app"></main>
-<footer class="foot">This product uses the TMDB API but is not endorsed or certified by TMDB. Metadata and images come from TMDB; video comes only from the provider you configure.</footer>
-<nav class="bot" aria-label="Main"><a href="#/home">Home</a><a href="#/movie">Movies</a><a href="#/tv">TV</a><a href="#/anime">Anime</a><a href="#/library">Library</a></nav>
-<div class="modal" id="mDet" role="dialog" aria-modal="true" aria-label="Title details" hidden></div>
-<div class="modal p" id="mPlay" role="dialog" aria-modal="true" aria-label="Video player" hidden>
- <div class="pl"><div class="pbar"><span id="ptl"></span><button class="x" onclick="history.back()">Close</button></div>
- <div class="vwrap"><video id="vid" controls playsinline preload="metadata"></video><div class="vst" id="vst" role="status"></div></div><div class="pctl" id="pctl"></div></div>
-</div>
-<div id="toast" role="status"></div>
-<noscript>StreamVault needs JavaScript.</noscript>
-<script>
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let tt;const toast=m=>{const t=$('#toast');t.textContent=m;clearTimeout(tt);tt=setTimeout(()=>t.textContent='',3500)};
-const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch{toast('Browser storage is full or blocked. Changes will not be kept.');return false}}};
-const S={key:ls.get('sv_key',''),tpl:ls.get('sv_tpl',''),lang:ls.get('sv_lang','en-US')};
-let L=ls.get('sv_lib',null)||{watch:[],plan:[],done:[],cw:{},pos:{},hist:[]};const saveL=()=>ls.set('sv_lib',L);
-let retry=()=>route(),PT=0,ac,D={},P=null,libTab='cw';
-/* ---------- TMDB ---------- */
-const cache=new Map(),IMG='https://image.tmdb.org/t/p/';
-async function api(path,params={},signal){
- if(!S.key)throw{code:'nokey'};
- const u=new URL('https://api.themoviedb.org/3'+path),h={};
- if(S.key.length>40)h.Authorization='Bearer '+S.key;else u.searchParams.set('api_key',S.key);
- u.searchParams.set('language',S.lang);
- for(const[k,v]of Object.entries(params))if(v!==''&&v!=null)u.searchParams.set(k,v);
- const ck=u.toString();if(cache.has(ck))return cache.get(ck);
- let r;try{r=await fetch(u,{headers:h,signal})}catch(e){if(e.name==='AbortError')throw e;throw{code:'net'}}
- if(r.status===401)throw{code:'auth'};if(r.status===429)throw{code:'rate'};if(!r.ok)throw{code:'http',status:r.status};
- const j=await r.json();cache.set(ck,j);return j}
-const errMsg=e=>({nokey:'Add your TMDB key in Settings to load titles.',auth:'TMDB rejected the key. Check it in Settings.',rate:'TMDB rate limit reached. Wait a moment, then retry.',net:'Network problem. Check your connection, then retry.'}[e.code]||'TMDB returned an error ('+(e.status||'unknown')+').');
-const errBox=e=>`<div class="empty"><p>${esc(errMsg(e))}</p>${e.code==='nokey'||e.code==='auth'?'<a class="btn pri" href="#/settings">Open settings</a>':'<button class="btn retry">Retry</button>'}</div>`;
-const norm=(x,t)=>({id:x.id,type:x.media_type||t||(x.title?'movie':'tv'),title:x.title||x.name||'Untitled',poster:x.poster_path,bd:x.backdrop_path,ov:x.overview,year:(x.release_date||x.first_air_date||'').slice(0,4),vote:x.vote_average||0});
-const img=(p,w)=>p?IMG+w+p:'';
-function fb(i){const s=document.createElement('span');s.className='ph';s.textContent=i.dataset.n;i.replaceWith(s)}
-const card=(i,a)=>`<button class="card" ${a||`data-t="${i.type}" data-id="${i.id}"`} aria-label="${esc(i.title)}">${i.poster?`<img loading="lazy" alt="" data-n="${esc(i.title)}" src="${img(i.poster,'w342')}" onerror="fb(this)">`:`<span class="ph">${esc(i.title)}</span>`}<b>${esc(i.title)}</b><small>${i.year}${i.vote?'  ★ '+i.vote.toFixed(1):''}</small></button>`;
-const lcard=(i,a,rm,bar)=>`<div class="lc">${card(i,a)}${bar||''}<button class="rm" data-rm="${rm}" aria-label="Remove ${esc(i.title)}">✕</button></div>`;
-/* ---------- modals ---------- */
-const stack=[];
-function pushModal(el,onClose){el.hidden=false;document.body.classList.add('lock');stack.push({el,onClose});history.pushState({m:1},'')}
-function popModal(){const m=stack.pop();if(!m)return;m.el.hidden=true;m.onClose&&m.onClose();if(!stack.length)document.body.classList.remove('lock')}
-const closeAll=()=>{while(stack.length)popModal()};
-addEventListener('popstate',popModal);
-addEventListener('keydown',e=>{if(e.key==='Escape'&&stack.length)history.back()});
-/* ---------- pager ---------- */
-function pager(fetchPage,grid,more,empty){let page=1;const my=++PT;
- const go=async()=>{more.innerHTML='';if(page===1)grid.innerHTML='<i class="sk"></i>'.repeat(9);
-  try{const{items,total}=await fetchPage(page);if(my!==PT)return;if(page===1)grid.innerHTML='';
-   if(!items.length&&page===1){grid.innerHTML=`<p class="empty">${empty}</p>`;return}
-   grid.insertAdjacentHTML('beforeend',items.map(i=>card(i)).join(''));
-   if(page<Math.min(total,500)){more.innerHTML='<button class="btn">Load more</button>';more.firstChild.onclick=()=>{page++;go()}}
-  }catch(e){if(e.name==='AbortError'||my!==PT)return;if(page===1)grid.innerHTML='';more.innerHTML=errBox(e);retry=go}};
- go()}
-/* ---------- pages ---------- */
-async function row(el,title,path,params,sig,t){
- el.innerHTML=`<h2>${title}</h2><div class="rail">${'<i class="sk"></i>'.repeat(8)}</div>`;
- try{const d=await api(path,params,sig),items=d.results.filter(x=>x.media_type!=='person').map(x=>norm(x,t));
-  el.innerHTML=`<h2>${title}</h2><div class="rail">${items.map(i=>card(i)).join('')||'<p class="mu">Nothing to show yet.</p>'}</div>`;return items}
- catch(e){if(e.name!=='AbortError')el.innerHTML=`<h2>${title}</h2>${errBox(e)}`}}
-function home(sig){
- const cw=Object.entries(L.cw).sort((a,b)=>b[1].at-a[1].at);
- const R=[['Trending today','/trending/all/day'],['Popular movies','/movie/popular','movie'],['Top-rated movies','/movie/top_rated','movie'],['Coming soon','/movie/upcoming','movie'],['Popular shows','/tv/popular','tv'],['Airing now','/tv/on_the_air','tv'],['Top-rated shows','/tv/top_rated','tv']];
- $('#app').innerHTML=`<section id="hero" class="hero sk"></section>${cw.length?`<section><h2>Continue watching</h2><div class="rail">${cw.map(([k,c])=>lcard(c.item,`data-resume="${k}"`,'cw|'+k,`<div class="pg"><i style="width:${Math.min(100,c.t/c.d*100)}%"></i></div>`)).join('')}</div></section>`:''}${R.map((_,i)=>`<section id="r${i}"></section>`).join('')}`;
- const ps=R.map((r,i)=>row($('#r'+i),r[0],r[1],{},sig,r[2]));
- ps[0].then(items=>{const h=items?.find(i=>i.bd),el=$('#hero');if(!el)return;if(!h){el.remove();return}
-  el.classList.remove('sk');el.style.backgroundImage=`url(${img(h.bd,'w780')})`;
-  el.innerHTML=`<div><h1>${esc(h.title)}</h1><small>${h.type==='tv'?'Series':'Movie'}  ${h.year}  ★ ${h.vote.toFixed(1)}</small><p>${esc(h.ov)}</p><div><button class="btn pri" data-t="${h.type}" data-id="${h.id}">View details</button></div></div>`})}
-async function browse(type,sig){
- const mt=type==='movie'?'movie':'tv',f={sort:'popularity.desc',genre:'',year:'',rate:'',lang:type==='anime'?'ja':''};
- const dt=mt==='movie'?'primary_release_date':'first_air_date';
- $('#app').innerHTML=`<h1 class="pt">${{movie:'Movies',tv:'TV shows',anime:'Anime'}[type]}</h1><form class="filters" onsubmit="return false">
- <label>Sort<select data-f="sort"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="${dt}.desc">Newest</option></select></label>
- <label>Genre<select data-f="genre" id="gsel"><option value="">Any</option></select></label>
- <label>Year<input data-f="year" type="number" inputmode="numeric" min="1900" max="2100" placeholder="Any" style="width:90px"></label>
- <label>Rating<select data-f="rate"><option value="">Any</option><option>6</option><option>7</option><option>8</option></select></label>
- <label>Language<select data-f="lang">${[['','Any'],['en','English'],['ja','Japanese'],['ko','Korean'],['hi','Hindi'],['es','Spanish'],['fr','French']].map(([v,n])=>`<option value="${v}" ${v===f.lang?'selected':''}>${n}</option>`).join('')}</select></label></form>
- <div class="grid" id="grid"></div><div id="more"></div>`;
- const run=()=>pager(async p=>{const d=await api('/discover/'+mt,{sort_by:f.sort,page:p,with_genres:[type==='anime'?'16':'',f.genre].filter(Boolean).join(','),[mt==='movie'?'primary_release_year':'first_air_date_year']:f.year,'vote_average.gte':f.rate,'vote_count.gte':(f.rate||f.sort.startsWith('vote'))?150:'',with_original_language:f.lang,include_adult:'false'},sig);return{items:d.results.map(x=>norm(x,mt)),total:d.total_pages}},$('#grid'),$('#more'),'No titles match these filters. Loosen one and try again.');
- $$('[data-f]').forEach(el=>el.onchange=()=>{f[el.dataset.f]=el.value;run()});
- run();
- try{const g=await api(`/genre/${mt}/list`,{},sig);$('#gsel').insertAdjacentHTML('beforeend',g.genres.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join(''))}catch{}}
-function search(sig){
- $('#app').innerHTML=`<form id="sf" role="search" onsubmit="return false"><input id="q" type="search" placeholder="Movies, shows, anime" autocomplete="off" aria-label="Search titles"><button type="reset" class="btn">Clear</button></form><div class="grid" id="grid"><p class="empty">Type a title to search TMDB.</p></div><div id="more"></div>`;
- const q=$('#q');let t;q.focus();
- const run=()=>{const v=q.value.trim();if(!v){PT++;$('#grid').innerHTML='<p class="empty">Type a title to search TMDB.</p>';$('#more').innerHTML='';return}
-  pager(async p=>{const d=await api('/search/multi',{query:v,page:p,include_adult:'false'},sig);return{items:d.results.filter(x=>x.media_type!=='person').map(x=>norm(x)),total:d.total_pages}},$('#grid'),$('#more'),`No results for “${esc(v)}”. Check the spelling or try a shorter title.`)};
- q.oninput=()=>{clearTimeout(t);t=setTimeout(run,350)};$('#sf').onreset=()=>{clearTimeout(t);setTimeout(()=>{run();q.focus()})}}
-function library(){
- const T=[['cw','Continue'],['watch','Watchlist'],['plan','Planned'],['done','Watched'],['hist','History']];
- let h='';
- if(libTab==='cw'){const e=Object.entries(L.cw).sort((a,b)=>b[1].at-a[1].at);h=e.map(([k,c])=>lcard(c.item,`data-resume="${k}"`,'cw|'+k,`<div class="pg"><i style="width:${Math.min(100,c.t/c.d*100)}%"></i></div>`)).join('')}
- else if(libTab==='hist')h=L.hist.map((x,i)=>lcard(x.item,`data-t="${x.item.type}" data-id="${x.item.id}"`,'hist|'+i)).join('');
- else h=L[libTab].map((x,i)=>lcard(x,'',libTab+'|'+i)).join('');
- $('#app').innerHTML=`<h1 class="pt">Library</h1><div class="tabs" role="tablist">${T.map(([k,n])=>`<button class="btn ${k===libTab?'on':''}" role="tab" aria-selected="${k===libTab}" data-tab="${k}">${n}</button>`).join('')}${libTab==='hist'&&L.hist.length?'<button class="btn" data-clear="hist">Clear history</button>':''}</div><div class="grid">${h||'<p class="empty">Nothing here yet. Open a title and save it to a list, or start watching.</p>'}</div>`}
-function settings(){
- $('#app').innerHTML=`<h1 class="pt">Settings</h1><div class="set">
- <section><b>TMDB key</b><small>Free at themoviedb.org/settings/api. Paste the v3 API key or the v4 read access token. It stays in this browser.</small><input id="k" type="password" autocomplete="off" value="${esc(S.key)}" aria-label="TMDB key"><button class="btn pri" id="sk">Test and save</button></section>
- <section><b>Metadata language</b><select id="lg">${['en-US','ja-JP','ko-KR','hi-IN','es-ES','fr-FR','de-DE'].map(l=>`<option ${l===S.lang?'selected':''}>${l}</option>`).join('')}</select></section>
- <section><b>Playback provider</b><small>URL of a service you run or are licensed to use. The app calls it per title and plays only what it returns.</small><input id="tp" type="url" placeholder="https://your-server/resolve?type={type}&id={id}&s={season}&e={episode}" value="${esc(S.tpl)}" aria-label="Provider URL"><button class="btn pri" id="st">Save provider</button>
- <details><summary>Response format</summary><pre>{"sources":[{"url":"https://…/movie.mp4","type":"mp4","label":"1080p"},{"url":"https://…/index.m3u8","type":"hls"}],
-"subtitles":[{"url":"https://…/en.vtt","lang":"en","label":"English"}]}</pre><small>Placeholders: {type} movie or tv, {id} TMDB id, {season}, {episode}. Return 404 when nothing is available. Needs CORS headers for this page. Subtitles must be WebVTT. Formats: MP4/WebM, plus HLS through hls.js.</small></details></section>
- <section><
+<header class="topbar">
+  <a class="brand" href="#home" aria-label="CineFrame home" onclick="goHome();return false"><span class="brandmark">▶</span><span>CINE<em>FRAME</em></span></a>
+  <nav class="nav" aria-label="Main navigation"><button class="active" data-page="home" onclick="goHome()">Home</button><button data-page="movies" onclick="showCategory('movie')">Movies</button><button data-page="tv" onclick="showCategory('tv')">Series</button></nav>
+  <label class="searchwrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles…" autocomplete="off" aria-label="Search movies and shows"></label>
+  <button class="watch-btn" onclick="showWatchlist()"><span>＋</span><span class="watch-label">My List</span><b id="watchCount">0</b></button>
+</header>
+<main id="app">
+  <section class="hero" id="hero">
+    <div class="hero-backdrop" id="heroBackdrop"></div>
+    <div class="hero-content"><div class="eyebrow"><span class="dot"></span> CINEFRAME ORIGINAL EXPERIENCE</div><h1 id="heroTitle">Your next obsession starts here.</h1><div class="meta" id="heroMeta"><span>Discover movies and series</span></div><p id="heroOverview">Browse trending stories, discover your next favourite, and keep your watchlist in one place.</p><div class="actions"><button class="primary" id="heroPlay" onclick="playHero()">▶ &nbsp; Watch now</button><button class="quiet" id="heroInfo" onclick="showHeroDetails()">ⓘ &nbsp; More info</button></div></div>
+  </section>
+  <div id="homeSections"><section class="section" id="continueSection" hidden><div class="section-heading"><h2>Continue watching</h2><span class="section-sub">Pick up where you left off</span></div><div class="row-scroll" id="continueRow"></div></section>
+  <section class="section"><div class="section-heading"><h2>Trending this week</h2><span class="section-sub">Popular right now</span></div><div class="row-scroll" id="trendingRow"></div></section>
+  <section class="section"><div class="section-heading"><h2>Popular movies</h2><span class="section-sub">Big-screen favourites</span></div><div class="row-scroll" id="moviesRow"></div></section>
+  <section class="section"><div class="section-heading"><h2>Popular series</h2><span class="section-sub">Stories worth binging</span></div><div class="row-scroll" id="tvRow"></div></section>
+  <section class="section"><div class="section-heading"><h2>Top-rated movies</h2><span class="section-sub">Audience favourites</span></div><div class="row-scroll" id="ratedRow"></div></section></div>
+  <section id="listingPage" class="section search-page hidden"><div class="section-heading"><h2 id="listingTitle">Explore</h2><span class="section-sub" id="listingCount"></span></div><div class="filterbar" id="filterbar"><button class="pill active" data-filter="all">All</button><button class="pill" data-filter="movie">Movies</button><button class="pill" data-filter="tv">Series</button></div><div class="results-grid" id="listingGrid"></div><div style="text-align:center;padding:24px"><button class="quiet" id="loadMore" onclick="loadMoreResults()">Load more</button></div></section>
+</main>
+<footer class="footer">CineFrame is a fan-made discovery interface. Movie and television metadata and images are provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Availability and playback depend on the selected external provider.<br><br><span class="tiny-note">Your watchlist and recent titles are saved in this browser on this device. A single-file site cannot keep an API key secret; avoid sharing this HTML publicly with a personal key inside it.</span></footer>
+<nav class="mobile-nav" aria-label="Mobile navigation"><button class="active" onclick="goHome()"><span>⌂</span><span>Home</span></button><button onclick="showCategory('movie')"><span>▣</span><span>Movies</span></button><button onclick="showCategory('tv')"><span>▤</span><span>Series</span></button><button onclick="showWatchlist()"><span>＋</span><span>My List</span></button></nav>
+<div class="overlay" id="detailOverlay" aria-modal="true" role="dialog" aria-label="Title details"><div class="modal"><button class="close" onclick="closeOverlay('detailOverlay')" aria-label="Close details">×</button><div class="detail-hero" id="detailHero"><div class="detail-copy"><div class="eyebrow"><span class="dot"></span><span id="detailType">FEATURED TITLE</span></div><h2 id="detailTitle">Title</h2><div class="meta" id="detailMeta"></div><div class="actions"><button class="secondary" onclick="playSelected()">▶ &nbsp; Play</button><button class="quiet" id="detailListButton" onclick="toggleSelectedWatchlist()">＋ My List</button><button class="quiet" onclick="playTrailerSelected()">▷ Trailer</button></div></div></div><div class="detail-body"><p class="detail-overview" id="detailOverview"></p><div class="tiny-note" id="detailGenres"></div><div id="tvControls" class="hidden"><h3 class="subhead">Episodes</h3><div class="selects"><select id="seasonSelect" aria-label="Season" onchange="loadSeasonEpisodes()"></select><select id="episodeSelect" aria-label="Episode" onchange="updateEpisode()"></select></div></div><h3 class="subhead">Videos & trailers</h3><div class="video-strip" id="videoStrip"><div class="tiny-note">Loading videos…</div></div><h3 class="subhead">More like this</h3><div class="row-scroll" id="recommendRow"></div></div></div></div>
+<div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player"><div class="modal player-modal"><div class="player-top"><strong id="playerTitle">Now playing</strong><select id="providerSelect" aria-label="Player provider" onchange="switchProvider()"><option value="vidrift">VidRift</option><option value="apiplayer">ApiPlayer.ru</option></select><button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button></div><div class="loading-line" id="playerLoading"></div><div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div><div class="player-footer"><span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span><div style="display:flex;gap:8px"><button onclick="openExternalPlayer()">Open provider ↗</button><button onclick="restartPlayer()">Reload player</button></div></div></div></div>
+<div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js" defer></script>
+</body>
+</html>
