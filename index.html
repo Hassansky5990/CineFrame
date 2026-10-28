@@ -257,14 +257,18 @@ function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=
 function cardMarkup(item){const id=Number(item.id);const type=mediaType(item);const inList=getWatchlist().some(x=>Number(x.id)===id&&mediaType(x)===type);return `<article class="movie-card" role="button" tabindex="0" aria-label="Details for ${escapeHtml(titleOf(item))}" onclick="openDetailsById('${type}',${id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailsById('${type}',${id})}"><img class="poster" src="${posterOf(item)}" alt="${escapeHtml(titleOf(item))} poster" loading="lazy" onerror="imageFallback(this)"><button class="card-watch" onclick="event.stopPropagation();toggleWatchlist(${id},'${type}',this)" aria-label="${inList?'Remove from':'Add to'} My List">${inList?'✓':'＋'}</button><div class="card-copy"><div class="card-title">${escapeHtml(titleOf(item))}</div><div class="card-meta"><span>${yearOf(item)}</span><span class="score">★ ${ratingOf(item)}</span></div></div></article>`}
 function renderRow(id,items){$(id).innerHTML=items?.length?items.slice(0,20).map(cardMarkup).join(''):'<div class="empty">No titles found.</div>';updateShelfForRow(id)}
 function setHero(item){if(!item)return;state.hero=item;const back=backdropOf(item);$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">★ ${ratingOf(item)}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent='Play';}
+function shelfScrollStep(row){
+  const card=row?.querySelector('.movie-card');
+  const gap=parseFloat(getComputedStyle(row).columnGap)||20;
+  const cardStep=card?card.getBoundingClientRect().width+gap:Math.max(1,row.clientWidth*.85);
+  const visibleCards=card?Math.max(1,Math.floor(row.clientWidth/cardStep)):1;
+  return Math.max(1,cardStep*Math.max(1,visibleCards-1));
+}
 function scrollShelf(rowId,direction){
   const row=$(rowId);
   if(!row)return;
-  const card=row.querySelector('.movie-card');
-  const gap=parseFloat(getComputedStyle(row).columnGap)||20;
-  const cardStep=card?card.getBoundingClientRect().width+gap:row.clientWidth*.85;
-  const visibleCards=card?Math.max(1,Math.floor(row.clientWidth/cardStep)):1;
-  row.scrollBy({left:direction*cardStep*Math.max(1,visibleCards-1),behavior:'smooth'});
+  const step=shelfScrollStep(row);
+  row.scrollBy({left:direction*step,behavior:'smooth'});
 }
 function updateShelf(rowId){
   const row=$(rowId);
@@ -279,9 +283,9 @@ function updateShelf(rowId){
   prev.disabled=!canScroll||position<=4;
   next.disabled=!canScroll||position>=max-4;
   progress.style.width=(max?Math.max(0,Math.min(100,position/max*100)):100)+'%';
-  const step=Math.max(1,row.clientWidth*.8);
+  const step=shelfScrollStep(row);
   const pages=Math.max(1,Math.ceil(max/step)+1);
-  const page=Math.min(pages,Math.floor(position/step)+1);
+  const page=!max?1:position>=max-4?pages:Math.min(pages,Math.floor(position/step+.5)+1);
   count.textContent=String(page).padStart(2,'0')+' / '+String(pages).padStart(2,'0');
 }
 function updateShelfForRow(rowId){updateShelf(rowId)}
