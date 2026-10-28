@@ -204,29 +204,63 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .footer{padding-bottom:130px}.toast{bottom:96px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.movie-card:hover,.movie-card:focus-within{transform:none}}
 
-/* Explicit recommendation-card sizing: keep More like this independent of shelf defaults. */
+/* Balanced recommendation cards: readable posters and safely wrapped metadata. */
 #detailOverlay #recommendRow{
-  grid-auto-columns:clamp(320px,34vw,420px)!important;
+  grid-auto-columns:clamp(210px,24vw,270px)!important;
   gap:18px!important;
   padding:22px 6px 34px!important;
   overflow-x:auto!important;
+  align-items:start!important;
 }
 #detailOverlay #recommendRow .movie-card{
+  display:block!important;
   width:100%!important;
   min-width:0!important;
 }
 #detailOverlay #recommendRow .poster{
+  display:block!important;
   width:100%!important;
+  height:auto!important;
   aspect-ratio:2/3!important;
+  object-fit:cover!important;
+}
+#detailOverlay #recommendRow .card-copy{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:11px 2px 0!important;
+}
+#detailOverlay #recommendRow .card-title{
+  display:-webkit-box!important;
+  min-width:0!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  overflow-wrap:anywhere!important;
+  text-overflow:clip!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  font-size:.94rem!important;
+  line-height:1.35!important;
+  min-height:2.55em;
+}
+#detailOverlay #recommendRow .card-meta{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:4px 9px!important;
+  min-width:0!important;
+  margin-top:5px!important;
+  font-size:.8rem!important;
+  line-height:1.4!important;
 }
 @media(max-width:760px){
   #detailOverlay #recommendRow{
-    grid-auto-columns:minmax(0,min(88vw,380px))!important;
+    grid-auto-columns:clamp(165px,57vw,220px)!important;
     gap:14px!important;
     padding:18px 2px 30px!important;
   }
-  #detailOverlay #recommendRow .card-title{font-size:1rem!important;line-height:1.35}
-  #detailOverlay #recommendRow .card-meta{font-size:.84rem!important}
+  #detailOverlay #recommendRow .card-title{font-size:.92rem!important}
+  #detailOverlay #recommendRow .card-meta{font-size:.78rem!important}
+  #detailOverlay #recommendRow .card-watch{width:32px!important;height:32px!important;top:7px!important;right:7px!important}
 }
 </style>
 </head>
