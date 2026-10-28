@@ -203,6 +203,31 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .mobile-nav button.active{background:#ffffff24;color:#fff}.mobile-nav-icon{width:22px;height:22px}
 .footer{padding-bottom:130px}.toast{bottom:96px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.movie-card:hover,.movie-card:focus-within{transform:none}}
+
+/* Explicit recommendation-card sizing: keep More like this independent of shelf defaults. */
+#detailOverlay #recommendRow{
+  grid-auto-columns:clamp(320px,34vw,420px)!important;
+  gap:18px!important;
+  padding:22px 6px 34px!important;
+  overflow-x:auto!important;
+}
+#detailOverlay #recommendRow .movie-card{
+  width:100%!important;
+  min-width:0!important;
+}
+#detailOverlay #recommendRow .poster{
+  width:100%!important;
+  aspect-ratio:2/3!important;
+}
+@media(max-width:760px){
+  #detailOverlay #recommendRow{
+    grid-auto-columns:minmax(0,min(88vw,380px))!important;
+    gap:14px!important;
+    padding:18px 2px 30px!important;
+  }
+  #detailOverlay #recommendRow .card-title{font-size:1rem!important;line-height:1.35}
+  #detailOverlay #recommendRow .card-meta{font-size:.84rem!important}
+}
 </style>
 </head>
 <body>
