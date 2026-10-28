@@ -488,42 +488,60 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 
 
-/* Detail popup action buttons: match the reference layout on phones */
-@media(max-width:700px){
-  .detail-copy .actions{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:10px;
-    width:100%;
-    margin-top:18px;
-  }
-  .detail-copy .actions button{
+/* Mobile detail popup buttons — match reference proportions */
+@media(max-width:760px){
+  #detailOverlay .detail-hero{padding:0 22px 28px;min-height:440px}
+  #detailOverlay .detail-copy{width:100%;max-width:none}
+  #detailOverlay .detail-copy .actions{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:stretch;
     width:100%;
     max-width:none;
-    min-width:0;
-    min-height:58px;
-    padding:0 12px;
-    border-radius:999px;
-    font-size:1rem;
+    gap:10px!important;
+    margin-top:22px;
+  }
+  #detailOverlay .detail-copy .actions button{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    min-height:60px!important;
+    padding:0 10px!important;
+    margin:0!important;
+    border-radius:999px!important;
+    font-size:1rem!important;
+    font-weight:600;
+    line-height:1.2;
     gap:8px;
     white-space:nowrap;
-    box-shadow:none;
+    box-shadow:none!important;
+    transform:none;
   }
-  .detail-copy .actions .action-play{
-    grid-column:1 / -1;
-    min-height:62px;
-    background:#fff;
-    color:#111;
-    border:1px solid #ffffff;
-    font-size:1.08rem;
+  #detailOverlay .detail-copy .actions .action-play{
+    grid-column:1 / -1!important;
+    min-height:62px!important;
+    background:#fff!important;
+    color:#080808!important;
+    border:1px solid #fff!important;
+    font-size:1.08rem!important;
   }
-  .detail-copy .actions #detailListButton,
-  .detail-copy .actions .action-info{
-    background:#3a3b42;
-    color:#fff;
-    border:1px solid #ffffff20;
+  #detailOverlay .detail-copy .actions #detailListButton,
+  #detailOverlay .detail-copy .actions .action-info{
+    background:#3a3b42!important;
+    color:#fff!important;
+    border:1px solid #ffffff20!important;
   }
-  .detail-copy .actions .action-icon{width:19px;height:19px;flex:0 0 19px}
+  #detailOverlay .detail-copy .actions .action-icon{
+    width:19px!important;height:19px!important;flex:0 0 19px!important;
+  }
+}
+@media(max-width:380px){
+  #detailOverlay .detail-hero{padding-inline:18px}
+  #detailOverlay .detail-copy .actions{gap:8px!important}
+  #detailOverlay .detail-copy .actions button{padding-inline:7px!important;font-size:.92rem!important}
 }
 
 </style>
