@@ -282,6 +282,7 @@ async function loadSeasonEpisodes(){
   }
 }
 function selectEpisode(episodeNumber,button){
+  if(!state.selected||mediaType(state.selected)!=='tv')return;
   state.currentEpisode=Number(episodeNumber)||1;
   const list=$('episodeList');
   if(list){
@@ -291,6 +292,8 @@ function selectEpisode(episodeNumber,button){
       card.setAttribute('aria-pressed',selected?'true':'false');
     });
   }
+  // Clicking an episode card should start that exact episode, not only change its highlight.
+  launchPlayer(state.selected,state.currentSeason,state.currentEpisode);
 }
 function showHeroDetails(){if(state.hero)openDetails(state.hero)}
 function playHero(){if(state.hero)launchPlayer(state.hero,1,1)}
