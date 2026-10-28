@@ -461,7 +461,9 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   .home-shelf .popular-arrows{gap:7px}
   .filterbar .pill{min-height:42px;padding:8px 8px;font-size:.88rem}
   .filterbar .filter-control select{min-height:42px;font-size:.92rem}
-  /* Detail modal action buttons intentionally retain their original styling. */
+  .detail-copy .actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .detail-copy .actions button{min-height:50px;padding:0 5px;font-size:.88rem;gap:5px}
+  .detail-copy .actions .action-icon{width:18px;height:18px;flex-basis:18px}
   .recommend-tools .popular-arrow{width:38px;height:38px;flex-basis:38px}
   .recommend-tools .popular-arrows{gap:6px}
   .selects select{min-height:42px;font-size:.92rem}
@@ -477,6 +479,9 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 @media(max-width:380px){
   .hero .actions{gap:7px}
   .hero .actions button{padding:0 7px;font-size:.88rem}
+  .detail-copy .actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .detail-copy .actions button{min-height:48px;font-size:.88rem;padding-inline:8px}
+  .detail-copy .actions .action-play{grid-column:1 / -1}
   .home-shelf .popular-progress{display:none}
   .home-shelf .popular-count{min-width:40px}
   .mobile-nav button span{font-size:.68rem}
