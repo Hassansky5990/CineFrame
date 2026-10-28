@@ -544,6 +544,32 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   #detailOverlay .detail-copy .actions button{padding-inline:7px!important;font-size:.92rem!important}
 }
 
+/* Correct detail action row width: stretch the copy block inside the hero flex layout */
+@media(max-width:760px){
+  #detailOverlay .detail-hero{
+    display:flex!important;
+    align-items:flex-end!important;
+    padding-left:22px!important;
+    padding-right:22px!important;
+  }
+  #detailOverlay .detail-hero .detail-copy{
+    display:block!important;
+    flex:1 1 100%!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #detailOverlay .detail-copy .actions{
+    display:grid!important;
+    width:100%!important;
+    max-width:none!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  #detailOverlay .detail-copy .actions .action-play{
+    grid-column:1 / -1!important;
+    width:100%!important;
+  }
+}
 </style>
 </head>
 <body>
