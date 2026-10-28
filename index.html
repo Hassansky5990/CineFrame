@@ -279,6 +279,178 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   #detailOverlay #recommendRow .card-meta{font-size:.78rem!important}
   #detailOverlay #recommendRow .card-watch{width:32px!important;height:32px!important;top:7px!important;right:7px!important}
 }
+
+/* Mobile alignment pass: consistent button sizing, spacing and control rows. */
+@media(max-width:760px){
+  button{ -webkit-tap-highlight-color:transparent; }
+  .hero .actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+    max-width:360px;
+    gap:8px;
+    margin-inline:auto;
+  }
+  .hero .actions button{
+    width:100%;
+    min-width:0;
+    min-height:46px;
+    padding:0 10px;
+    gap:6px;
+    white-space:nowrap;
+    font-size:.88rem;
+  }
+  .hero .actions .action-icon{width:18px;height:18px;flex:0 0 18px}
+  .home-shelf .section-heading{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:center;
+    gap:8px;
+  }
+  .home-shelf .section-heading h2{min-width:0}
+  .home-shelf .section-heading .popular-tools{
+    width:100%;
+    justify-content:flex-end;
+    gap:8px;
+    margin-left:0;
+  }
+  .home-shelf .popular-progress{width:clamp(28px,10vw,44px)}
+  .home-shelf .popular-count{min-width:42px;font-size:.68rem}
+  .home-shelf .popular-arrow{width:36px;height:36px;flex:0 0 36px}
+  .filterbar{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-items:stretch;
+    gap:8px;
+  }
+  .filterbar .pill{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-width:0;
+    min-height:42px;
+    padding:8px 5px;
+    font-size:.8rem;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .filterbar .filter-control{
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:64px minmax(0,1fr);
+    align-items:center;
+    width:100%;
+    min-width:0;
+    gap:8px;
+  }
+  .filter-control select{
+    width:100%;
+    max-width:none;
+    min-width:0;
+    min-height:42px;
+    padding:8px 30px 8px 12px;
+  }
+  .detail-copy .actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    width:100%;
+    gap:8px;
+  }
+  .detail-copy .actions button{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-width:0;
+    min-height:44px;
+    padding:0 6px;
+    gap:5px;
+    font-size:.78rem;
+    white-space:nowrap;
+  }
+  .detail-copy .actions .action-icon{width:16px;height:16px;flex:0 0 16px}
+  .recommend-heading{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:center;
+    gap:6px;
+  }
+  .recommend-heading .subhead{min-width:0}
+  .recommend-heading .recommend-tools{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    width:100%;
+    gap:7px;
+  }
+  .recommend-tools .popular-progress{width:clamp(28px,9vw,42px)}
+  .recommend-tools .popular-count{min-width:42px;font-size:.68rem}
+  .recommend-tools .popular-arrow{width:36px;height:36px;flex:0 0 36px}
+  .selects{display:grid;grid-template-columns:minmax(0,1fr);width:100%}
+  .selects select{width:100%;min-width:0;min-height:42px}
+  .episode-load-more{
+    min-height:44px;
+    padding:10px 20px;
+    line-height:1.2;
+  }
+  .player-top{gap:8px;align-items:center}
+  .player-top select{
+    width:34%;
+    max-width:34%;
+    min-width:0;
+    min-height:40px;
+    padding:8px 8px;
+    border-radius:10px;
+  }
+  .player-top .close{width:40px;height:40px;flex:0 0 40px}
+  .player-footer{gap:12px;align-items:stretch}
+  .player-footer>div{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px!important;
+    width:100%;
+  }
+  .player-footer button{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-width:0;
+    min-height:42px;
+    padding:8px 7px;
+    font-size:.78rem;
+    line-height:1.2;
+    white-space:normal;
+    text-align:center;
+  }
+  .mobile-nav{align-items:stretch}
+  .mobile-nav button{
+    min-width:0;
+    min-height:52px;
+    padding:6px 2px;
+    gap:4px;
+    line-height:1.1;
+    white-space:nowrap;
+  }
+  .mobile-nav button span{display:block;font-size:.66rem;line-height:1.1}
+  .watch-btn{flex:0 0 auto;justify-content:center;min-width:54px}
+  .watch-btn b{flex:0 0 24px;padding:0 4px}
+  .actions button,.filterbar button,.player-footer button,.episode-load-more{touch-action:manipulation}
+}
+@media(max-width:360px){
+  .topbar{gap:8px;padding-inline:10px}
+  .watch-btn{min-width:50px;padding-inline:6px}
+  .home-shelf .section-heading .popular-tools{gap:6px}
+  .home-shelf .popular-progress{width:24px}
+  .home-shelf .popular-count{min-width:36px;font-size:.64rem}
+  .detail-copy .actions{gap:5px}
+  .detail-copy .actions button{gap:3px;padding-inline:3px;font-size:.72rem}
+  .detail-copy .actions .action-icon{width:14px;height:14px;flex-basis:14px}
+  .recommend-tools{gap:5px!important}
+  .recommend-tools .popular-count{min-width:36px!important}
+}
+
 </style>
 </head>
 <body>
