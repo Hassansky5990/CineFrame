@@ -67,6 +67,18 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .section h2:after{content:"\203A";margin-left:8px;color:var(--muted);font-weight:500}
 .section-sub{color:var(--muted);font-size:.84rem}
 #homeSections .section-sub{display:none}
+.popular-section .section-heading{align-items:center;margin-bottom:2px}
+.popular-tools{display:flex;align-items:center;gap:13px;margin-left:auto}
+.popular-progress{width:clamp(34px,5vw,68px);height:3px;overflow:hidden;border-radius:99px;background:#ffffff20}
+.popular-progress span{display:block;width:0;height:100%;border-radius:inherit;background:var(--gold);transition:width .25s ease}
+.popular-count{min-width:42px;color:#ffffff9c;font-size:.72rem;font-variant-numeric:tabular-nums;letter-spacing:.08em;text-align:center}
+.popular-arrows{display:flex;align-items:center;gap:7px}
+.popular-arrow{width:38px;height:38px;display:grid;place-items:center;border:1px solid #ffffff24;border-radius:50%;background:linear-gradient(145deg,#ffffff18,#ffffff07);color:#fff;box-shadow:inset 0 1px 0 #ffffff12;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:background .2s,border-color .2s,transform .2s,color .2s}
+.popular-arrow svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.popular-arrow:hover:not(:disabled){background:var(--gold);border-color:var(--gold);color:#000;transform:translateY(-1px)}
+.popular-arrow:disabled{opacity:.28;cursor:default}
+.popular-section .row-scroll{scroll-behavior:smooth}
+@media(max-width:760px){.popular-tools{gap:8px}.popular-progress{width:28px}.popular-count{min-width:35px;font-size:.66rem}.popular-arrow{width:34px;height:34px}.popular-arrows{gap:5px}}
 .row-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(190px,18vw,252px);gap:var(--gap);overflow-x:auto;overflow-y:hidden;padding:26px var(--gutter) 40px;margin:-10px 0 -14px;scroll-snap-type:x proximity;scroll-padding-inline:var(--gutter);scrollbar-width:none;overscroll-behavior-inline:contain;align-items:start;min-width:0}
 .row-scroll::-webkit-scrollbar{display:none}
 .movie-card{position:relative;min-width:0;scroll-snap-align:start;cursor:pointer;border-radius:16px;transition:transform .45s var(--ease);will-change:transform}
@@ -194,7 +206,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   <div id="homeSections"><section class="section" id="continueSection" hidden><div class="section-heading"><h2>Continue watching</h2><span class="section-sub">Pick up where you left off</span></div><div class="row-scroll" id="continueRow"></div></section>
   <section class="section" id="forYouSection" hidden><div class="section-heading"><h2>Picked for you</h2><span class="section-sub" id="forYouSubtitle">Based on your taste</span></div><div class="row-scroll" id="forYouRow"></div></section>
   <section class="section"><div class="section-heading"><h2>Trending this week</h2><span class="section-sub">Popular right now</span></div><div class="row-scroll" id="trendingRow"></div></section>
-  <section class="section"><div class="section-heading"><h2>Popular movies</h2><span class="section-sub">Big-screen favourites</span></div><div class="row-scroll" id="moviesRow"></div></section>
+  <section class="section popular-section" id="popularMoviesSection"><div class="section-heading"><h2>Popular movies</h2><div class="popular-tools" aria-label="Popular movies slider controls"><div class="popular-progress" aria-hidden="true"><span id="popularSliderProgress"></span></div><span class="popular-count" id="popularSliderCount" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow" id="popularPrev" onclick="scrollPopular(-1)" aria-label="Previous popular movies" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow" id="popularNext" onclick="scrollPopular(1)" aria-label="Next popular movies" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="moviesRow" aria-label="Popular movies" tabindex="0"></div></section>
   <section class="section"><div class="section-heading"><h2>Popular series</h2><span class="section-sub">Stories worth binging</span></div><div class="row-scroll" id="tvRow"></div></section>
   <section class="section"><div class="section-heading"><h2>Top-rated movies</h2><span class="section-sub">Audience favourites</span></div><div class="row-scroll" id="ratedRow"></div></section></div>
   <section id="listingPage" class="section search-page hidden"><div class="section-heading"><h2 id="listingTitle">Explore</h2><span class="section-sub" id="listingCount"></span></div><div class="filterbar" id="filterbar"><button class="pill active" data-filter="all">All</button><button class="pill" data-filter="movie">Movies</button><button class="pill" data-filter="tv">Series</button><label class="filter-control"><span>Genre:</span><select id="genreFilter" aria-label="Filter by genre"><option value="">All genres</option></select></label><label class="filter-control"><span>Sort:</span><select id="sortFilter" aria-label="Sort results" onchange="applyListingControls()"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option><option value="title.asc">Title A–Z</option></select></label></div><div class="results-grid" id="listingGrid"></div><div style="text-align:center;padding:24px"><button class="quiet" id="loadMore" onclick="loadMoreResults()">Load more</button></div></section>
@@ -243,9 +255,39 @@ async function api(path, params={}){
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
 function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=>'<div class="movie-card"><div class="poster skeleton"></div><div class="card-copy"><div class="skeleton" style="height:13px;border-radius:4px"></div><div class="skeleton" style="height:10px;width:55%;margin-top:8px;border-radius:4px"></div></div></div>').join('')}
 function cardMarkup(item){const id=Number(item.id);const type=mediaType(item);const inList=getWatchlist().some(x=>Number(x.id)===id&&mediaType(x)===type);return `<article class="movie-card" role="button" tabindex="0" aria-label="Details for ${escapeHtml(titleOf(item))}" onclick="openDetailsById('${type}',${id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailsById('${type}',${id})}"><img class="poster" src="${posterOf(item)}" alt="${escapeHtml(titleOf(item))} poster" loading="lazy" onerror="imageFallback(this)"><button class="card-watch" onclick="event.stopPropagation();toggleWatchlist(${id},'${type}',this)" aria-label="${inList?'Remove from':'Add to'} My List">${inList?'✓':'＋'}</button><div class="card-copy"><div class="card-title">${escapeHtml(titleOf(item))}</div><div class="card-meta"><span>${yearOf(item)}</span><span class="score">★ ${ratingOf(item)}</span></div></div></article>`}
-function renderRow(id,items){$(id).innerHTML=items?.length?items.slice(0,20).map(cardMarkup).join(''):'<div class="empty">No titles found.</div>'}
+function renderRow(id,items){$(id).innerHTML=items?.length?items.slice(0,20).map(cardMarkup).join(''):'<div class="empty">No titles found.</div>';if(id==='moviesRow')updatePopularSlider()}
 function setHero(item){if(!item)return;state.hero=item;const back=backdropOf(item);$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">★ ${ratingOf(item)}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent='Play';}
-async function init(){['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));loadHomeData();updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){['detailOverlay','playerOverlay','trailerOverlay'].forEach(closeOverlay)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
+function scrollPopular(direction){
+  const row=$('moviesRow');
+  if(!row)return;
+  const card=row.querySelector('.movie-card');
+  const gap=parseFloat(getComputedStyle(row).columnGap)||20;
+  const cardStep=card?card.getBoundingClientRect().width+gap:row.clientWidth*.85;
+  const visibleCards=card?Math.max(1,Math.floor(row.clientWidth/cardStep)):1;
+  row.scrollBy({left:direction*cardStep*Math.max(1,visibleCards-1),behavior:'smooth'});
+}
+function updatePopularSlider(){
+  const row=$('moviesRow'),prev=$('popularPrev'),next=$('popularNext'),progress=$('popularSliderProgress'),count=$('popularSliderCount');
+  if(!row||!prev||!next||!progress||!count)return;
+  const max=Math.max(0,row.scrollWidth-row.clientWidth);
+  const position=Math.max(0,Math.min(max,row.scrollLeft));
+  const canScroll=max>4;
+  prev.disabled=!canScroll||position<=4;
+  next.disabled=!canScroll||position>=max-4;
+  progress.style.width=(max?Math.max(0,Math.min(100,position/max*100)):100)+'%';
+  const step=Math.max(1,row.clientWidth*.8);
+  const pages=Math.max(1,Math.ceil(max/step)+1);
+  const page=Math.min(pages,Math.floor(position/step)+1);
+  count.textContent=String(page).padStart(2,'0')+' / '+String(pages).padStart(2,'0');
+}
+function setupPopularSlider(){
+  const row=$('moviesRow');
+  if(!row)return;
+  row.addEventListener('scroll',updatePopularSlider,{passive:true});
+  window.addEventListener('resize',updatePopularSlider,{passive:true});
+  updatePopularSlider();
+}
+async function init(){['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupPopularSlider();loadHomeData();updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){['detailOverlay','playerOverlay','trailerOverlay'].forEach(closeOverlay)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
 async function loadHomeData(){try{const [trending,movies,tv,rated]=await Promise.all([api('/trending/all/week'),api('/movie/popular',{region:'US'}),api('/tv/popular'),api('/movie/top_rated',{region:'US'})]);state.trending=(trending.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path);state.movies=(movies.results||[]).map(x=>normalize(x,'movie'));state.tv=(tv.results||[]).map(x=>normalize(x,'tv'));state.rated=(rated.results||[]).map(x=>normalize(x,'movie'));renderRow('trendingRow',state.trending);renderRow('moviesRow',state.movies);renderRow('tvRow',state.tv);renderRow('ratedRow',state.rated);const hero=state.trending.find(x=>x.backdrop_path&&x.overview)||state.movies[0]||state.tv[0];setHero(hero);loadPersonalized();if(!state.trending.length)toast('Catalog loaded with limited results.');}catch(err){console.error(err);showCatalogError(err.message)}}
 async function loadPersonalized(){const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join(','),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join(','),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
 async function loadGenres(type){if(state.genres[type]?.length)return state.genres[type];try{const data=await api(`/genre/${type}/list`);state.genres[type]=data.genres||[];return state.genres[type]}catch(e){return []}}
