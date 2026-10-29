@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-const inlineScripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-  .filter(match => !/\\bsrc\\s*=/.test(match[1]) && match[2].trim());
+const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(match => !/\bsrc\s*=/.test(match[1]) && match[2].trim());
 
 assert.ok(inlineScripts.length > 0, 'index.html should contain the app JavaScript');
 inlineScripts.forEach((match, index) => {
