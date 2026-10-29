@@ -248,9 +248,20 @@ app.get('/api/resolve', requireUser, async (req, res) => {
   res.json({ sources, subtitles });
 });
 
+app.use((req, res, next) => {
+  const pathname = String(req.path || '').toLowerCase();
+  if (pathname.includes('..') || pathname.includes('%2f') || pathname.includes('%5c') ||
+      /^\/(server\.cjs|package\.json|test\.js|\.env(?:\.|$))/.test(pathname)) {
+    return res.status(404).end();
+  }
+  next();
+});
 const root = path.join(__dirname, 'www');
 app.use(express.static(fs.existsSync(root) ? root : __dirname, { extensions: ['html'] }));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/') || path.extname(req.path)) return res.status(404).end();
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const server = http.createServer(app);
 module.exports = server;
