@@ -155,7 +155,8 @@ app.post('/api/login', (req, res) => {
 });
 app.get('/api/me', (req, res) => res.json({ user: userForRequest(req) }));
 app.post('/api/logout', (req, res) => {
-  const token = parseCookies(req).sv;
+  const auth = String(req.headers.authorization || '');
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : parseCookies(req).sv;
   if (token) db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hashToken(token));
   clearSessionCookie(res);
   res.json({ ok: true });
