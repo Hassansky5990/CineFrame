@@ -1,5 +1,5 @@
+
 {
-  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api/tmdb/:path*",
