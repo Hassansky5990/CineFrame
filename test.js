@@ -1,4 +1,6 @@
 'use strict';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 // Run: node test.js  (uses a temporary database; no external network needed)
 const os = require('node:os'), path = require('node:path'), http = require('node:http');
 process.env.SESSION_SECRET = 'x'.repeat(40); process.env.DB_PATH = path.join(os.tmpdir(), 'sv-test-' + Date.now() + '.db');
@@ -10,7 +12,7 @@ let results = [];
 const t = (name, ok) => { results.push([name, ok]); console.log((ok ? 'PASS ' : 'FAIL ') + name); };
 (async () => {
   await new Promise(r => prov.listen(0, r)); process.env.PROVIDER_URL = `http://127.0.0.1:${prov.address().port}/r?type={type}&id={id}&s={season}&e={episode}`;
-  const server = require('./server'); await new Promise(r => server.listen(0, r)); const base = `http://127.0.0.1:${server.address().port}`;
+  const server = require('./server.cjs'); await new Promise(r => server.listen(0, r)); const base = `http://127.0.0.1:${server.address().port}`;
   const call = async (m, p, body, ck, h = {}) => { const r = await fetch(base + p, { method: m, redirect: 'manual', headers: { 'Content-Type': 'application/json', ...(ck && { Cookie: ck }), ...h }, body: body && JSON.stringify(body) }); let j = null; try { j = await r.json(); } catch {} return { s: r.status, j, ck: (r.headers.get('set-cookie') || '').split(';')[0] }; };
   const pw = 'correct-horse-battery';
   let a = await call('POST', '/api/register', { email: 'A@Example.com', password: pw }); t('register returns session cookie', a.s === 200 && a.ck.startsWith('sv='));
