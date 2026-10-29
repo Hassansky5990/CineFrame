@@ -689,7 +689,7 @@ function buildApiUrl(path){
   if(TMDB_API_KEY){const u=new URL('https://api.themoviedb.org/3'+path);if(TMDB_API_KEY.length<40)u.searchParams.set('api_key',TMDB_API_KEY);return u}
   if(!/^https?:$/.test(window.location.protocol))throw new Error('This page was opened as a local file, so the /api/tmdb-proxy endpoint is not reachable. Serve it from your server over http(s), or configure TMDB_API_KEY on the server.');
   const u=new URL(API_BASE,window.location.href);
-  u.searchParams.set('path',String(path).replace(/^\\/+/, ''));
+  u.searchParams.set('path',String(path).replace(/^\/+/, ''));
   return u;
 }
 async function api(path, params={}){
@@ -700,7 +700,7 @@ async function api(path, params={}){
   if(!res.ok){
     let detail='';
     try{const errorBody=JSON.parse(body);detail=errorBody.status_message||errorBody.error||errorBody.message||''}catch{}
-    if(!detail&&body)detail=body.replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim().slice(0,180);
+    if(!detail&&body)detail=body.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180);
     throw new Error(detail||`TMDB request failed (${res.status})`);
   }
   try{return JSON.parse(body)}catch{throw new Error('TMDB proxy returned a non-JSON response. Check the deployment logs and API route.')}
