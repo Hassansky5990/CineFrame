@@ -62,6 +62,6 @@ Redeploy after adding environment variables. Without `DATABASE_URL`, discovery c
 - Never commit `.env`, database credentials, or API keys.
 - The local Express backend uses SQLite and stores its database under `data/`; back up that file if you self-host.
 - The Vercel backend uses PostgreSQL. Do not use a local SQLite file as persistent storage in serverless functions.
-- Passwords are scrypt-hashed, sessions are random opaque tokens stored by hash, and the library endpoint only stores the supported library fields.
+- Passwords are scrypt-hashed, sessions are random opaque tokens stored by hash, and the library endpoint only stores supported library fields. Android keeps its opaque session token in app-local storage as a fallback for WebView cookie isolation; keep the app's scripts trusted and current.
 - Configure a persistent database and set an explicit `APP_ORIGIN` before exposing account creation publicly.
 - Player embeds and subtitles are controlled by their respective providers. Use media sources and subtitle files you are authorized to access.
