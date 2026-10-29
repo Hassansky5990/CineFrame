@@ -605,6 +605,25 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   }
   .popular-arrow{display:grid!important;place-items:center!important}
 }
+
+/* Optional cloud account surface */
+.account-btn{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border:1px solid var(--hair);border-radius:50%;background:#ffffff12;color:#fff}
+.account-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.account-btn.signed-in{border-color:#e509147a;background:#e5091425}
+.account-modal{max-width:440px;padding:26px}
+.account-modal h2{margin:0 0 6px;font-size:1.4rem}
+.account-modal p{color:var(--muted);font-size:.9rem}
+.account-form{display:grid;gap:12px;margin-top:18px}
+.account-form input{width:100%;border:1px solid var(--hair);border-radius:12px;background:#ffffff0d;color:#fff;padding:13px 14px;outline-offset:2px}
+.account-form button{border:0;border-radius:12px;padding:12px 14px;font-weight:650}
+.account-primary{background:#e50914;color:white}
+.account-secondary{background:#ffffff12;color:white;border:1px solid var(--hair)!important}
+.account-status{font-size:.85rem;line-height:1.45;margin:12px 0 0;color:var(--soft);overflow-wrap:anywhere}
+.account-status.error{color:#ff8585}
+.account-status.success{color:#93e0aa}
+.account-signout{display:none;width:100%;margin-top:14px}
+@media(max-width:650px){.account-btn{width:38px;height:38px;flex-basis:38px}.watch-btn{gap:6px}.watch-label{display:none}}
+
 </style>
 </head>
 <body>
@@ -612,6 +631,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   <a class="brand" href="#home" aria-label="CineFrame home" onclick="goHome();return false"><span class="brandmark">▶</span><span>CINE<em>FRAME</em></span></a>
   <nav class="nav" aria-label="Main navigation"><button class="active" data-page="home" onclick="goHome()"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="movies" onclick="showCategory('movie')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button data-page="tv" onclick="showCategory('tv')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button></nav>
   <label class="searchwrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles…" autocomplete="off" aria-label="Search movies and shows"></label>
+  <button class="account-btn" id="accountButton" onclick="openAccount()" aria-label="Account" title="Account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
   <button class="watch-btn" onclick="showWatchlist()"><span>＋</span><span class="watch-label">My List</span><b id="watchCount">0</b></button>
 </header>
 <main id="app">
@@ -632,6 +652,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <div class="overlay" id="detailOverlay" aria-modal="true" role="dialog" aria-label="Title details"><div class="modal"><button class="close" onclick="closeOverlay('detailOverlay')" aria-label="Close details">×</button><button type="button" id="detailBackButton" class="detail-back" onclick="backToPreviousTitle()" aria-label="Back to previous title" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>Back</span></button><div class="detail-hero" id="detailHero"><img class="detail-hero-artwork" id="detailHeroArtwork" alt="" aria-hidden="true"><div class="detail-copy"><div class="eyebrow"><span class="dot"></span><span id="detailType">FEATURED TITLE</span></div><h2 id="detailTitle">Title</h2><div class="meta" id="detailMeta"></div><div class="actions"><button class="secondary action-play" onclick="playSelected()"><svg class="action-icon action-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9.1 6.2a1.1 1.1 0 0 1 0 1.8l-9.1 6.2c-.7.5-1.6-.1-1.6-.9z" fill="currentColor" stroke="none"/></svg><span>Play</span></button><button class="quiet" id="detailListButton" onclick="toggleSelectedWatchlist()">＋ My List</button><button class="quiet action-info" onclick="playTrailerSelected()"><svg class="action-icon action-icon-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Trailer</span></button></div></div></div><div class="detail-body"><p class="detail-overview" id="detailOverview"></p><div class="tiny-note" id="detailGenres"></div><div id="tvControls" class="hidden"><h3 class="subhead">Episodes</h3><div class="selects"><select id="seasonSelect" aria-label="Season" onchange="loadSeasonEpisodes()"></select></div><div class="episode-tools"><label class="episode-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="episodeSearch" type="search" placeholder="Search episodes by name or number…" aria-label="Search episodes" oninput="searchEpisodes(this.value)" autocomplete="off"></label><span id="episodeCount" class="episode-count">Episodes</span></div><div id="episodeList" class="episode-list" aria-live="polite"><div class="tiny-note">Choose a season to view its episodes.</div></div><button type="button" class="quiet episode-load-more" id="episodeLoadMore" onclick="showMoreEpisodes()" hidden>Show more episodes</button></div><h3 class="subhead">Videos & trailers</h3><div class="video-strip" id="videoStrip"><div class="tiny-note">Loading videos…</div></div><div class="recommend-heading"><h3 class="subhead">More like this</h3><div class="popular-tools recommend-tools" aria-label="Related titles slider controls"><div class="popular-progress" aria-hidden="true"><span id="recommendSliderProgress"></span></div><span class="popular-count" id="recommendSliderCount" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow" id="recommendPrev" onclick="scrollRecommendations(-1)" aria-label="Previous related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow" id="recommendNext" onclick="scrollRecommendations(1)" aria-label="Next related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="recommendRow" aria-label="More like this" tabindex="0"></div></div></div></div>
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player"><div class="modal player-modal"><div class="player-top"><strong id="playerTitle">Now playing</strong><select id="providerSelect" aria-label="Player provider" onchange="switchProvider()"><option value="vidrift">VidRift</option><option value="apiplayer">ApiPlayer.ru</option></select><button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button></div><div class="loading-line" id="playerLoading"></div><div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div><div class="player-footer"><span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span><div style="display:flex;gap:8px"><button onclick="openExternalPlayer()">Open provider ↗</button><button onclick="restartPlayer()">Reload player</button></div></div></div></div>
 <div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
+<div class="overlay" id="accountOverlay" aria-modal="true" role="dialog" aria-labelledby="accountTitle"><div class="modal account-modal"><button class="close" onclick="closeOverlay('accountOverlay')" aria-label="Close account">×</button><h2 id="accountTitle">Your CineFrame account</h2><p id="accountIntro">Sign in to sync My List and Continue Watching between devices.</p><form class="account-form" id="accountForm" onsubmit="event.preventDefault();accountAction('signin')"><label>Email<input id="accountEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>Password<input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="At least 6 characters"></label><button class="account-primary" type="submit">Sign in</button><button class="account-secondary" type="button" onclick="accountAction('signup')">Create account</button></form><p class="account-status" id="accountStatus" role="status">Cloud sync is optional and must be configured by the site owner.</p><button class="account-secondary account-signout" id="accountSignout" onclick="accountSignOut()">Sign out</button></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -903,6 +924,107 @@ async function runSearch(reset,requestId=state.searchRequestId){const query=stat
 
 window.addEventListener('scroll',()=>document.querySelector('.topbar')?.classList.toggle('scrolled',window.scrollY>24),{passive:true});
 document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest('.movie-card');if(!c)return;const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/(r.width*1.5);c.style.setProperty('--mx',(px*100)+'%');c.style.setProperty('--my',(py*100)+'%');c.style.setProperty('--ry',((px-.5)*8)+'deg');c.style.setProperty('--rx',((.5-Math.min(py,1))*6)+'deg')},{passive:true});
+
+let cloudConfigPromise=null;
+let cloudSession=safeStore.get('cineframe_session',null);
+let cloudSyncTimer=null;
+async function getCloudConfig(){
+  if(!cloudConfigPromise)cloudConfigPromise=fetch('/api/app-config',{headers:{Accept:'application/json'}}).then(r=>r.ok?r.json():{}).catch(()=>({}));
+  return cloudConfigPromise;
+}
+function cloudConfigured(cfg){return Boolean(cfg?.supabaseUrl&&cfg?.supabaseAnonKey)}
+function cloudSetStatus(message,kind=''){
+  const el=$('accountStatus');if(!el)return;
+  el.textContent=message;el.className='account-status'+(kind?' '+kind:'');
+}
+function updateAccountUI(){
+  const signed=Boolean(cloudSession?.access_token&&cloudSession?.user?.email);
+  const button=$('accountButton');
+  if(button){button.classList.toggle('signed-in',signed);button.title=signed?'Signed in as '+cloudSession.user.email:'Account';button.setAttribute('aria-label',button.title)}
+  const intro=$('accountIntro'), form=$('accountForm'), signout=$('accountSignout');
+  if(intro)intro.textContent=signed?'Signed in as '+cloudSession.user.email+'. Your library can sync to this account.':'Sign in to sync My List and Continue Watching between devices.';
+  if(form)form.style.display=signed?'none':'grid';
+  if(signout)signout.style.display=signed?'block':'none';
+}
+function openAccount(){openOverlay('accountOverlay');updateAccountUI();getCloudConfig().then(cfg=>{if(!cloudConfigured(cfg)&&!cloudSession)cloudSetStatus('Cloud accounts are not configured yet. The site owner must add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel, then create the library table described in README.md.');});}
+async function supabaseAuth(path,body,cfg){
+  const response=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey},body:JSON.stringify(body)});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.msg||data.message||data.error_description||data.error||'Authentication failed.');
+  return data;
+}
+async function accountAction(mode){
+  const email=$('accountEmail').value.trim(),password=$('accountPassword').value;
+  if(!email||!password){cloudSetStatus('Enter your email and password.','error');return}
+  cloudSetStatus(mode==='signup'?'Creating your account…':'Signing in…');
+  try{
+    const cfg=await getCloudConfig();
+    if(!cloudConfigured(cfg))throw new Error('Cloud accounts are not configured yet. Set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel and follow the database setup in README.md.');
+    const data=mode==='signup'?await supabaseAuth('signup',{email,password},cfg):await supabaseAuth('token?grant_type=password',{email,password},cfg);
+    if(!data.access_token){
+      cloudSetStatus('Account created. Check your email to confirm it, then return here to sign in.','success');
+      return;
+    }
+    cloudSession={access_token:data.access_token,refresh_token:data.refresh_token,token_type:data.token_type,expires_at:Date.now()+Number(data.expires_in||3600)*1000,user:data.user};
+    safeStore.set('cineframe_session',cloudSession);updateAccountUI();
+    await loadCloudLibrary();
+    cloudSetStatus('Signed in. Your library is syncing.','success');
+  }catch(error){cloudSetStatus(error.message||'Could not sign in.','error')}
+}
+async function validCloudSession(){
+  if(!cloudSession?.access_token)return null;
+  if(Number(cloudSession.expires_at||0)>Date.now()+60000)return cloudSession;
+  if(!cloudSession.refresh_token){accountSignOut(false);return null}
+  try{
+    const cfg=await getCloudConfig();if(!cloudConfigured(cfg))return null;
+    const data=await supabaseAuth('token?grant_type=refresh_token',{refresh_token:cloudSession.refresh_token},cfg);
+    cloudSession={...cloudSession,...data,expires_at:Date.now()+Number(data.expires_in||3600)*1000};
+    safeStore.set('cineframe_session',cloudSession);updateAccountUI();return cloudSession;
+  }catch{accountSignOut(false);return null}
+}
+async function cloudRequest(table,method='GET',body=null,query=''){
+  const session=await validCloudSession(),cfg=await getCloudConfig();
+  if(!session||!cloudConfigured(cfg))return null;
+  const url=cfg.supabaseUrl.replace(/\/$/,'')+'/rest/v1/'+table+(query?'?'+query:'');
+  const headers={apikey:cfg.supabaseAnonKey,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'};
+  if(method==='POST')headers.Prefer='resolution=merge-duplicates,return=minimal';
+  const response=await fetch(url,{method,headers,body:body?JSON.stringify(body):undefined});
+  if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.message||error.details||'Cloud library request failed. Check the setup instructions in README.md.')}
+  return response.status===204?null:response.json().catch(()=>null);
+}
+function mergeLibrary(local,remote,key='id'){
+  const map=new Map();
+  for(const item of [...(remote||[]),...(local||[])])if(item&&item[key]!==undefined)map.set(String(item.media_type||'')+':'+String(item[key]),item);
+  return [...map.values()];
+}
+async function loadCloudLibrary(){
+  const session=await validCloudSession();if(!session?.user?.id)return;
+  try{
+    const rows=await cloudRequest('cineframe_library','GET',null,'select=watchlist,history&user_id=eq.'+encodeURIComponent(session.user.id)+'&limit=1');
+    const row=Array.isArray(rows)?rows[0]:null;
+    if(row){
+      safeStore.set('cineframe_watchlist',mergeLibrary(getWatchlist(),row.watchlist||[]));
+      const mergedHistory=mergeLibrary(getHistory(),row.history||[]).sort((a,b)=>Number(b.watchedAt||0)-Number(a.watchedAt||0)).slice(0,30);
+      safeStore.set('cineframe_history',mergedHistory);
+    }
+    await syncCloudLibrary();updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();
+  }catch(error){cloudSetStatus('Signed in, but cloud sync needs setup: '+error.message,'error')}
+}
+async function syncCloudLibrary(){
+  const session=await validCloudSession();if(!session?.user?.id)return;
+  try{
+    await cloudRequest('cineframe_library','POST',{user_id:session.user.id,watchlist:getWatchlist(),history:getHistory(),updated_at:new Date().toISOString()},'on_conflict=user_id');
+  }catch(error){cloudSetStatus('Cloud sync issue: '+error.message,'error')}
+}
+function scheduleCloudSync(){
+  if(!cloudSession?.access_token)return;
+  clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudLibrary(),700);
+}
+function accountSignOut(showMessage=true){
+  cloudSession=null;safeStore.set('cineframe_session',null);updateAccountUI();
+  if(showMessage)cloudSetStatus('Signed out. Your local library remains on this device.','success');
+}
+
 init();
 </script>
 
