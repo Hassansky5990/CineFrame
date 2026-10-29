@@ -811,7 +811,9 @@ function renderEpisodeList(){
   const list=$('episodeList'),count=$('episodeCount'),more=$('episodeLoadMore');
   if(!list||!count||!more)return;
   const query=state.episodeQuery;
-  const episodes=state.episodeItems||[];
+  const today=new Date().toISOString().slice(0,10);
+  // TMDB's season payload includes planned future episodes. Only show episodes that have aired.
+  const episodes=(state.episodeItems||[]).filter(ep=>!ep.air_date||ep.air_date<=today);
   const filtered=episodes.filter(ep=>{
     if(!query)return true;
     const number=String(ep.episode_number??'');
