@@ -693,7 +693,7 @@ function buildApiUrl(path){
 async function api(path, params={}){
   const url=buildApiUrl(path);url.searchParams.set('language','en-US');
   Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v)});
-  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);if(!res.ok){let detail='';try{detail=(await res.json()).status_message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
+  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);if(!res.ok){let detail='';try{const errorBody=await res.json();detail=errorBody.status_message||errorBody.error||errorBody.message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
 }
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
 function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=>'<div class="movie-card"><div class="poster skeleton"></div><div class="card-copy"><div class="skeleton" style="height:13px;border-radius:4px"></div><div class="skeleton" style="height:10px;width:55%;margin-top:8px;border-radius:4px"></div></div></div>').join('')}
