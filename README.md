@@ -15,6 +15,11 @@ The Android project is generated on the workflow runner, so it is not committed 
 
 ## App features in this repository
 
+- Android-safe header/player spacing that respects system gesture and status-bar insets.
+- Continue Watching cards show saved progress when an embedded player sends playback-time messages. Embedded providers do not always expose those messages, so progress tracking depends on provider support.
+- A Subtitles shortcut in the player explains where to find the provider's CC/settings controls; the external provider still owns subtitle selection and timing.
+
+
 - Existing mobile-first CineFrame interface packaged with Capacitor.
 - Branded CineFrame app icon and native splash resources generated during the Android build.
 - Existing My List and Continue Watching history persisted locally on the device.
@@ -59,6 +64,18 @@ with check ((select auth.uid()) = user_id);
 
 Use Supabase Auth email/password and set the email-confirmation behavior you want in the Supabase dashboard. The API config endpoint only returns the public anon key and project URL; the user's access token and RLS policies protect per-user data.
 
+## Run the site locally
+
+Install Node.js 20+, copy `.env.example` to `.env`, then add your server-side `TMDB_API_KEY`. To enable optional cloud accounts locally, add `SUPABASE_URL` and `SUPABASE_ANON_KEY` too.
+
+```sh
+npm install
+cp .env.example .env
+npm start
+```
+
+Open `http://localhost:3000`. The local server keeps the TMDB key on the server and serves the public Supabase configuration only. Supabase Auth and Row Level Security are still responsible for account and library access.
+
 ## Local Android development
 
 Install Node.js 20+, Java 21, and Android Studio/SDK, then run:
@@ -72,4 +89,4 @@ npx cap sync android
 npx cap open android
 ```
 
-After generating the Android project once, use `npm run android:build` when web code or assets change.
+After generating the Android project once, `npm run android:build` rebuilds the web bundle, regenerates branded Android assets, syncs Capacitor, and assembles the debug APK at `android/app/build/outputs/apk/debug/app-debug.apk`.
