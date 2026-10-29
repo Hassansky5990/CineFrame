@@ -11,6 +11,8 @@ on:
       - 'capacitor.config.json'
       - 'package.json'
       - 'sw.js'
+      - 'scripts/**'
+      - 'server.cjs'
       - '.github/workflows/android-apk.yml'
 
 permissions:
@@ -33,6 +35,8 @@ jobs:
           java-version: '21'
       - name: Install dependencies
         run: npm install
+      - name: Run source checks
+        run: npm test
       - name: Prepare web assets
         run: npm run build:web
       - name: Generate Android project
