@@ -107,7 +107,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px;background:#0000008c;backdrop-filter:blur(34px) saturate(140%);-webkit-backdrop-filter:blur(34px) saturate(140%)}
 .overlay.open{display:flex;animation:fadeIn .3s ease}
 .modal{position:relative;width:min(940px,100%);max-height:min(92dvh,1020px);overflow:auto;background:var(--panel);border-radius:30px;box-shadow:0 60px 140px #000,0 0 0 1px var(--hair);animation:modalIn .45s var(--ease)}
-.close{position:sticky;float:none;top:16px;z-index:5;margin:16px 16px -52px auto;width:36px;height:36px;border:1px solid var(--hair);border-radius:50%;background:#00000073;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .2s}.close:hover{background:#ffffff40}
+.close{position:fixed;top:16px;right:16px;z-index:90;float:none;margin:0;width:36px;height:36px;border:1px solid var(--hair);border-radius:50%;background:#00000073;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .2s}.close:hover{background:#ffffff40}
 .detail-hero{position:relative;min-height:min(54vw,500px);padding:0 48px 38px;display:flex;align-items:flex-end;background:var(--panel2) center/cover no-repeat}
 .detail-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--panel) 0%,#1c1c1ed9 22%,#1c1c1e00 66%)}
 .detail-copy{position:relative;z-index:1;max-width:680px}
