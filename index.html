@@ -663,7 +663,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <script>
 'use strict';
 // Requests go through the existing server-side TMDB proxy. Keep TMDB_API_KEY in server environment variables.
-const API_BASE = (window.Capacitor?.isNativePlatform?.() ? 'https://cineframe-web.vercel.app/api/tmdb' : '/api/tmdb');
+const API_BASE = (window.Capacitor?.isNativePlatform?.() ? 'https://cineframe-web.vercel.app/api/tmdb-proxy' : '/api/tmdb-proxy');
 // Optional: paste a TMDB API key (v3 key or v4 read token) ONLY if this page is not served by your own server, e.g. opened as a local file.
 const TMDB_API_KEY = '';
 const IMG = 'https://image.tmdb.org/t/p/';
@@ -687,13 +687,23 @@ function imageFallback(img){img.onerror=null;img.src=FALLBACK_POSTER}
 function normalize(item,type){return {...item,media_type:item.media_type||type}}
 function buildApiUrl(path){
   if(TMDB_API_KEY){const u=new URL('https://api.themoviedb.org/3'+path);if(TMDB_API_KEY.length<40)u.searchParams.set('api_key',TMDB_API_KEY);return u}
-  if(!/^https?:$/.test(window.location.protocol))throw new Error('This page was opened as a local file, so the /api/tmdb proxy is not reachable. Serve it from your server over http(s), or paste a TMDB API key into TMDB_API_KEY at the top of the script.');
-  return new URL(API_BASE+path,window.location.href);
+  if(!/^https?:$/.test(window.location.protocol))throw new Error('This page was opened as a local file, so the /api/tmdb-proxy endpoint is not reachable. Serve it from your server over http(s), or configure TMDB_API_KEY on the server.');
+  const u=new URL(API_BASE,window.location.href);
+  u.searchParams.set('path',String(path).replace(/^\\/+/, ''));
+  return u;
 }
 async function api(path, params={}){
   const url=buildApiUrl(path);url.searchParams.set('language','en-US');
   Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v)});
-  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);if(!res.ok){let detail='';try{const errorBody=await res.json();detail=errorBody.status_message||errorBody.error||errorBody.message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
+  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);
+  const body=await res.text();
+  if(!res.ok){
+    let detail='';
+    try{const errorBody=JSON.parse(body);detail=errorBody.status_message||errorBody.error||errorBody.message||''}catch{}
+    if(!detail&&body)detail=body.replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim().slice(0,180);
+    throw new Error(detail||`TMDB request failed (${res.status})`);
+  }
+  try{return JSON.parse(body)}catch{throw new Error('TMDB proxy returned a non-JSON response. Check the deployment logs and API route.')}
 }
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
 function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=>'<div class="movie-card"><div class="poster skeleton"></div><div class="card-copy"><div class="skeleton" style="height:13px;border-radius:4px"></div><div class="skeleton" style="height:10px;width:55%;margin-top:8px;border-radius:4px"></div></div></div>').join('')}
