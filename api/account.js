@@ -115,7 +115,7 @@ export default async function handler(req, res) {
       if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return sendError(res, 405, 'Method not allowed'); }
       const email = String(req.body && req.body.email || '').trim().toLowerCase();
       const password = String(req.body && req.body.password || '');
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || email.length > 254) return sendError(res, 400, 'Enter a valid email address');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return sendError(res, 400, 'Enter a valid email address');
       if (password.length < 12 || password.length > 128) return sendError(res, 400, 'Password must be 12–128 characters');
       const salt = crypto.randomBytes(16).toString('hex');
       const digest = passwordHash(password, salt);
