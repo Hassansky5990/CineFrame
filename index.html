@@ -821,11 +821,15 @@ function setupHomeSliders(){
 }
 
 async function accountApi(endpoint,method='GET',body){
+  const nativeApp=Boolean(window.Capacitor?.isNativePlatform?.());
   const options={method,credentials:'include',headers:{}};
+  const savedToken=nativeApp?safeStore.get('cineframe_account_token',''):'';
+  if(nativeApp&&typeof savedToken==='string'&&savedToken)options.headers.Authorization='Bearer '+savedToken;
   if(body!==undefined){options.headers['Content-Type']='application/json';options.body=JSON.stringify(body)}
   const response=await fetch(ACCOUNT_API_BASE+endpoint,options);
   const payload=await response.json().catch(()=>({error:'Unexpected response from account service'}));
   if(!response.ok)throw new Error(payload.error||('Account request failed ('+response.status+')'));
+  if(nativeApp&&payload.sessionToken)safeStore.set('cineframe_account_token',payload.sessionToken);
   return payload;
 }
 function setAccountMessage(message,isError=false){['accountMessage','accountProfileMessage'].forEach(id=>{const node=$(id);if(node){node.textContent=message||'';node.classList.toggle('error',Boolean(isError))}})}
@@ -906,7 +910,7 @@ async function submitAccountForm(event){
 }
 async function logoutAccount(){
   try{await accountApi('/logout','POST',{})}catch(error){console.warn('CineFrame sign-out request failed:',error.message)}
-  state.accountUser=null;state.accountReady=false;state.accountSyncHold=false;clearTimeout(state.accountSyncTimer);
+  state.accountUser=null;state.accountReady=false;state.accountSyncHold=false;clearTimeout(state.accountSyncTimer);safeStore.set('cineframe_account_token','');
   renderAccountMode('login');closeOverlay('accountOverlay');toast('Signed out. Your on-device library is unchanged.');
 }
 
