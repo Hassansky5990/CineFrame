@@ -1,26 +1,13 @@
 {
-  "name": "cineframe",
-  "version": "1.1.0",
+  "name": "CineFrame",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "npm run build:web && node server.cjs",
-    "build:web": "mkdir -p www/assets && cp index.html www/index.html && cp manifest.webmanifest www/manifest.webmanifest && cp sw.js www/sw.js && cp -R assets/. www/assets/",
-    "android:sync": "npm run build:web && npm run android:assets && npx cap sync android",
-    "android:open": "cap open android",
-    "android:build": "npm run build:web && npm run android:assets && npx cap sync android && cd android && ./gradlew assembleDebug",
-    "test": "node scripts/check-html.mjs",
-    "android:assets": "npx capacitor-assets generate --android --assetPath assets --androidProject android --splashBackgroundColor '#000000' --iconBackgroundColor '#080808'"
+    "start": "node server.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/splash-screen": "^7.0.2"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^7.4.3",
-    "@capacitor/assets": "^3.0.5"
+    "express": "^4.21.2"
   }
 }
