@@ -4,19 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.cjs",
+    "test": "node test.js",
     "build:web": "mkdir -p www/assets && cp index.html www/index.html && cp manifest.webmanifest www/manifest.webmanifest && cp -R assets/. www/assets/",
-    "android:sync": "npm run build:web && cap sync android",
-    "android:open": "cap open android"
+    "android:assets": "npx @capacitor/assets generate --android --assetPath assets --androidProject android --iconBackgroundColor '#080808' --splashBackgroundColor '#080808'",
+    "android:sync": "npm run build:web && cap sync android && npm run android:assets",
+    "android:open": "cap open android",
+    "android:build": "npm run build:web && cap sync android && npm run android:assets && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "@capacitor/android": "^7.4.3",
     "@capacitor/core": "^7.4.3",
-    "@capacitor/splash-screen": "^7.0.2"
+    "@capacitor/splash-screen": "^7.0.2",
+    "better-sqlite3": "^11.7.0",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/assets": "^3.0.5"
   }
 }
