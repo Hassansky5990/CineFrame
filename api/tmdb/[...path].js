@@ -1,5 +1,23 @@
 
+function addNativeCors(req, res) {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  let sameHost = false;
+  try { sameHost = new URL(origin).host === String(req.headers.host || ''); } catch {}
+  const native = ['capacitor://localhost', 'https://localhost', 'http://localhost', 'http://localhost:8100'].includes(origin);
+  const allowed = sameHost || native || origin === process.env.APP_ORIGIN || origin === 'https://cineframe-web.vercel.app';
+  if (!allowed) return false;
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Vary', 'Origin');
+  return true;
+}
+
 export default async function handler(req, res) {
+  if (!addNativeCors(req, res)) return res.status(403).json({ error: 'Origin not allowed' });
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
