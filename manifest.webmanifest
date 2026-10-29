@@ -2,8 +2,8 @@
   "name": "CineFrame",
   "short_name": "CineFrame",
   "description": "Discover movies, series and anime.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
@@ -13,7 +13,13 @@
       "src": "/assets/cineframe-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/cineframe-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
