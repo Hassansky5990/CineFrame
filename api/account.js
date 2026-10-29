@@ -45,7 +45,7 @@ function addCors(req, res) {
   if (!allow) return false;
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Vary', 'Origin');
   return true;
@@ -87,7 +87,8 @@ function sendError(res, status, error) {
   return res.status(status).json({ error });
 }
 async function findUser(pool, req) {
-  const token = cookies(req).sv;
+  const auth = String(req.headers.authorization || '');
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : cookies(req).sv;
   if (!token || token.length > 256) return null;
   const result = await pool.query(
     'SELECT u.id, u.email FROM cineframe_sessions s JOIN cineframe_users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at > NOW()',
@@ -99,7 +100,7 @@ async function createSession(pool, res, user) {
   const token = crypto.randomBytes(32).toString('base64url');
   await pool.query('INSERT INTO cineframe_sessions (token_hash,user_id,expires_at) VALUES ($1,$2,NOW() + INTERVAL \'30 days\')', [hashToken(token), user.id]);
   setCookie(res, token);
-  return { id: String(user.id), email: user.email };
+  return { user: { id: String(user.id), email: user.email }, sessionToken: token };
 }
 
 export default async function handler(req, res) {
@@ -126,7 +127,7 @@ export default async function handler(req, res) {
         if (error && error.code === '23505') return sendError(res, 409, 'An account with that email already exists');
         throw error;
       }
-      return res.status(200).json({ user: await createSession(pool, res, inserted.rows[0]) });
+      return res.status(200).json(await createSession(pool, res, inserted.rows[0]));
     }
     if (op === 'login') {
       if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return sendError(res, 405, 'Method not allowed'); }
@@ -138,7 +139,7 @@ export default async function handler(req, res) {
       const actual = user ? Buffer.from(passwordHash(password, user.salt), 'hex') : Buffer.alloc(64);
       const expected = user ? Buffer.from(user.password_hash, 'hex') : Buffer.alloc(64);
       if (!user || actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return sendError(res, 401, 'Email or password is incorrect');
-      return res.status(200).json({ user: await createSession(pool, res, user) });
+      return res.status(200).json(await createSession(pool, res, user));
     }
     if (op === 'me') {
       if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return sendError(res, 405, 'Method not allowed'); }
