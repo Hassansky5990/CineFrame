@@ -147,7 +147,8 @@ export default async function handler(req, res) {
     }
     if (op === 'logout') {
       if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return sendError(res, 405, 'Method not allowed'); }
-      const token = cookies(req).sv;
+      const auth = String(req.headers.authorization || '');
+      const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : cookies(req).sv;
       if (token) await pool.query('DELETE FROM cineframe_sessions WHERE token_hash=$1', [hashToken(token)]);
       clearCookie(res);
       return res.status(200).json({ ok: true });
