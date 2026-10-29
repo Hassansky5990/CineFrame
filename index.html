@@ -69,7 +69,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .section h2:after{content:none}
 .section-sub{color:var(--muted);font-size:.84rem}
 #homeSections .section-sub{display:none}
-.home-shelf .section-heading{align-items:center;margin-bottom:2px}
+.home-shelf .section-heading{align-items:center;margin-bottom:2px}.home-shelf .explore-more{margin-left:auto;flex:0 0 auto;padding:5px 0 5px 12px;border:0;background:transparent;color:#a1a1aa;font-size:.82rem;font-weight:600;letter-spacing:.005em;white-space:nowrap;cursor:pointer;transition:color .18s}.home-shelf .explore-more:hover{color:#fff}.home-shelf .explore-more:after{content:' →';display:inline-block;margin-left:3px;color:#777;transition:transform .18s,color .18s}.home-shelf .explore-more:hover:after{color:#fff;transform:translateX(3px)}
 .popular-tools{display:flex;align-items:center;gap:13px;margin-left:auto}
 .popular-progress{width:clamp(34px,5vw,68px);height:3px;overflow:hidden;border-radius:99px;background:#ffffff20}
 .popular-progress span{display:block;width:0;height:100%;border-radius:inherit;background:var(--gold);transition:width .25s ease}
@@ -700,7 +700,7 @@ function updateShelf(rowId){
   const page=!max?1:position>=max-4?pages:Math.min(pages,Math.floor(position/step+.5)+1);
   count.textContent=String(page).padStart(2,'0')+' / '+String(pages).padStart(2,'0');
 }
-function updateShelfForRow(rowId){updateShelf(rowId)}
+function updateShelfForRow(rowId){updateShelf(rowId);const row=$(rowId);if(!row)return;const shelf=row.closest('.home-shelf');const heading=shelf?.querySelector('.section-heading');if(!heading)return;let link=heading.querySelector('.explore-more');if(!link){link=document.createElement('button');link.type='button';link.className='explore-more';link.textContent='Explore more';link.addEventListener('click',()=>{if(rowId==='ratedRow'){showCategory('movie');$('sortFilter').value='vote_average.desc';applyListingControls()}else if(rowId==='tvRow')showCategory('tv');else if(rowId==='moviesRow')showCategory('movie');else if(rowId==='trendingRow'||rowId==='forYouRow')showCategory('all');else if(rowId==='continueRow')showWatchlist()});heading.append(link)}}
 function scrollRecommendations(direction){
   const row=$('recommendRow');
   if(!row)return;
