@@ -47,7 +47,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   }
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -74,7 +74,8 @@ function clearSessionCookie(res) {
   res.setHeader('Set-Cookie', 'sv=; Path=/; HttpOnly; SameSite=' + (production ? 'None; Secure' : 'Lax') + '; Max-Age=0');
 }
 function userForRequest(req) {
-  const token = parseCookies(req).sv;
+  const auth = String(req.headers.authorization || '');
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : parseCookies(req).sv;
   if (!token || token.length > 256) return null;
   const row = db.prepare('SELECT u.id, u.email, s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=?').get(hashToken(token));
   if (!row) return null;
@@ -120,7 +121,7 @@ function createSession(res, user) {
   const token = crypto.randomBytes(32).toString('base64url');
   db.prepare('INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,?)').run(hashToken(token), user.id, Date.now() + SESSION_TTL);
   setSessionCookie(res, token);
-  return { id: user.id, email: user.email };
+  return { user: { id: user.id, email: user.email }, sessionToken: token };
 }
 
 app.post('/api/register', (req, res) => {
@@ -136,8 +137,8 @@ app.post('/api/register', (req, res) => {
   try {
     const result = db.prepare('INSERT INTO users (email,salt,password_hash,created_at) VALUES (?,?,?,?)')
       .run(email, credentials.salt, credentials.passwordHash, Date.now());
-    const user = createSession(res, { id: Number(result.lastInsertRowid), email });
-    return res.status(200).json({ user });
+    const session = createSession(res, { id: Number(result.lastInsertRowid), email });
+    return res.status(200).json(session);
   } catch (error) {
     if (String(error && error.code).includes('SQLITE_CONSTRAINT')) return res.status(409).json({ error: 'An account with that email already exists' });
     return res.status(500).json({ error: 'Unable to create account' });
@@ -150,7 +151,7 @@ app.post('/api/login', (req, res) => {
   const row = db.prepare('SELECT id,email,salt,password_hash FROM users WHERE email=?').get(email);
   if (!row || !passwordMatches(password, row.salt, row.password_hash)) return res.status(401).json({ error: 'Email or password is incorrect' });
   db.prepare('DELETE FROM sessions WHERE user_id=? AND expires_at<=?').run(row.id, Date.now());
-  return res.status(200).json({ user: createSession(res, row) });
+  return res.status(200).json(createSession(res, row));
 });
 app.get('/api/me', (req, res) => res.json({ user: userForRequest(req) }));
 app.post('/api/logout', (req, res) => {
