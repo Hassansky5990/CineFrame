@@ -1,6 +1,29 @@
-
 {
   "rewrites": [
+    {
+      "source": "/api/register",
+      "destination": "/api/account?op=register"
+    },
+    {
+      "source": "/api/login",
+      "destination": "/api/account?op=login"
+    },
+    {
+      "source": "/api/me",
+      "destination": "/api/account?op=me"
+    },
+    {
+      "source": "/api/logout",
+      "destination": "/api/account?op=logout"
+    },
+    {
+      "source": "/api/library",
+      "destination": "/api/account?op=library"
+    },
+    {
+      "source": "/api/delete-account",
+      "destination": "/api/account?op=delete-account"
+    },
     {
       "source": "/api/tmdb/:path*",
       "destination": "/api/tmdb-proxy?path=:path*"
