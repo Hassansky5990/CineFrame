@@ -693,7 +693,7 @@ input,select,textarea{font-size:16px}
       </form>
       <button id="accountModeToggle" class="account-mode-toggle" type="button" onclick="toggleAccountMode()">Create an account</button>
     </div>
-    <div id="accountSignedIn" class="account-signed-in" hidden><div class="account-user-mark" aria-hidden="true">✓</div><strong id="accountEmailLabel"></strong><p>Your watchlist and viewing history are synced to this account.</p><button class="primary account-submit" type="button" onclick="syncAccountLibrary(true)">Sync library now</button><button class="account-signout" type="button" onclick="logoutAccount()">Sign out</button></div>
+    <div id="accountSignedIn" class="account-signed-in" hidden><div class="account-user-mark" aria-hidden="true">✓</div><strong id="accountEmailLabel"></strong><p>Your watchlist and viewing history are synced to this account.</p><p id="accountProfileMessage" class="account-message" role="status" aria-live="polite"></p><button class="primary account-submit" type="button" onclick="syncAccountLibrary(true)">Sync library now</button><button class="account-signout" type="button" onclick="logoutAccount()">Sign out</button></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -828,7 +828,7 @@ async function accountApi(endpoint,method='GET',body){
   if(!response.ok)throw new Error(payload.error||('Account request failed ('+response.status+')'));
   return payload;
 }
-function setAccountMessage(message,isError=false){const node=$('accountMessage');if(!node)return;node.textContent=message||'';node.classList.toggle('error',Boolean(isError))}
+function setAccountMessage(message,isError=false){['accountMessage','accountProfileMessage'].forEach(id=>{const node=$(id);if(node){node.textContent=message||'';node.classList.toggle('error',Boolean(isError))}})}
 function renderAccountMode(mode){
   state.accountMode=state.accountUser?'profile':mode;
   const signedIn=Boolean(state.accountUser);
@@ -840,6 +840,7 @@ function renderAccountMode(mode){
   $('accountModeToggle').textContent=state.accountMode==='register'?'Already have an account? Sign in':'New to CineFrame? Create an account';
   $('accountPassword').autocomplete=state.accountMode==='register'?'new-password':'current-password';
   $('accountEmailLabel').textContent=state.accountUser?.email||'';
+  const triggerLabel=$('accountTrigger')?.querySelector('.account-label');if(triggerLabel)triggerLabel.textContent=signedIn?'Account':'Sign in';
   setAccountMessage('');
 }
 function openAccount(){renderAccountMode(state.accountUser?'profile':'login');openOverlay('accountOverlay')}
