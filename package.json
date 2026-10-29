@@ -1,13 +1,22 @@
 {
-  "name": "StreamVault-Next",
-  "version": "1.0.0",
+  "name": "cineframe",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:web": "mkdir -p www/assets && cp index.html www/index.html && cp manifest.webmanifest www/manifest.webmanifest && cp -R assets/. www/assets/",
+    "android:sync": "npm run build:web && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/splash-screen": "^7.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
   }
 }
