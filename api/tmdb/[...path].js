@@ -1,4 +1,6 @@
 
+const allowedTmdbRoots = new Set(['movie', 'tv', 'search', 'discover', 'genre', 'trending', 'person', 'collection', 'company', 'keyword', 'configuration', 'watch']);
+
 function addNativeCors(req, res) {
   const origin = req.headers.origin;
   if (!origin) return true;
@@ -38,8 +40,8 @@ export default async function handler(req, res) {
       ? route
       : "";
 
-  if (!path) {
-    return res.status(400).json({ error: "Missing TMDB endpoint path" });
+  if (!path || path.includes("..") || path.startsWith("/") || !allowedTmdbRoots.has(path.split("/")[0]) || path.split("/").some(segment => !/^[a-zA-Z0-9_-]+$/.test(segment))) {
+    return res.status(404).json({ error: "TMDB endpoint not allowed" });
   }
 
   const url = new URL(
