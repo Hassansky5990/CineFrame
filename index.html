@@ -974,7 +974,7 @@ function mountPlayer(){
     $('playerLoading').classList.add('hidden');
     $('playerFootnote').textContent='The provider is taking too long. Try Reload player or Open provider.';
   },15000);
-  $('playerTitle').textContent=titleOf(state.selected)+(mediaType(state.selected)==='tv'?\` · S${String(state.currentSeason).padStart(2,'0')} E${String(state.currentEpisode).padStart(2,'0')}\`:'');
+  $('playerTitle').textContent=titleOf(state.selected)+(mediaType(state.selected)==='tv'?` · S${String(state.currentSeason).padStart(2,'0')} E${String(state.currentEpisode).padStart(2,'0')}`:'');
 }
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
