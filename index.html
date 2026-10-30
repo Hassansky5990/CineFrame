@@ -169,7 +169,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .player-top{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--hair)}
 .player-top strong{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .player-top select{max-width:42%}
-.player-frame{position:relative;aspect-ratio:16/9;background:#000}
+.player-wait{position:absolute;inset:0;display:grid;place-items:center;padding:24px;color:#aaa;font-size:.9rem;pointer-events:none}.player-frame{position:relative;aspect-ratio:16/9;background:#000}
 .player-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .player-footer{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 20px;color:var(--muted);font-size:.8rem}
 .player-footer button{background:var(--glass);color:#fff;border:1px solid var(--hair);border-radius:999px;padding:8px 16px;font-weight:500}.player-footer button:hover{background:#ffffff38}
@@ -903,7 +903,31 @@ function playSelected(){if(!state.selected)return;launchPlayer(state.selected,st
 function playTrailerSelected(){const trailer=state.videos.find(v=>v.site==='YouTube'&&v.type==='Trailer')||state.videos.find(v=>v.site==='YouTube');if(trailer)playTrailer(trailer.key,trailer.name||'Trailer');else toast('No YouTube trailer was found for this title.')}
 function buildProviderUrl(item,provider,season=1,episode=1){const type=mediaType(item);const id=Number(item.id);if(provider==='vidrift'){const path=type==='tv'?`${VIDRIFT_BASE}/tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`:`${VIDRIFT_BASE}/movie/${id}`;const url=new URL(path);url.searchParams.set('title',titleOf(item));url.searchParams.set('brand','CineFrame');url.searchParams.set('brandColor','e50914');if(item.backdrop_path)url.searchParams.set('poster',backdropOf(item));return url.toString()}if(type==='tv')return `${API_PLAYER_BASE}tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`;return `${API_PLAYER_BASE}movie/${id}`}
 function launchPlayer(item,season=1,episode=1){state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=$('providerSelect').value||'vidrift';$('playerTitle').textContent=titleOf(item)+(mediaType(item)==='tv'?` · S${String(season).padStart(2,'0')} E${String(episode).padStart(2,'0')}`:'');$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
-function mountPlayer(){if(!state.selected)return;const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);state.playerUrl=url;$('playerLoading').classList.remove('hidden');$('playerFrame').innerHTML=`<iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;const frame=$('externalPlayer');frame.addEventListener('load',()=>{$('playerLoading').classList.add('hidden')},{once:true});setTimeout(()=>$('playerLoading').classList.add('hidden'),9000);$('playerFootnote').textContent=state.currentProvider==='vidrift'?'VidRift player · provider availability may vary.':'ApiPlayer.ru player · provider availability may vary.'}
+let playerLoadTimer=null;
+let playerAttempt=0;
+function mountPlayer(){
+  if(!state.selected)return;
+  const attempt=++playerAttempt;
+  if(playerLoadTimer)clearTimeout(playerLoadTimer);
+  const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
+  state.playerUrl=url;
+  $('playerLoading').classList.remove('hidden');
+  $('playerFootnote').textContent='Connecting to the selected provider…';
+  $('playerFrame').innerHTML=`<div class="player-wait" role="status">Connecting to player…</div><iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  const frame=$('externalPlayer');
+  frame.addEventListener('load',()=>{
+    if(attempt!==playerAttempt)return;
+    if(playerLoadTimer)clearTimeout(playerLoadTimer);
+    $('playerLoading').classList.add('hidden');
+    $('playerFootnote').textContent='Player loaded. If playback does not begin, try Reload player or Open provider.';
+  },{once:true});
+  playerLoadTimer=setTimeout(()=>{
+    if(attempt!==playerAttempt)return;
+    $('playerLoading').classList.add('hidden');
+    $('playerFootnote').textContent='The provider is taking too long. Try Reload player or Open provider.';
+  },15000);
+  $('playerTitle').textContent=titleOf(state.selected)+(mediaType(state.selected)==='tv'?\` · S${String(state.currentSeason).padStart(2,'0')} E${String(state.currentEpisode).padStart(2,'0')}\`:'');
+}
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
 function openExternalPlayer(){if(state.playerUrl)window.open(state.playerUrl,'_blank','noopener,noreferrer')}
