@@ -667,11 +667,8 @@ async function syncCloudLibrary(preferCloud=false){
   try{
     const {data,error}=await supabaseClient.from('cineframe_library').select('watchlist,history').eq('user_id',currentUser.id).maybeSingle();
     if(error)throw error;
-    if(data&&preferCloud){
-      safeStore.set('cineframe_watchlist',Array.isArray(data.watchlist)?data.watchlist:[]);
-      safeStore.set('cineframe_history',Array.isArray(data.history)?data.history:[]);
-    }else if(data){
-      const byKey=(a,b)=>{const m=new Map();[...a,...b].forEach(x=>m.set(mediaType(x)+':'+Number(x.id),x));return [...m.values()]};
+    if(data){
+      const byKey=(remote,local)=>{const m=new Map();[...remote,...local].forEach(x=>m.set(mediaType(x)+':'+Number(x.id),x));return [...m.values()]};
       safeStore.set('cineframe_watchlist',byKey(data.watchlist||[],getWatchlist()));
       safeStore.set('cineframe_history',byKey(data.history||[],getHistory()).sort((a,b)=>(b.watchedAt||0)-(a.watchedAt||0)).slice(0,30));
     }
