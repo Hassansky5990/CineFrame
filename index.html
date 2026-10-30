@@ -601,6 +601,40 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   }
   .popular-arrow{display:grid!important;place-items:center!important}
 }
+
+/* CineFrame account modal */
+.auth-overlay{align-items:center!important;justify-content:center!important;padding:22px!important;background:#000000c7!important}
+.auth-card{position:relative;width:min(100%,440px);max-height:calc(100dvh - 44px);overflow:auto;padding:34px 32px 30px;border:1px solid #ffffff20;border-radius:24px;background:#171719;box-shadow:0 28px 100px #000c;animation:modalIn .32s var(--ease)}
+.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;color:#fff;font-size:1rem;font-weight:700;letter-spacing:-.035em}
+.auth-brandmark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;color:#080808;font-size:12px}
+.auth-card h2{margin:0;font-size:2rem;line-height:1.08;letter-spacing:-.045em}
+.auth-subtitle{margin:9px 0 25px;color:var(--muted);font-size:.92rem;line-height:1.5}
+.auth-field{display:grid;gap:8px;margin:0 0 17px;color:#e8e8eb;font-size:.82rem;font-weight:600}
+.auth-field input{width:100%;height:48px;min-width:0;padding:0 14px;border:1px solid #ffffff24;border-radius:12px;outline:0;background:#ffffff0a;color:#fff;font:inherit;font-size:.94rem;transition:border-color .2s,background .2s}
+.auth-field input:focus{border-color:#ffffff80;background:#ffffff10}
+.auth-field input::placeholder{color:#77777f}
+.auth-password-wrap{display:flex;align-items:center;gap:8px;padding-right:8px;border:1px solid #ffffff24;border-radius:12px;background:#ffffff0a}
+.auth-password-wrap:focus-within{border-color:#ffffff80;background:#ffffff10}
+.auth-password-wrap input{border:0;background:transparent;box-shadow:none}
+.auth-password-wrap input:focus{background:transparent}
+.auth-show-password{flex:0 0 auto;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:#b7b7bf;font-size:.78rem;font-weight:600}
+.auth-show-password:hover{background:#ffffff12;color:#fff}
+.auth-submit{display:flex;align-items:center;justify-content:center;width:100%;min-height:49px;margin-top:7px;border:0;border-radius:12px;background:#fff;color:#080808;font-size:.94rem;font-weight:700;transition:background .2s,transform .2s}
+.auth-submit:hover{background:#e9e9ec;transform:translateY(-1px)}
+.auth-submit:disabled{opacity:.55;cursor:wait;transform:none}
+.auth-switch{display:block;width:100%;margin-top:18px;padding:8px;border:0;background:transparent;color:#d0d0d5;font-size:.86rem;font-weight:600}
+.auth-switch:hover{color:#fff;text-decoration:underline}
+.auth-feedback{margin:14px 0 0;padding:11px 12px;border:1px solid #ffffff1c;border-radius:10px;background:#ffffff09;color:#dedee3;font-size:.82rem;line-height:1.45}
+.auth-feedback[data-state="error"]{border-color:#ff453a55;background:#ff453a12;color:#ffb8b3}
+.auth-feedback[data-state="success"]{border-color:#30d15855;background:#30d15810;color:#b9f5c7}
+.auth-account-panel{padding:20px 0 0;text-align:center}
+.auth-account-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 16px;border:1px solid #ffffff22;border-radius:50%;background:#ffffff0b;color:#fff;font-size:1.5rem}
+.auth-account-email{margin:8px 0 22px;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+.auth-signout{width:100%;min-height:46px;border:1px solid #ff453a66;border-radius:12px;background:#ff453a12;color:#ffb8b3;font-weight:700}
+.auth-signout:hover{background:#ff453a22}
+.auth-overlay .close{top:13px;right:13px;width:34px;height:34px;font-size:22px!important}
+@media(max-width:480px){.auth-overlay{padding:14px!important}.auth-card{padding:30px 22px 24px;border-radius:20px;max-height:calc(100dvh - 28px)}.auth-card h2{font-size:1.8rem}.auth-brand{margin-bottom:24px}}
+
 </style>
 </head>
 <body>
@@ -630,6 +664,35 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player"><div class="modal player-modal"><div class="player-top"><strong id="playerTitle">Now playing</strong><select id="providerSelect" aria-label="Player provider" onchange="switchProvider()"><option value="vidrift">VidRift</option><option value="apiplayer">ApiPlayer.ru</option></select><button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button></div><div class="loading-line" id="playerLoading"></div><div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div><div class="player-footer"><span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span><div style="display:flex;gap:8px"><button onclick="openExternalPlayer()">Open provider ↗</button><button onclick="restartPlayer()">Reload player</button></div></div></div></div>
 <div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
 <div class="toast" id="toast" role="status"></div>
+<div class="overlay auth-overlay" id="authOverlay" aria-modal="true" role="dialog" aria-labelledby="authTitle" aria-describedby="authSubtitle">
+  <section class="auth-card">
+    <button class="close" type="button" onclick="closeOverlay('authOverlay')" aria-label="Close account window">×</button>
+    <div class="auth-brand"><span class="auth-brandmark">▶</span><span>CINEFRAME</span></div>
+    <h2 id="authTitle">Welcome back</h2>
+    <p class="auth-subtitle" id="authSubtitle">Sign in to sync your watchlist and continue watching across devices.</p>
+    <form id="authForm" onsubmit="submitAccountForm(event)">
+      <label class="auth-field" for="authEmail">Email address
+        <input id="authEmail" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+      </label>
+      <label class="auth-field" for="authPassword">Password
+        <span class="auth-password-wrap">
+          <input id="authPassword" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" minlength="8" maxlength="128" required>
+          <button class="auth-show-password" id="authPasswordToggle" type="button" onclick="toggleAuthPassword()" aria-pressed="false">Show</button>
+        </span>
+      </label>
+      <p class="auth-feedback" id="authFeedback" role="status" aria-live="polite" hidden></p>
+      <button class="auth-submit" id="authSubmit" type="submit">Sign in</button>
+      <button class="auth-switch" id="authSwitch" type="button" onclick="toggleAuthMode()">New to CineFrame? Create an account</button>
+    </form>
+    <div class="auth-account-panel" id="authAccountPanel" hidden>
+      <div class="auth-account-icon" aria-hidden="true">✓</div>
+      <h2>You're signed in</h2>
+      <p class="auth-account-email" id="authAccountEmail"></p>
+      <button class="auth-signout" type="button" onclick="signOutFromAccount()">Sign out</button>
+    </div>
+  </section>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
@@ -650,17 +713,107 @@ const supabaseClient = window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLI
 let currentUser = null, cloudSyncTimer = null, cloudSyncBusy = false;
 const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
 const getHistory = () => safeStore.get('cineframe_history', []);
-function updateAccountButton(){const b=$('accountButton'),l=$('accountLabel');if(!b||!l)return;l.textContent=currentUser?(currentUser.email?.split('@')[0]||'Account'):'Sign in';b.title=currentUser?currentUser.email+' — click to sign out':'Sign in or create an account';}
-async function accountAction(){
+let authMode='signin';
+function setAuthFeedback(message='',type='info'){
+  const el=$('authFeedback');
+  if(!el)return;
+  el.textContent=message;
+  el.dataset.state=type;
+  el.hidden=!message;
+}
+function setAuthMode(mode){
+  authMode=mode==='signup'?'signup':'signin';
+  $('authTitle').textContent=authMode==='signup'?'Create your account':'Welcome back';
+  $('authSubtitle').textContent=authMode==='signup'?'Create an account to keep your watchlist and Continue Watching synced across devices.':'Sign in to sync your watchlist and Continue Watching across devices.';
+  $('authSubmit').textContent=authMode==='signup'?'Create account':'Sign in';
+  $('authSwitch').textContent=authMode==='signup'?'Already have an account? Sign in':'New to CineFrame? Create an account';
+  $('authPassword').autocomplete=authMode==='signup'?'new-password':'current-password';
+  $('authPassword').minLength=authMode==='signup'?8:1;
+  $('authPassword').value='';
+  $('authPassword').type='password';
+  $('authPasswordToggle').textContent='Show';
+  $('authPasswordToggle').setAttribute('aria-pressed','false');
+  setAuthFeedback();
+}
+function toggleAuthMode(){setAuthMode(authMode==='signin'?'signup':'signin')}
+function toggleAuthPassword(){
+  const input=$('authPassword'),button=$('authPasswordToggle');
+  const reveal=input.type==='password';
+  input.type=reveal?'text':'password';
+  button.textContent=reveal?'Hide':'Show';
+  button.setAttribute('aria-pressed',String(reveal));
+}
+function updateAccountButton(){
+  const b=$('accountButton'),l=$('accountLabel');
+  if(!b||!l)return;
+  l.textContent=currentUser?(currentUser.email?.split('@')[0]||'Account'):'Sign in';
+  b.title=currentUser?currentUser.email+' — account settings':'Sign in or create an account';
+}
+function accountAction(){
   if(!supabaseClient){toast('Account service unavailable');return}
-  if(currentUser){if(!confirm('Sign out of CineFrame?'))return;const {error}=await supabaseClient.auth.signOut();if(error){toast(error.message);return}currentUser=null;updateAccountButton();toast('Signed out');return}
-  const email=prompt('Enter your email address:');if(!email)return;
-  const password=prompt('Enter your password (at least 8 characters):');if(!password)return;
-  const create=confirm('Create a new account? Choose Cancel to sign in.');
-  const result=create?await supabaseClient.auth.signUp({email:email.trim(),password}):await supabaseClient.auth.signInWithPassword({email:email.trim(),password});
-  if(result.error){toast(result.error.message);return}
-  if(create&&!result.data.session){toast('Check your email to confirm your account, then sign in.');return}
-  if(result.data.user){currentUser=result.data.user;updateAccountButton();await syncCloudLibrary(true);toast('Signed in — cloud sync enabled')}
+  const signedIn=!!currentUser;
+  $('authForm').hidden=signedIn;
+  $('authAccountPanel').hidden=!signedIn;
+  $('authTitle').textContent=signedIn?'Your CineFrame account':'Welcome back';
+  $('authSubtitle').textContent=signedIn?'Your watchlist and Continue Watching are connected to this account.':'Sign in to sync your watchlist and Continue Watching across devices.';
+  $('authAccountEmail').textContent=currentUser?.email||'';
+  if(!signedIn)setAuthMode('signin');
+  openOverlay('authOverlay');
+  if(!signedIn)setTimeout(()=>$('authEmail').focus(),80);
+}
+async function submitAccountForm(event){
+  event.preventDefault();
+  if(!supabaseClient){setAuthFeedback('Account service is unavailable. Please refresh and try again.','error');return}
+  const email=$('authEmail').value.trim();
+  const password=$('authPassword').value;
+  if(!email||!password){setAuthFeedback('Enter your email address and password.','error');return}
+  const submit=$('authSubmit');
+  submit.disabled=true;
+  submit.textContent=authMode==='signup'?'Creating account…':'Signing in…';
+  $('authSwitch').disabled=true;
+  setAuthFeedback();
+  try{
+    const result=authMode==='signup'
+      ?await supabaseClient.auth.signUp({email,password})
+      :await supabaseClient.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(authMode==='signup'&&!result.data.session){
+      setAuthMode('signin');
+      $('authEmail').value=email;
+      setAuthFeedback('Your account has been created. Check your email for the confirmation link, then sign in.','success');
+      return;
+    }
+    currentUser=result.data.user||result.data.session?.user||null;
+    updateAccountButton();
+    closeOverlay('authOverlay');
+    await syncCloudLibrary(true);
+    toast('Signed in — cloud sync enabled');
+  }catch(error){
+    setAuthFeedback(error?.message||'Could not complete your request. Please try again.','error');
+  }finally{
+    submit.disabled=false;
+    $('authSwitch').disabled=false;
+    submit.textContent=authMode==='signup'?'Create account':'Sign in';
+  }
+}
+async function signOutFromAccount(){
+  if(!supabaseClient)return;
+  const button=document.querySelector('.auth-signout');
+  button.disabled=true;
+  button.textContent='Signing out…';
+  try{
+    const {error}=await supabaseClient.auth.signOut();
+    if(error)throw error;
+    currentUser=null;
+    updateAccountButton();
+    closeOverlay('authOverlay');
+    toast('Signed out');
+  }catch(error){
+    setAuthFeedback(error?.message||'Could not sign out. Please try again.','error');
+  }finally{
+    button.disabled=false;
+    button.textContent='Sign out';
+  }
 }
 async function syncCloudLibrary(preferCloud=false){
   if(!currentUser||!supabaseClient||cloudSyncBusy)return;
