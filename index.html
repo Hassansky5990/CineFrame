@@ -25,12 +25,12 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .brand{display:flex;align-items:center;gap:10px;font-size:1.18rem;font-weight:600;letter-spacing:-.04em;text-decoration:none;text-transform:lowercase;white-space:nowrap}
 .brand em{font-style:normal;font-weight:400;color:var(--soft)}
 .brandmark{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:linear-gradient(180deg,#fff,#c7c7cc);color:#000;font-size:10px;padding-left:2px;box-shadow:0 4px 14px #0008,inset 0 -1px 0 #0003}
-.nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:#ffffff14;border:1px solid var(--hair);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:0 8px 30px #0006}
+.nav{position:static;display:flex;align-items:center;gap:2px;padding:4px;margin-left:auto;flex:0 0 auto;border-radius:999px;background:#ffffff14;border:1px solid var(--hair);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:0 8px 30px #0006}
 .nav button{display:inline-flex;align-items:center;border:0;border-radius:999px;background:none;color:var(--soft);padding:8px 20px;font-size:.88rem;font-weight:500;transition:background .25s,color .25s}
 .nav button:hover{color:#fff}.nav button.active{background:#ffffff29;color:#fff;font-weight:600}
 .nav-icon{display:none}
 .mobile-nav-icon{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.searchwrap{position:relative;display:flex;align-items:center;margin-left:auto;width:min(260px,22vw)}
+.searchwrap{position:relative;display:flex;align-items:center;margin-left:0;flex:0 1 260px;min-width:0;width:min(260px,22vw)}
 .searchwrap span{position:absolute;left:14px;font-size:19px;color:var(--soft);pointer-events:none}
 .searchwrap input{width:100%;min-width:0;height:40px;border-radius:999px;border:1px solid var(--hair);background:#ffffff14;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);color:#fff;padding:0 16px 0 42px;font-size:.88rem;transition:background .25s,border-color .25s}
 .searchwrap input:focus{outline:none;background:#ffffff26;border-color:#ffffff59}.searchwrap input::placeholder{color:var(--muted)}
@@ -169,7 +169,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .player-top{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--hair)}
 .player-top strong{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .player-top select{max-width:42%}
-.player-frame{position:relative;aspect-ratio:16/9;background:#000}
+.player-wait{position:absolute;inset:0;display:grid;place-items:center;padding:24px;color:#aaa;font-size:.9rem;pointer-events:none}.player-frame{position:relative;aspect-ratio:16/9;background:#000}
 .player-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .player-footer{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 20px;color:var(--muted);font-size:.8rem}
 .player-footer button{background:var(--glass);color:#fff;border:1px solid var(--hair);border-radius:999px;padding:8px 16px;font-weight:500}.player-footer button:hover{background:#ffffff38}
@@ -186,6 +186,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 @media(min-width:1600px){.row-scroll{grid-auto-columns:clamp(230px,15vw,290px)}}
 @media(max-width:1000px){.nav{position:static;transform:none;margin-left:auto}.searchwrap{margin-left:0;width:min(210px,24vw)}.row-scroll{grid-auto-columns:clamp(180px,24vw,225px)}}
 @media(max-width:900px){.row-scroll{grid-auto-columns:clamp(165px,28vw,210px)}}
+@media(max-width:900px){.brand span:last-child,.watch-btn .watch-label{display:none}.searchwrap{width:clamp(120px,18vw,165px);flex-basis:clamp(120px,18vw,165px)}.nav button{padding:8px 10px}.watch-btn{min-width:48px;justify-content:center;padding-inline:8px}}
 @media(hover:none){.movie-card:hover,.movie-card:focus-within{transform:none}.movie-card:before{display:none}.card-watch{opacity:1;transform:none;width:30px;height:30px;top:7px;right:7px;font-size:16px}}
 @media(max-width:760px){
 :root{--gap:12px}
@@ -600,6 +601,40 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   }
   .popular-arrow{display:grid!important;place-items:center!important}
 }
+
+/* CineFrame account modal */
+.auth-overlay{align-items:center!important;justify-content:center!important;padding:22px!important;background:#000000c7!important}
+.auth-card{position:relative;width:min(100%,440px);max-height:calc(100dvh - 44px);overflow:auto;padding:34px 32px 30px;border:1px solid #ffffff20;border-radius:24px;background:#171719;box-shadow:0 28px 100px #000c;animation:modalIn .32s var(--ease)}
+.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;color:#fff;font-size:1rem;font-weight:700;letter-spacing:-.035em}
+.auth-brandmark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;color:#080808;font-size:12px}
+.auth-card h2{margin:0;font-size:2rem;line-height:1.08;letter-spacing:-.045em}
+.auth-subtitle{margin:9px 0 25px;color:var(--muted);font-size:.92rem;line-height:1.5}
+.auth-field{display:grid;gap:8px;margin:0 0 17px;color:#e8e8eb;font-size:.82rem;font-weight:600}
+.auth-field input{width:100%;height:48px;min-width:0;padding:0 14px;border:1px solid #ffffff24;border-radius:12px;outline:0;background:#ffffff0a;color:#fff;font:inherit;font-size:.94rem;transition:border-color .2s,background .2s}
+.auth-field input:focus{border-color:#ffffff80;background:#ffffff10}
+.auth-field input::placeholder{color:#77777f}
+.auth-password-wrap{display:flex;align-items:center;gap:8px;padding-right:8px;border:1px solid #ffffff24;border-radius:12px;background:#ffffff0a}
+.auth-password-wrap:focus-within{border-color:#ffffff80;background:#ffffff10}
+.auth-password-wrap input{border:0;background:transparent;box-shadow:none}
+.auth-password-wrap input:focus{background:transparent}
+.auth-show-password{flex:0 0 auto;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:#b7b7bf;font-size:.78rem;font-weight:600}
+.auth-show-password:hover{background:#ffffff12;color:#fff}
+.auth-submit{display:flex;align-items:center;justify-content:center;width:100%;min-height:49px;margin-top:7px;border:0;border-radius:12px;background:#fff;color:#080808;font-size:.94rem;font-weight:700;transition:background .2s,transform .2s}
+.auth-submit:hover{background:#e9e9ec;transform:translateY(-1px)}
+.auth-submit:disabled{opacity:.55;cursor:wait;transform:none}
+.auth-switch{display:block;width:100%;margin-top:18px;padding:8px;border:0;background:transparent;color:#d0d0d5;font-size:.86rem;font-weight:600}
+.auth-switch:hover{color:#fff;text-decoration:underline}
+.auth-feedback{margin:14px 0 0;padding:11px 12px;border:1px solid #ffffff1c;border-radius:10px;background:#ffffff09;color:#dedee3;font-size:.82rem;line-height:1.45}
+.auth-feedback[data-state="error"]{border-color:#ff453a55;background:#ff453a12;color:#ffb8b3}
+.auth-feedback[data-state="success"]{border-color:#30d15855;background:#30d15810;color:#b9f5c7}
+.auth-account-panel{padding:20px 0 0;text-align:center}
+.auth-account-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 16px;border:1px solid #ffffff22;border-radius:50%;background:#ffffff0b;color:#fff;font-size:1.5rem}
+.auth-account-email{margin:8px 0 22px;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+.auth-signout{width:100%;min-height:46px;border:1px solid #ff453a66;border-radius:12px;background:#ff453a12;color:#ffb8b3;font-weight:700}
+.auth-signout:hover{background:#ff453a22}
+.auth-overlay .close{top:13px;right:13px;width:34px;height:34px;font-size:22px!important}
+@media(max-width:480px){.auth-overlay{padding:14px!important}.auth-card{padding:30px 22px 24px;border-radius:20px;max-height:calc(100dvh - 28px)}.auth-card h2{font-size:1.8rem}.auth-brand{margin-bottom:24px}}
+
 </style>
 </head>
 <body>
@@ -607,6 +642,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   <a class="brand" href="#home" aria-label="CineFrame home" onclick="goHome();return false"><span class="brandmark">▶</span><span>CINE<em>FRAME</em></span></a>
   <nav class="nav" aria-label="Main navigation"><button class="active" data-page="home" onclick="goHome()"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="movies" onclick="showCategory('movie')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button data-page="tv" onclick="showCategory('tv')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button></nav>
   <label class="searchwrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles…" autocomplete="off" aria-label="Search movies and shows"></label>
+  <button class="watch-btn" id="accountButton" onclick="accountAction()" aria-label="Sign in to CineFrame"><span>♙</span><span class="watch-label" id="accountLabel">Sign in</span></button>
   <button class="watch-btn" onclick="showWatchlist()"><span>＋</span><span class="watch-label">My List</span><b id="watchCount">0</b></button>
 </header>
 <main id="app">
@@ -628,6 +664,36 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player"><div class="modal player-modal"><div class="player-top"><strong id="playerTitle">Now playing</strong><select id="providerSelect" aria-label="Player provider" onchange="switchProvider()"><option value="vidrift">VidRift</option><option value="apiplayer">ApiPlayer.ru</option></select><button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button></div><div class="loading-line" id="playerLoading"></div><div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div><div class="player-footer"><span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span><div style="display:flex;gap:8px"><button onclick="openExternalPlayer()">Open provider ↗</button><button onclick="restartPlayer()">Reload player</button></div></div></div></div>
 <div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
 <div class="toast" id="toast" role="status"></div>
+<div class="overlay auth-overlay" id="authOverlay" aria-modal="true" role="dialog" aria-labelledby="authTitle" aria-describedby="authSubtitle">
+  <section class="auth-card">
+    <button class="close" type="button" onclick="closeOverlay('authOverlay')" aria-label="Close account window">×</button>
+    <div class="auth-brand"><span class="auth-brandmark">▶</span><span>CINEFRAME</span></div>
+    <h2 id="authTitle">Welcome back</h2>
+    <p class="auth-subtitle" id="authSubtitle">Sign in to sync your watchlist and continue watching across devices.</p>
+    <form id="authForm" onsubmit="submitAccountForm(event)">
+      <label class="auth-field" for="authEmail">Email address
+        <input id="authEmail" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+      </label>
+      <label class="auth-field" for="authPassword">Password
+        <span class="auth-password-wrap">
+          <input id="authPassword" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" minlength="8" maxlength="128" required>
+          <button class="auth-show-password" id="authPasswordToggle" type="button" onclick="toggleAuthPassword()" aria-pressed="false">Show</button>
+        </span>
+      </label>
+      <p class="auth-feedback" id="authFeedback" role="status" aria-live="polite" hidden></p>
+      <button class="auth-submit" id="authSubmit" type="submit">Sign in</button>
+      <button class="auth-switch" id="authSwitch" type="button" onclick="toggleAuthMode()">New to CineFrame? Create an account</button>
+    </form>
+    <div class="auth-account-panel" id="authAccountPanel" hidden>
+      <div class="auth-account-icon" aria-hidden="true">✓</div>
+      <h2>You're signed in</h2>
+      <p class="auth-account-email" id="authAccountEmail"></p>
+      <button class="auth-signout" type="button" onclick="signOutFromAccount()">Sign out</button>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
 // Requests go through the existing server-side TMDB proxy. Keep TMDB_API_KEY in server environment variables.
@@ -641,8 +707,144 @@ const FALLBACK_POSTER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent
 const state = { trending:[], movies:[], tv:[], rated:[], selected:null, hero:null, page:'home', searchTimer:null, searchQuery:'', searchPage:1, searchType:'all', categoryPage:1, categoryType:'movie', categoryItems:[], currentProvider:'vidrift', currentSeason:1, currentEpisode:1, detailHistory:[], episodeItems:[], episodeQuery:'', episodeVisibleCount:12, videos:[], recommendations:[], playerUrl:'', genres:{movie:[],tv:[]}, categoryTotalPages:1, searchTotalPages:1, listingBusy:false, categoryRequestId:0, searchRequestId:0, detailRequestId:0, itemCache:{} };
 const $ = id => document.getElementById(id);
 const safeStore = { get(key, fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}} };
+const SUPABASE_URL = 'https://kxikramsinkvboizgsjm.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Q3wszD5DEZbi3eDsQNAQ7w_moqFLJX7';
+const supabaseClient = window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY) || null;
+let currentUser = null, cloudSyncTimer = null, cloudSyncBusy = false;
 const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
 const getHistory = () => safeStore.get('cineframe_history', []);
+let authMode='signin';
+function setAuthFeedback(message='',type='info'){
+  const el=$('authFeedback');
+  if(!el)return;
+  el.textContent=message;
+  el.dataset.state=type;
+  el.hidden=!message;
+}
+function setAuthMode(mode){
+  authMode=mode==='signup'?'signup':'signin';
+  $('authTitle').textContent=authMode==='signup'?'Create your account':'Welcome back';
+  $('authSubtitle').textContent=authMode==='signup'?'Create an account to keep your watchlist and Continue Watching synced across devices.':'Sign in to sync your watchlist and Continue Watching across devices.';
+  $('authSubmit').textContent=authMode==='signup'?'Create account':'Sign in';
+  $('authSwitch').textContent=authMode==='signup'?'Already have an account? Sign in':'New to CineFrame? Create an account';
+  $('authPassword').autocomplete=authMode==='signup'?'new-password':'current-password';
+  $('authPassword').minLength=authMode==='signup'?8:1;
+  $('authPassword').value='';
+  $('authPassword').type='password';
+  $('authPasswordToggle').textContent='Show';
+  $('authPasswordToggle').setAttribute('aria-pressed','false');
+  setAuthFeedback();
+}
+function toggleAuthMode(){setAuthMode(authMode==='signin'?'signup':'signin')}
+function toggleAuthPassword(){
+  const input=$('authPassword'),button=$('authPasswordToggle');
+  const reveal=input.type==='password';
+  input.type=reveal?'text':'password';
+  button.textContent=reveal?'Hide':'Show';
+  button.setAttribute('aria-pressed',String(reveal));
+}
+function updateAccountButton(){
+  const b=$('accountButton'),l=$('accountLabel');
+  if(!b||!l)return;
+  l.textContent=currentUser?(currentUser.email?.split('@')[0]||'Account'):'Sign in';
+  b.title=currentUser?currentUser.email+' — account settings':'Sign in or create an account';
+}
+function accountAction(){
+  if(!supabaseClient){toast('Account service unavailable');return}
+  const signedIn=!!currentUser;
+  $('authForm').hidden=signedIn;
+  $('authAccountPanel').hidden=!signedIn;
+  $('authTitle').textContent=signedIn?'Your CineFrame account':'Welcome back';
+  $('authSubtitle').textContent=signedIn?'Your watchlist and Continue Watching are connected to this account.':'Sign in to sync your watchlist and Continue Watching across devices.';
+  $('authAccountEmail').textContent=currentUser?.email||'';
+  if(!signedIn)setAuthMode('signin');
+  openOverlay('authOverlay');
+  if(!signedIn)setTimeout(()=>$('authEmail').focus(),80);
+}
+async function submitAccountForm(event){
+  event.preventDefault();
+  if(!supabaseClient){setAuthFeedback('Account service is unavailable. Please refresh and try again.','error');return}
+  const email=$('authEmail').value.trim();
+  const password=$('authPassword').value;
+  if(!email||!password){setAuthFeedback('Enter your email address and password.','error');return}
+  const submit=$('authSubmit');
+  submit.disabled=true;
+  submit.textContent=authMode==='signup'?'Creating account…':'Signing in…';
+  $('authSwitch').disabled=true;
+  setAuthFeedback();
+  try{
+    const result=authMode==='signup'
+      ?await supabaseClient.auth.signUp({email,password})
+      :await supabaseClient.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(authMode==='signup'&&!result.data.session){
+      setAuthMode('signin');
+      $('authEmail').value=email;
+      setAuthFeedback('Your account has been created. Check your email for the confirmation link, then sign in.','success');
+      return;
+    }
+    currentUser=result.data.user||result.data.session?.user||null;
+    updateAccountButton();
+    closeOverlay('authOverlay');
+    await syncCloudLibrary(true);
+    toast('Signed in — cloud sync enabled');
+  }catch(error){
+    setAuthFeedback(error?.message||'Could not complete your request. Please try again.','error');
+  }finally{
+    submit.disabled=false;
+    $('authSwitch').disabled=false;
+    submit.textContent=authMode==='signup'?'Create account':'Sign in';
+  }
+}
+async function signOutFromAccount(){
+  if(!supabaseClient)return;
+  const button=document.querySelector('.auth-signout');
+  button.disabled=true;
+  button.textContent='Signing out…';
+  try{
+    const {error}=await supabaseClient.auth.signOut();
+    if(error)throw error;
+    currentUser=null;
+    updateAccountButton();
+    closeOverlay('authOverlay');
+    toast('Signed out');
+  }catch(error){
+    setAuthFeedback(error?.message||'Could not sign out. Please try again.','error');
+  }finally{
+    button.disabled=false;
+    button.textContent='Sign out';
+  }
+}
+async function syncCloudLibrary(preferCloud=false){
+  if(!currentUser||!supabaseClient||cloudSyncBusy)return;
+  cloudSyncBusy=true;
+  try{
+    const {data,error}=await supabaseClient.from('cineframe_library').select('watchlist,history').eq('user_id',currentUser.id).maybeSingle();
+    if(error)throw error;
+    if(data){
+      const byKey=(remote,local)=>{const m=new Map();[...remote,...local].forEach(x=>m.set(mediaType(x)+':'+Number(x.id),x));return [...m.values()]};
+      safeStore.set('cineframe_watchlist',byKey(data.watchlist||[],getWatchlist()));
+      safeStore.set('cineframe_history',byKey(data.history||[],getHistory()).sort((a,b)=>(b.watchedAt||0)-(a.watchedAt||0)).slice(0,30));
+    }
+    const payload={user_id:currentUser.id,watchlist:getWatchlist(),history:getHistory(),updated_at:new Date().toISOString()};
+    const saved=await supabaseClient.from('cineframe_library').upsert(payload,{onConflict:'user_id'});
+    if(saved.error)throw saved.error;
+    updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();
+  }catch(error){console.error('CineFrame cloud sync failed',error);toast('Cloud sync unavailable — local data is still saved')}
+  finally{cloudSyncBusy=false}
+}
+function scheduleCloudSync(){if(!currentUser)return;clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudLibrary(false),700)}
+async function initCloudAccounts(){
+  if(!supabaseClient){console.warn('Supabase SDK unavailable');return}
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error)console.warn('Could not restore Supabase session',error);
+  currentUser=data?.session?.user||null;updateAccountButton();
+  if(currentUser)await syncCloudLibrary(true);
+  supabaseClient.auth.onAuthStateChange((event,session)=>{
+    currentUser=session?.user||null;updateAccountButton();
+    if(event==='SIGNED_IN')setTimeout(()=>syncCloudLibrary(true),0);
+  });
+}
 function escapeHtml(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeArg(value=''){return encodeURIComponent(String(value)).replace(/'/g,'%27')}
 function titleOf(item){return item?.title || item?.name || item?.original_title || item?.original_name || 'Untitled'}
@@ -766,7 +968,7 @@ function setupHomeSliders(){
     document.querySelectorAll('.home-shelf .row-scroll').forEach(row=>updateShelf(row.id));
   },{passive:true});
 }
-async function init(){['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
+async function init(){initCloudAccounts();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
 async function loadHomeData(){const jobs=[['trending',()=>api('/trending/all/week')],['movies',()=>api('/movie/popular',{region:'US'})],['tv',()=>api('/tv/popular')],['rated',()=>api('/movie/top_rated',{region:'US'})]];const results=await Promise.allSettled(jobs.map(([,load])=>load()));let loaded=0;results.forEach((result,i)=>{const key=jobs[i][0];if(result.status==='fulfilled'){const data=result.value;state[key]=key==='trending'?(data.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path):(data.results||[]).map(x=>normalize(x,key==='movies'?'movie':key==='tv'?'tv':'movie'));loaded++}else{console.warn(`CineFrame ${key} shelf failed`,result.reason);state[key]=[]}});renderRow('trendingRow',state.trending);renderRow('moviesRow',state.movies);renderRow('tvRow',state.tv);renderRow('ratedRow',state.rated);const hero=state.trending.find(x=>x.backdrop_path&&x.overview)||state.movies[0]||state.tv[0];setHero(hero);if(!loaded)showCatalogError('Could not load TMDB shelves. Check your connection and try again.');else{if(loaded<jobs.length)toast('Some shelves could not load. The available titles are still shown.');loadPersonalized()} }
 let personalizedTimer=null;function schedulePersonalized(){clearTimeout(personalizedTimer);personalizedTimer=setTimeout(()=>loadPersonalized(),650)}
 async function loadPersonalized(){const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));if($('forYouSubtitle'))$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);if($('forYouSubtitle'))$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
@@ -774,7 +976,7 @@ async function loadGenres(type){if(state.genres[type]?.length)return state.genre
 async function populateGenreFilter(type){const select=$('genreFilter');if(!select)return;select.innerHTML='<option value="">All genres</option>';const types=type==='all'?['movie','tv']:[type==='anime'?'tv':type];const lists=await Promise.all(types.map(loadGenres));const map=new Map();lists.flat().forEach(g=>{if(!map.has(g.id))map.set(g.id,g.name)});[...map.entries()].sort((a,b)=>a[1].localeCompare(b[1])).forEach(([id,name])=>select.add(new Option(name,id)));}
 function showCatalogError(msg){$('homeSections').innerHTML=`<section class="section" style="padding-top:35px"><div class="error-box"><strong>Could not load TMDB.</strong><p>${escapeHtml(msg)}</p><p class="tiny-note">Check your internet connection and confirm that the TMDB API key is valid. This page requires internet access.</p><button class="secondary" onclick="location.reload()">Retry</button></div></section>`;$('heroOverview').textContent='Connect to the internet to load the movie and TV catalog.'}
 function updateWatchCount(){$('watchCount').textContent=getWatchlist().length}
-function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false;if(index>=0){list.splice(index,1)}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);list.unshift(found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'});added=true}safeStore.set('cineframe_watchlist',list);updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
+function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false;if(index>=0){list.splice(index,1)}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);list.unshift(found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'});added=true}safeStore.set('cineframe_watchlist',list);scheduleCloudSync();updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
 function updateDetailListButton(){if(!state.selected)return;const has=getWatchlist().some(x=>Number(x.id)===Number(state.selected.id)&&mediaType(x)===mediaType(state.selected));$('detailListButton').textContent=has?'✓ In My List':'＋ My List'}
 function toggleSelectedWatchlist(){if(!state.selected)return;toggleWatchlist(state.selected.id,mediaType(state.selected));updateDetailListButton()}
 function updateDetailBackButton(){
@@ -903,13 +1105,37 @@ function playSelected(){if(!state.selected)return;launchPlayer(state.selected,st
 function playTrailerSelected(){const trailer=state.videos.find(v=>v.site==='YouTube'&&v.type==='Trailer')||state.videos.find(v=>v.site==='YouTube');if(trailer)playTrailer(trailer.key,trailer.name||'Trailer');else toast('No YouTube trailer was found for this title.')}
 function buildProviderUrl(item,provider,season=1,episode=1){const type=mediaType(item);const id=Number(item.id);if(provider==='vidrift'){const path=type==='tv'?`${VIDRIFT_BASE}/tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`:`${VIDRIFT_BASE}/movie/${id}`;const url=new URL(path);url.searchParams.set('title',titleOf(item));url.searchParams.set('brand','CineFrame');url.searchParams.set('brandColor','e50914');if(item.backdrop_path)url.searchParams.set('poster',backdropOf(item));return url.toString()}if(type==='tv')return `${API_PLAYER_BASE}tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`;return `${API_PLAYER_BASE}movie/${id}`}
 function launchPlayer(item,season=1,episode=1){state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=$('providerSelect').value||'vidrift';$('playerTitle').textContent=titleOf(item)+(mediaType(item)==='tv'?` · S${String(season).padStart(2,'0')} E${String(episode).padStart(2,'0')}`:'');$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
-function mountPlayer(){if(!state.selected)return;const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);state.playerUrl=url;$('playerLoading').classList.remove('hidden');$('playerFrame').innerHTML=`<iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;const frame=$('externalPlayer');frame.addEventListener('load',()=>{$('playerLoading').classList.add('hidden')},{once:true});setTimeout(()=>$('playerLoading').classList.add('hidden'),9000);$('playerFootnote').textContent=state.currentProvider==='vidrift'?'VidRift player · provider availability may vary.':'ApiPlayer.ru player · provider availability may vary.'}
+let playerLoadTimer=null;
+let playerAttempt=0;
+function mountPlayer(){
+  if(!state.selected)return;
+  const attempt=++playerAttempt;
+  if(playerLoadTimer)clearTimeout(playerLoadTimer);
+  const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
+  state.playerUrl=url;
+  $('playerLoading').classList.remove('hidden');
+  $('playerFootnote').textContent='Connecting to the selected provider…';
+  $('playerFrame').innerHTML=`<div class="player-wait" role="status">Connecting to player…</div><iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  const frame=$('externalPlayer');
+  frame.addEventListener('load',()=>{
+    if(attempt!==playerAttempt)return;
+    if(playerLoadTimer)clearTimeout(playerLoadTimer);
+    $('playerLoading').classList.add('hidden');
+    $('playerFootnote').textContent='Player loaded. If playback does not begin, try Reload player or Open provider.';
+  },{once:true});
+  playerLoadTimer=setTimeout(()=>{
+    if(attempt!==playerAttempt)return;
+    $('playerLoading').classList.add('hidden');
+    $('playerFootnote').textContent='The provider is taking too long. Try Reload player or Open provider.';
+  },15000);
+  $('playerTitle').textContent=titleOf(state.selected)+(mediaType(state.selected)==='tv'?` · S${String(state.currentSeason).padStart(2,'0')} E${String(state.currentEpisode).padStart(2,'0')}`:'');
+}
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
 function openExternalPlayer(){if(state.playerUrl)window.open(state.playerUrl,'_blank','noopener,noreferrer')}
-function addToHistory(item,season,episode){const list=getHistory().filter(x=>!(Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)));list.unshift({id:Number(item.id),media_type:mediaType(item),title:titleOf(item),name:item.name,poster_path:item.poster_path||null,backdrop_path:item.backdrop_path||null,overview:item.overview||'',release_date:item.release_date||null,first_air_date:item.first_air_date||null,genre_ids:Array.isArray(item.genre_ids)?item.genre_ids.slice(0,8):[],vote_average:Number(item.vote_average)||0,vote_count:Number(item.vote_count)||0,watchedAt:Date.now(),season,episode});safeStore.set('cineframe_history',list.slice(0,30));renderContinue();schedulePersonalized()}
+function addToHistory(item,season,episode){const list=getHistory().filter(x=>!(Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)));list.unshift({id:Number(item.id),media_type:mediaType(item),title:titleOf(item),name:item.name,poster_path:item.poster_path||null,backdrop_path:item.backdrop_path||null,overview:item.overview||'',release_date:item.release_date||null,first_air_date:item.first_air_date||null,genre_ids:Array.isArray(item.genre_ids)?item.genre_ids.slice(0,8):[],vote_average:Number(item.vote_average)||0,vote_count:Number(item.vote_count)||0,watchedAt:Date.now(),season,episode});safeStore.set('cineframe_history',list.slice(0,30));scheduleCloudSync();renderContinue();schedulePersonalized()}
 function renderContinue(){const list=getHistory();$('continueSection').hidden=!list.length;if(list.length)renderRow('continueRow',list.map(x=>({...x,media_type:mediaType(x)})))}
-function clearWatchHistory(){const list=getHistory();if(!list.length)return;if(!window.confirm('Clear your entire Continue watching history?'))return;safeStore.set('cineframe_history',[]);renderContinue();schedulePersonalized();toast('Watch history cleared')}
+function clearWatchHistory(){const list=getHistory();if(!list.length)return;if(!window.confirm('Clear your entire Continue watching history?'))return;safeStore.set('cineframe_history',[]);scheduleCloudSync();renderContinue();schedulePersonalized();toast('Watch history cleared')}
 function playTrailer(key,name){$('trailerTitle').textContent=name;$('trailerFrame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(key)}?autoplay=1&rel=0" title="${escapeHtml(name)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;openOverlay('trailerOverlay')}
 function closePlayer(){closeOverlay('playerOverlay')}
 function handlePlayerMessage(event){if(event.origin!=='https://embed.vidrift.net'&&event.origin!=='https://embed.vidrift.in')return;const d=event.data;if(!d||typeof d!=='object')return;if(d.type==='vidrift:exit')closePlayer();if(d.type==='vidrift:episode'&&state.selected){state.currentSeason=Number(d.season)||state.currentSeason;state.currentEpisode=Number(d.episode)||state.currentEpisode;addToHistory(state.selected,state.currentSeason,state.currentEpisode)}}
