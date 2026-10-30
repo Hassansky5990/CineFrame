@@ -607,6 +607,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   <a class="brand" href="#home" aria-label="CineFrame home" onclick="goHome();return false"><span class="brandmark">▶</span><span>CINE<em>FRAME</em></span></a>
   <nav class="nav" aria-label="Main navigation"><button class="active" data-page="home" onclick="goHome()"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="movies" onclick="showCategory('movie')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button data-page="tv" onclick="showCategory('tv')"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button></nav>
   <label class="searchwrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles…" autocomplete="off" aria-label="Search movies and shows"></label>
+  <button class="watch-btn" id="accountButton" onclick="accountAction()" aria-label="Sign in to CineFrame"><span>♙</span><span class="watch-label" id="accountLabel">Sign in</span></button>
   <button class="watch-btn" onclick="showWatchlist()"><span>＋</span><span class="watch-label">My List</span><b id="watchCount">0</b></button>
 </header>
 <main id="app">
@@ -628,6 +629,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player"><div class="modal player-modal"><div class="player-top"><strong id="playerTitle">Now playing</strong><select id="providerSelect" aria-label="Player provider" onchange="switchProvider()"><option value="vidrift">VidRift</option><option value="apiplayer">ApiPlayer.ru</option></select><button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button></div><div class="loading-line" id="playerLoading"></div><div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div><div class="player-footer"><span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span><div style="display:flex;gap:8px"><button onclick="openExternalPlayer()">Open provider ↗</button><button onclick="restartPlayer()">Reload player</button></div></div></div></div>
 <div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
 <div class="toast" id="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
 // Requests go through the existing server-side TMDB proxy. Keep TMDB_API_KEY in server environment variables.
@@ -641,8 +643,57 @@ const FALLBACK_POSTER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent
 const state = { trending:[], movies:[], tv:[], rated:[], selected:null, hero:null, page:'home', searchTimer:null, searchQuery:'', searchPage:1, searchType:'all', categoryPage:1, categoryType:'movie', categoryItems:[], currentProvider:'vidrift', currentSeason:1, currentEpisode:1, detailHistory:[], episodeItems:[], episodeQuery:'', episodeVisibleCount:12, videos:[], recommendations:[], playerUrl:'', genres:{movie:[],tv:[]}, categoryTotalPages:1, searchTotalPages:1, listingBusy:false, categoryRequestId:0, searchRequestId:0, detailRequestId:0, itemCache:{} };
 const $ = id => document.getElementById(id);
 const safeStore = { get(key, fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}} };
+const SUPABASE_URL = 'https://kxikramsinkvboizgsjm.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Q3wszD5DEZbi3eDsQNAQ7w_moqFLJX7';
+const supabaseClient = window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY) || null;
+let currentUser = null, cloudSyncTimer = null, cloudSyncBusy = false;
 const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
 const getHistory = () => safeStore.get('cineframe_history', []);
+function updateAccountButton(){const b=$('accountButton'),l=$('accountLabel');if(!b||!l)return;l.textContent=currentUser?(currentUser.email?.split('@')[0]||'Account'):'Sign in';b.title=currentUser?currentUser.email+' — click to sign out':'Sign in or create an account';}
+async function accountAction(){
+  if(!supabaseClient){toast('Account service unavailable');return}
+  if(currentUser){if(!confirm('Sign out of CineFrame?'))return;const {error}=await supabaseClient.auth.signOut();if(error){toast(error.message);return}currentUser=null;updateAccountButton();toast('Signed out');return}
+  const email=prompt('Enter your email address:');if(!email)return;
+  const password=prompt('Enter your password (at least 8 characters):');if(!password)return;
+  const create=confirm('Create a new account? Choose Cancel to sign in.');
+  const result=create?await supabaseClient.auth.signUp({email:email.trim(),password}):await supabaseClient.auth.signInWithPassword({email:email.trim(),password});
+  if(result.error){toast(result.error.message);return}
+  if(create&&!result.data.session){toast('Check your email to confirm your account, then sign in.');return}
+  if(result.data.user){currentUser=result.data.user;updateAccountButton();await syncCloudLibrary(true);toast('Signed in — cloud sync enabled')}
+}
+async function syncCloudLibrary(preferCloud=false){
+  if(!currentUser||!supabaseClient||cloudSyncBusy)return;
+  cloudSyncBusy=true;
+  try{
+    const {data,error}=await supabaseClient.from('cineframe_library').select('watchlist,history').eq('user_id',currentUser.id).maybeSingle();
+    if(error)throw error;
+    if(data&&preferCloud){
+      safeStore.set('cineframe_watchlist',Array.isArray(data.watchlist)?data.watchlist:[]);
+      safeStore.set('cineframe_history',Array.isArray(data.history)?data.history:[]);
+    }else if(data){
+      const byKey=(a,b)=>{const m=new Map();[...a,...b].forEach(x=>m.set(mediaType(x)+':'+Number(x.id),x));return [...m.values()]};
+      safeStore.set('cineframe_watchlist',byKey(data.watchlist||[],getWatchlist()));
+      safeStore.set('cineframe_history',byKey(data.history||[],getHistory()).sort((a,b)=>(b.watchedAt||0)-(a.watchedAt||0)).slice(0,30));
+    }
+    const payload={user_id:currentUser.id,watchlist:getWatchlist(),history:getHistory(),updated_at:new Date().toISOString()};
+    const saved=await supabaseClient.from('cineframe_library').upsert(payload,{onConflict:'user_id'});
+    if(saved.error)throw saved.error;
+    updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();
+  }catch(error){console.error('CineFrame cloud sync failed',error);toast('Cloud sync unavailable — local data is still saved')}
+  finally{cloudSyncBusy=false}
+}
+function scheduleCloudSync(){if(!currentUser)return;clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudLibrary(false),700)}
+async function initCloudAccounts(){
+  if(!supabaseClient){console.warn('Supabase SDK unavailable');return}
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error)console.warn('Could not restore Supabase session',error);
+  currentUser=data?.session?.user||null;updateAccountButton();
+  if(currentUser)await syncCloudLibrary(true);
+  supabaseClient.auth.onAuthStateChange((event,session)=>{
+    currentUser=session?.user||null;updateAccountButton();
+    if(event==='SIGNED_IN')setTimeout(()=>syncCloudLibrary(true),0);
+  });
+}
 function escapeHtml(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeArg(value=''){return encodeURIComponent(String(value)).replace(/'/g,'%27')}
 function titleOf(item){return item?.title || item?.name || item?.original_title || item?.original_name || 'Untitled'}
@@ -766,7 +817,7 @@ function setupHomeSliders(){
     document.querySelectorAll('.home-shelf .row-scroll').forEach(row=>updateShelf(row.id));
   },{passive:true});
 }
-async function init(){['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
+async function init(){initCloudAccounts();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
 async function loadHomeData(){const jobs=[['trending',()=>api('/trending/all/week')],['movies',()=>api('/movie/popular',{region:'US'})],['tv',()=>api('/tv/popular')],['rated',()=>api('/movie/top_rated',{region:'US'})]];const results=await Promise.allSettled(jobs.map(([,load])=>load()));let loaded=0;results.forEach((result,i)=>{const key=jobs[i][0];if(result.status==='fulfilled'){const data=result.value;state[key]=key==='trending'?(data.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path):(data.results||[]).map(x=>normalize(x,key==='movies'?'movie':key==='tv'?'tv':'movie'));loaded++}else{console.warn(`CineFrame ${key} shelf failed`,result.reason);state[key]=[]}});renderRow('trendingRow',state.trending);renderRow('moviesRow',state.movies);renderRow('tvRow',state.tv);renderRow('ratedRow',state.rated);const hero=state.trending.find(x=>x.backdrop_path&&x.overview)||state.movies[0]||state.tv[0];setHero(hero);if(!loaded)showCatalogError('Could not load TMDB shelves. Check your connection and try again.');else{if(loaded<jobs.length)toast('Some shelves could not load. The available titles are still shown.');loadPersonalized()} }
 let personalizedTimer=null;function schedulePersonalized(){clearTimeout(personalizedTimer);personalizedTimer=setTimeout(()=>loadPersonalized(),650)}
 async function loadPersonalized(){const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));if($('forYouSubtitle'))$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);if($('forYouSubtitle'))$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
@@ -774,7 +825,7 @@ async function loadGenres(type){if(state.genres[type]?.length)return state.genre
 async function populateGenreFilter(type){const select=$('genreFilter');if(!select)return;select.innerHTML='<option value="">All genres</option>';const types=type==='all'?['movie','tv']:[type==='anime'?'tv':type];const lists=await Promise.all(types.map(loadGenres));const map=new Map();lists.flat().forEach(g=>{if(!map.has(g.id))map.set(g.id,g.name)});[...map.entries()].sort((a,b)=>a[1].localeCompare(b[1])).forEach(([id,name])=>select.add(new Option(name,id)));}
 function showCatalogError(msg){$('homeSections').innerHTML=`<section class="section" style="padding-top:35px"><div class="error-box"><strong>Could not load TMDB.</strong><p>${escapeHtml(msg)}</p><p class="tiny-note">Check your internet connection and confirm that the TMDB API key is valid. This page requires internet access.</p><button class="secondary" onclick="location.reload()">Retry</button></div></section>`;$('heroOverview').textContent='Connect to the internet to load the movie and TV catalog.'}
 function updateWatchCount(){$('watchCount').textContent=getWatchlist().length}
-function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false;if(index>=0){list.splice(index,1)}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);list.unshift(found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'});added=true}safeStore.set('cineframe_watchlist',list);updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
+function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false;if(index>=0){list.splice(index,1)}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);list.unshift(found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'});added=true}safeStore.set('cineframe_watchlist',list);scheduleCloudSync();updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
 function updateDetailListButton(){if(!state.selected)return;const has=getWatchlist().some(x=>Number(x.id)===Number(state.selected.id)&&mediaType(x)===mediaType(state.selected));$('detailListButton').textContent=has?'✓ In My List':'＋ My List'}
 function toggleSelectedWatchlist(){if(!state.selected)return;toggleWatchlist(state.selected.id,mediaType(state.selected));updateDetailListButton()}
 function updateDetailBackButton(){
@@ -931,9 +982,9 @@ function mountPlayer(){
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
 function openExternalPlayer(){if(state.playerUrl)window.open(state.playerUrl,'_blank','noopener,noreferrer')}
-function addToHistory(item,season,episode){const list=getHistory().filter(x=>!(Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)));list.unshift({id:Number(item.id),media_type:mediaType(item),title:titleOf(item),name:item.name,poster_path:item.poster_path||null,backdrop_path:item.backdrop_path||null,overview:item.overview||'',release_date:item.release_date||null,first_air_date:item.first_air_date||null,genre_ids:Array.isArray(item.genre_ids)?item.genre_ids.slice(0,8):[],vote_average:Number(item.vote_average)||0,vote_count:Number(item.vote_count)||0,watchedAt:Date.now(),season,episode});safeStore.set('cineframe_history',list.slice(0,30));renderContinue();schedulePersonalized()}
+function addToHistory(item,season,episode){const list=getHistory().filter(x=>!(Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)));list.unshift({id:Number(item.id),media_type:mediaType(item),title:titleOf(item),name:item.name,poster_path:item.poster_path||null,backdrop_path:item.backdrop_path||null,overview:item.overview||'',release_date:item.release_date||null,first_air_date:item.first_air_date||null,genre_ids:Array.isArray(item.genre_ids)?item.genre_ids.slice(0,8):[],vote_average:Number(item.vote_average)||0,vote_count:Number(item.vote_count)||0,watchedAt:Date.now(),season,episode});safeStore.set('cineframe_history',list.slice(0,30));scheduleCloudSync();renderContinue();schedulePersonalized()}
 function renderContinue(){const list=getHistory();$('continueSection').hidden=!list.length;if(list.length)renderRow('continueRow',list.map(x=>({...x,media_type:mediaType(x)})))}
-function clearWatchHistory(){const list=getHistory();if(!list.length)return;if(!window.confirm('Clear your entire Continue watching history?'))return;safeStore.set('cineframe_history',[]);renderContinue();schedulePersonalized();toast('Watch history cleared')}
+function clearWatchHistory(){const list=getHistory();if(!list.length)return;if(!window.confirm('Clear your entire Continue watching history?'))return;safeStore.set('cineframe_history',[]);scheduleCloudSync();renderContinue();schedulePersonalized();toast('Watch history cleared')}
 function playTrailer(key,name){$('trailerTitle').textContent=name;$('trailerFrame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(key)}?autoplay=1&rel=0" title="${escapeHtml(name)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;openOverlay('trailerOverlay')}
 function closePlayer(){closeOverlay('playerOverlay')}
 function handlePlayerMessage(event){if(event.origin!=='https://embed.vidrift.net'&&event.origin!=='https://embed.vidrift.in')return;const d=event.data;if(!d||typeof d!=='object')return;if(d.type==='vidrift:exit')closePlayer();if(d.type==='vidrift:episode'&&state.selected){state.currentSeason=Number(d.season)||state.currentSeason;state.currentEpisode=Number(d.episode)||state.currentEpisode;addToHistory(state.selected,state.currentSeason,state.currentEpisode)}}
