@@ -41,6 +41,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .account-btn:hover{background:#ffffff26;border-color:#ffffff45}
 .account-btn svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .account-btn.signed-in{border-color:#ffffff38;background:#ffffff20}
+.account-label{display:block;max-width:120px;overflow:hidden;text-overflow:ellipsis}
 
 /* Hero: an inset, rounded feature card */
 .hero{position:relative;isolation:isolate;margin:80px var(--gutter) 0;height:min(76vh,780px);min-height:520px;border-radius:32px;display:flex;align-items:flex-end;justify-content:center;padding:0 28px 60px;overflow:hidden;background:var(--panel);text-align:center;box-shadow:0 50px 120px -30px #000,0 0 0 1px var(--hair)}
@@ -168,6 +169,8 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .auth-signout:hover{background:#ffffff18}
 .auth-footnote{margin:18px 0 0;color:#777780;font-size:.72rem;line-height:1.55}
 .auth-modal .close{top:14px;right:14px}
+#authOverlay{align-items:center;justify-content:center;padding:16px}
+#authOverlay .auth-modal{width:min(460px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);border-radius:24px}
 .close{position:absolute;top:16px;right:16px;z-index:90;float:none;margin:0;width:36px;height:36px;border:1px solid var(--hair);border-radius:50%;background:#00000073;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .2s}.close:hover{background:#ffffff40}.close:hover{background:#ffffff40}
 .detail-hero{position:relative;isolation:isolate;overflow:hidden;height:clamp(360px,54vw,500px);min-height:360px;padding:0 48px 38px;display:flex;align-items:flex-end;background:var(--panel2) center/cover no-repeat}
 .detail-hero-artwork{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center center;pointer-events:none;max-width:none;transform:none;clip-path:none}
