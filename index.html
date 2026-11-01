@@ -1332,7 +1332,7 @@ function skipPlayer(seconds){if(state.currentProvider==='framextv')sendFrameXtvC
 function seekPlayerTo(seconds){if(state.currentProvider==='framextv')sendFrameXtvCommand('seek',{time:Number(seconds)});else sendVidriftCommand('vidrift:resume',{currentTime:Number(seconds)})}
 function setPlayerVolume(volume){if(state.currentProvider==='framextv')sendFrameXtvCommand('setVolume',{volume:Number(volume)});else sendVidriftCommand('vidrift:set',{volume:Number(volume)})}
 function changePlayerSpeed(){const speed=Number($('cineSpeed').value)||1;if(state.currentProvider==='vidrift'){sendVidriftCommand('vidrift:set',{speed});return}if(state.currentProvider==='framextv'){const supported=[0.5,1,1.25,1.5,2];if(!supported.includes(speed)){toast('FrameXTV does not list that playback speed.');$('cineSpeed').value='1';return}const frame=$('externalPlayer');if(!frame||!state.playerUrl)return;const url=new URL(state.playerUrl);url.searchParams.set('speed',String(speed));const current=Math.max(0,Number($('cineSeek').value)||0);if(current>0)url.searchParams.set('t',String(Math.floor(current)));state.playerUrl=url.toString();$('playerStatusText').textContent='Applying playback speed…';frame.addEventListener('load',()=>{$('playerStatusText').textContent='CineFrame controls connected'},{once:true});frame.src=state.playerUrl}}
-function syncVidriftFullscreen(on){const frame=$('externalPlayer');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'vidrift:fullscreen-state',on},'https://embed.vidrift.net')}
+function syncVidriftFullscreen(on){if(state.currentProvider!=='vidrift')return;const frame=$('externalPlayer');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'vidrift:fullscreen-state',on},'https://embed.vidrift.net')}
 function mountPlayer(){
   if(!state.selected)return;
   const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
@@ -1348,7 +1348,7 @@ function mountPlayer(){
   frame.addEventListener('load',()=>{
     $('playerLoading').classList.add('hidden');
     $('playerStatusDot').classList.add('ready');
-    $('playerStatusText').textContent=hasCineControls?'CineFrame controls connected':'Server page loaded · provider controls active';
+    $('playerStatusText').textContent=state.currentProvider==='framextv'?'FrameXTV frame loaded · CineFrame controls available':state.currentProvider==='vidrift'?'VidRift frame loaded · CineFrame controls available':'Server page loaded · provider controls active';
     if(state.currentProvider==='vidrift'){
       sendVidriftCommand('vidrift:get-state');
       syncVidriftFullscreen(Boolean(document.fullscreenElement));
