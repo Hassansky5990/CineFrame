@@ -788,6 +788,55 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     white-space:nowrap;
   }
 }
+
+/* Password visibility controls */
+.password-field{position:relative;display:block;width:100%;min-width:0}
+.auth-field .password-field input{padding-right:48px}
+.password-toggle{position:absolute;top:50%;right:7px;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:#a1a1aa;cursor:pointer}
+.password-toggle:hover{background:#ffffff12;color:#fff}
+.password-toggle:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.password-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* Player shell — premium theatre layout, distinct from the video surface */
+#playerOverlay{align-items:center;justify-content:center;padding:clamp(12px,3vw,34px);background:rgba(3,3,4,.88);backdrop-filter:blur(18px) saturate(115%)}
+#playerOverlay .player-modal{position:relative;width:min(1180px,100%);max-height:calc(100dvh - 2*clamp(12px,3vw,34px));height:auto;overflow:auto;border:1px solid #ffffff20;border-radius:25px;background:linear-gradient(145deg,#1b1b1f 0%,#101012 48%,#09090b 100%);box-shadow:0 35px 120px #000d,0 0 0 1px #ffffff08}
+#playerOverlay .player-top{position:relative;display:flex;align-items:center;gap:18px;min-height:82px;padding:17px 22px;background:linear-gradient(90deg,#222226,#17171a 65%,#131316);border-bottom:1px solid #ffffff12}
+#playerOverlay .player-mark{width:42px;height:42px;flex-basis:42px;border-radius:13px;background:#e50914;color:#fff;font-size:.9rem;box-shadow:0 7px 24px #e5091438}
+#playerOverlay .player-heading-copy strong{font-size:1rem;letter-spacing:-.02em}
+#playerOverlay .player-heading-copy span{font-size:.73rem;color:#a6a6ad}
+#playerOverlay .player-top select{min-width:145px;margin-left:auto;background:#252529;border:1px solid #ffffff22;color:#f5f5f5}
+#playerOverlay .player-stage{padding:20px 22px 0;background:transparent}
+#playerOverlay .player-frame{max-height:min(66vh,690px);border:1px solid #ffffff24;border-radius:16px;background:#000;box-shadow:0 22px 65px #000b}
+#playerOverlay .player-controls{padding:17px 3px 13px;border-bottom:1px solid #ffffff12}
+#playerOverlay .player-status{font-size:.76rem;color:#b5b5bd}
+#playerOverlay .player-control-btn{min-height:40px;border-radius:10px;background:#ffffff0b;border-color:#ffffff20}
+#playerOverlay .player-control-btn.primary-control{background:#e50914;border-color:#e50914;color:#fff}
+#playerOverlay .player-control-btn.primary-control:hover{background:#c90812}
+#playerOverlay .cine-controls{margin:0 0 14px;padding:15px 16px;border:1px solid #ffffff16;border-radius:14px;background:linear-gradient(120deg,#1b1b20,#141417)}
+#playerOverlay .cine-seek-row{gap:13px;color:#b9b9c1}
+#playerOverlay .cine-seek-row input,#playerOverlay .cine-volume-label input{accent-color:#e50914}
+#playerOverlay .cine-control-button{height:38px;border-radius:10px;background:#ffffff0b}
+#playerOverlay .cine-play-button{background:#f5f5f5;color:#111;border-color:#f5f5f5}
+#playerOverlay .player-episode-nav{margin:0 0 14px;padding:11px 13px;border:1px solid #ffffff15;border-radius:12px;background:#ffffff07}
+#playerOverlay .player-info{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:18px 22px 22px;padding:17px 19px;border:1px solid #ffffff15;border-radius:15px;background:linear-gradient(110deg,#202024,#151518)}
+#playerOverlay .player-info-copy{min-width:0}
+#playerOverlay .player-info-copy strong{display:block;color:#fff;font-size:.92rem;letter-spacing:-.01em}
+#playerOverlay .player-info-copy p{margin:5px 0 0;color:#92929b;font-size:.72rem}
+#playerOverlay .player-footer-note{max-width:390px;margin:0;color:#a0a0a9;font-size:.72rem;line-height:1.55;text-align:right}
+@media(max-width:700px){
+ #playerOverlay{padding:0}
+ #playerOverlay .player-modal{width:100%;max-height:100dvh;height:100dvh;border:0;border-radius:0;background:#101012}
+ #playerOverlay .player-top{min-height:70px;padding:12px 13px;gap:9px}
+ #playerOverlay .player-mark{width:35px;height:35px;flex-basis:35px}
+ #playerOverlay .player-top select{min-width:0;max-width:116px;padding:7px 9px;font-size:.7rem}
+ #playerOverlay .player-stage{padding:12px 11px 0}
+ #playerOverlay .player-frame{border-radius:11px;max-height:none}
+ #playerOverlay .player-controls{align-items:flex-start;flex-direction:column;padding:13px 1px 12px}
+ #playerOverlay .player-control-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ #playerOverlay .player-control-btn{min-width:0;padding:0 7px;font-size:.67rem}
+ #playerOverlay .cine-controls{padding:12px 10px}
+ #playerOverlay .player-info{flex-direction:column;gap:9px;margin:14px 11px;padding:14px}
+ #playerOverlay .player-footer-note{max-width:none;text-align:left}
+}
 </style>
 </head>
 <body>
@@ -880,8 +929,8 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     </div>
     <form class="auth-form" id="authForm" onsubmit="submitAuth(event)">
       <label class="auth-field" id="authEmailWrap">Email address<input id="authEmail" type="email" name="email" autocomplete="email" placeholder="you@example.com" required maxlength="254"></label>
-      <label class="auth-field">Password<input id="authPassword" type="password" name="password" autocomplete="current-password" placeholder="Your password" required minlength="6" maxlength="72"></label>
-      <label class="auth-field" id="authConfirmWrap" hidden>Confirm password<input id="authConfirmPassword" type="password" name="confirmPassword" autocomplete="new-password" placeholder="Enter your password again" minlength="6" maxlength="72"></label>
+      <label class="auth-field">Password<span class="password-field"><input id="authPassword" type="password" name="password" autocomplete="current-password" placeholder="Your password" required minlength="6" maxlength="72"><button class="password-toggle" type="button" onclick="togglePasswordVisibility('authPassword',this)" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <label class="auth-field" id="authConfirmWrap" hidden>Confirm password<span class="password-field"><input id="authConfirmPassword" type="password" name="confirmPassword" autocomplete="new-password" placeholder="Enter your password again" minlength="6" maxlength="72"><button class="password-toggle" type="button" onclick="togglePasswordVisibility('authConfirmPassword',this)" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <div class="auth-actions" id="authForgotWrap"><button class="auth-link" type="button" onclick="sendPasswordReset()">Forgot password?</button></div>
       <p class="auth-feedback" id="authFeedback" role="status" aria-live="polite"></p>
       <button class="auth-submit" id="authSubmit" type="submit">Sign in</button>
@@ -1148,6 +1197,7 @@ function safeAvatarUrl(value=''){try{const url=new URL(String(value));return ['h
 function renderAccountButton(){const user=state.auth.user;const label=$('accountButtonLabel');const button=$('accountButton');if(label)label.textContent=user?'Account':'Sign in';if(button){button.classList.toggle('signed-in',Boolean(user));button.setAttribute('aria-label',user?'Open CineFrame account':'Sign in to CineFrame');button.title=user?accountDisplayName(user):'Sign in to CineFrame'}}
 function renderAuthPanel(){const user=state.auth.user;const recovery=state.auth.mode==='recovery';const signedIn=Boolean(user)&&!recovery;$('authTabs').hidden=signedIn||recovery;$('authForm').hidden=signedIn;$('authAccountPanel').hidden=!signedIn;$('authModal')?.classList.toggle('account-expanded',signedIn);$('authEmailWrap').hidden=recovery;$('authEmail').required=!recovery;$('authConfirmWrap').hidden=!['signup','recovery'].includes(state.auth.mode);$('authForgotWrap').hidden=state.auth.mode!=='signin';if(signedIn){const name=accountDisplayName(user);const avatar=safeAvatarUrl(user.user_metadata?.avatar_url||'');$('authHeading').textContent='Your CineFrame account.';$('authIntro').textContent='Manage your profile and account security.';$('accountProfileName').textContent=name;$('accountProfileEmail').textContent=user.email||'Signed-in account';$('accountDisplayNameInput').value=user.user_metadata?.display_name||user.user_metadata?.full_name||'';$('accountAvatarInput').value=user.user_metadata?.avatar_url||'';$('accountAvatar').innerHTML=avatar?'<img src="'+escapeHtml(avatar)+'" alt="">':escapeHtml(initialsForName(name));$('accountStatus').textContent=user.email_confirmed_at?'Verified member':'Email pending';$('accountWatchCount').textContent=String(getWatchlist().length);$('accountHistoryCount').textContent=String(getHistory().length);$('accountSecurityStatus').textContent=user.email_confirmed_at?'Email verified · password managed securely by Supabase':'Confirm your email to complete account setup.';$('authAccountFeedback').textContent='';}else{$('authHeading').textContent=recovery?'Choose a new password.':state.auth.mode==='signup'?'Create your account.':'Welcome back.';$('authIntro').textContent=recovery?'Set a new password for your CineFrame account.':state.auth.mode==='signup'?'Create a CineFrame account with your email address.':'Sign in to your CineFrame account.';$('authSubmit').textContent=recovery?'Update password':state.auth.mode==='signup'?'Create account':'Sign in';$('authSignInTab').classList.toggle('active',state.auth.mode==='signin');$('authSignUpTab').classList.toggle('active',state.auth.mode==='signup');$('authSignInTab').setAttribute('aria-selected',String(state.auth.mode==='signin'));$('authSignUpTab').setAttribute('aria-selected',String(state.auth.mode==='signup'));$('authPassword').autocomplete=state.auth.mode==='signin'?'current-password':'new-password';if(!state.auth.configured)authFeedback('Supabase setup is incomplete. Add your project publishable key to enable account access.','error');else authFeedback();}}
 async function initializeAuth(){try{if(!authIsConfigured()){renderAccountButton();return}if(!window.supabase?.createClient){console.error('Supabase client library did not load');return}let confirmationReturn=new URLSearchParams(window.location.search).get('auth')==='confirmed';state.auth.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});state.auth.configured=true;state.auth.client.auth.onAuthStateChange((event,session)=>{const previous=state.auth.user?.id;state.auth.user=session?.user||null;renderAccountButton();if(event==='SIGNED_OUT'){state.auth.libraryReady=false;if(state.auth.libraryChannel){state.auth.client.removeChannel(state.auth.libraryChannel);state.auth.libraryChannel=null}safeStore.set('cineframe_watchlist',[]);safeStore.set('cineframe_history',[]);renderLibraryViews()}else if(state.auth.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'||previous!==state.auth.user.id)){state.auth.libraryReady=false;syncCloudLibrary()}if(event==='SIGNED_IN'&&confirmationReturn&&state.auth.user?.email_confirmed_at){confirmationReturn=false;state.auth.mode='signin';openOverlay('authOverlay');renderAuthPanel();$('authHeading').textContent='Email confirmed!';$('authIntro').textContent='Your CineFrame account is ready. You can now enjoy your personal watchlist and Continue Watching across devices.';toast('Email confirmed — welcome to CineFrame');const cleanUrl=new URL(window.location.href);cleanUrl.searchParams.delete('auth');cleanUrl.searchParams.delete('code');window.history.replaceState({},document.title,cleanUrl.pathname+cleanUrl.search+cleanUrl.hash);}if(event==='PASSWORD_RECOVERY'){state.auth.mode='recovery';$('authPassword').value='';$('authConfirmPassword').value='';if(!$('authOverlay')?.classList.contains('open'))openOverlay('authOverlay');renderAuthPanel();$('authPassword').focus({preventScroll:true});}else if($('authOverlay')?.classList.contains('open')&&!(event==='SIGNED_IN'&&state.auth.user?.email_confirmed_at&&$('authHeading').textContent==='Email confirmed!'))renderAuthPanel()});const {data,error}=await state.auth.client.auth.getSession();if(error)throw error;if(!state.auth.user)state.auth.user=data.session?.user||null;renderAccountButton();if(state.auth.user)await syncCloudLibrary();}catch(error){console.error('CineFrame authentication initialization failed:',error);state.auth.configured=false;renderAccountButton()}}
+function togglePasswordVisibility(inputId,button){const input=$(inputId);if(!input)return;const show=input.type==='password';input.type=show?'text':'password';button.setAttribute('aria-label',show?'Hide password':'Show password');button.setAttribute('aria-pressed',String(show));button.innerHTML=show?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.8M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 3-.5"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';}
 function openAuthModal(){state.auth.mode='signin';$('authEmail').value='';$('authPassword').value='';$('authConfirmPassword').value='';renderAuthPanel();openOverlay('authOverlay');}
 function setAuthMode(mode){if(!['signin','signup'].includes(mode)||state.auth.user)return;state.auth.mode=mode;authFeedback();renderAuthPanel();$('authPassword').value='';$('authConfirmPassword').value=''}
 function setAuthBusy(busy){state.auth.busy=busy;$('authSubmit').disabled=busy;$('authSubmit').textContent=busy?'Please wait…':state.auth.mode==='recovery'?'Update password':state.auth.mode==='signup'?'Create account':'Sign in'}
