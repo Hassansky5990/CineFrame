@@ -32,3 +32,24 @@ on public.cineframe_watch_history for all to authenticated
 using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create index if not exists cineframe_watchlist_user_updated_idx on public.cineframe_watchlist (user_id, updated_at desc);
 create index if not exists cineframe_history_user_watched_idx on public.cineframe_watch_history (user_id, watched_at desc);
+
+-- Enable live cross-device updates through Supabase Realtime.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'cineframe_watchlist'
+  ) then
+    alter publication supabase_realtime add table public.cineframe_watchlist;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'cineframe_watch_history'
+  ) then
+    alter publication supabase_realtime add table public.cineframe_watch_history;
+  end if;
+end $$;
