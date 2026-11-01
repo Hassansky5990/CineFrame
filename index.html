@@ -200,6 +200,42 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .account-signout:hover{background:#ff453a22}
 #authOverlay .auth-modal.account-expanded{width:min(590px,calc(100vw - 32px))}
 @media(max-width:520px){.auth-modal.account-expanded{padding:24px 18px}.account-profile-head{padding:13px}.account-avatar{width:50px;height:50px;flex-basis:50px}.account-status{font-size:.58rem;padding:4px 7px}.account-security{align-items:flex-start;flex-direction:column}.account-secondary{width:100%}}
+/* Compact account dashboard for narrow screens */
+@media(max-width:520px){
+ #authOverlay{align-items:flex-start;padding:8px}
+ #authOverlay .auth-modal.account-expanded{
+  width:100%;max-width:440px;max-height:calc(100dvh - 16px);
+  margin:0 auto;padding:17px 14px 13px;border-radius:18px;
+  overflow-y:auto;overscroll-behavior:contain;
+ }
+ #authOverlay .auth-modal.account-expanded>.close{top:10px;right:10px;width:32px;height:32px}
+ #authOverlay .auth-modal.account-expanded>.auth-kicker{margin:0 38px 5px 0;font-size:.61rem}
+ #authOverlay .auth-modal.account-expanded>h2{font-size:1.55rem;line-height:1.05}
+ #authOverlay .auth-modal.account-expanded>.auth-intro{margin:5px 34px 10px 0;font-size:.78rem;line-height:1.4}
+ #authOverlay .auth-modal.account-expanded .auth-account{gap:10px;padding-top:2px}
+ #authOverlay .account-profile-head{gap:10px;padding:10px 11px;border-radius:13px}
+ #authOverlay .account-avatar{width:42px;height:42px;flex-basis:42px;font-size:.9rem}
+ #authOverlay .account-profile-name{font-size:.88rem}
+ #authOverlay .account-profile-email{font-size:.68rem}
+ #authOverlay .account-status{font-size:.53rem;padding:4px 6px}
+ #authOverlay .account-section{gap:8px;padding:11px;border-radius:13px}
+ #authOverlay .account-section-label{font-size:.59rem}
+ #authOverlay .account-section-title{font-size:.8rem}
+ #authOverlay .account-section .auth-field{gap:5px;font-size:.73rem}
+ #authOverlay .account-section .auth-field input{height:39px;padding:0 11px;font-size:.82rem}
+ #authOverlay .account-save{min-height:38px;padding:0 14px;font-size:.76rem}
+ #authOverlay .account-stats{gap:7px}
+ #authOverlay .account-stat{gap:2px;padding:10px;border-radius:12px}
+ #authOverlay .account-stat strong{font-size:1.15rem}
+ #authOverlay .account-stat span{font-size:.65rem}
+ #authOverlay .account-security{align-items:center;flex-direction:row;gap:8px}
+ #authOverlay .account-security-copy strong{font-size:.76rem}
+ #authOverlay .account-security-copy span{font-size:.66rem;line-height:1.35}
+ #authOverlay .account-secondary{width:auto;min-height:34px;padding:0 10px;font-size:.67rem}
+ #authOverlay .account-local-note{font-size:.63rem;line-height:1.4}
+ #authOverlay .account-signout{min-height:38px;font-size:.78rem}
+ #authOverlay .auth-footnote{display:none}
+}
 #authOverlay{align-items:center;justify-content:center;padding:16px}
 #authOverlay .auth-modal{width:min(460px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);border-radius:24px}
 .close{position:absolute;top:16px;right:16px;z-index:90;float:none;margin:0;width:36px;height:36px;border:1px solid var(--hair);border-radius:50%;background:#00000073;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .2s}.close:hover{background:#ffffff40}.close:hover{background:#ffffff40}
