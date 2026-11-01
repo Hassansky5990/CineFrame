@@ -758,6 +758,29 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   }
   .popular-arrow{display:grid!important;place-items:center!important}
 }
+
+/* Keep the account password-reset control fully contained on small screens. */
+#authOverlay .account-security .account-secondary{
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  min-width:0;
+  min-height:42px;
+  max-width:100%;
+  padding:10px 14px;
+  line-height:1.25;
+  text-align:center;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media(max-width:520px){
+  #authOverlay .account-security .account-secondary{
+    width:100%;
+    align-self:stretch;
+  }
+}
 </style>
 </head>
 <body>
