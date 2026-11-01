@@ -777,8 +777,11 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 @media(max-width:520px){
   #authOverlay .account-security .account-secondary{
-    width:100%;
-    align-self:stretch;
+    width:auto;
+    min-width:0;
+    align-self:flex-start;
+    padding:0 14px;
+    white-space:nowrap;
   }
 }
 </style>
