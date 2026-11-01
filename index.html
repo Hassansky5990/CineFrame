@@ -815,8 +815,8 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
         <button class="account-save" id="accountSaveButton" type="button" onclick="saveAccountProfile()">Save profile</button>
       </section>
       <div class="account-stats" aria-label="Your CineFrame activity">
-        <div class="account-stat"><strong id="accountWatchCount">0</strong><span>Saved titles · this device</span></div>
-        <div class="account-stat"><strong id="accountHistoryCount">0</strong><span>Watch history · this device</span></div>
+        <div class="account-stat"><strong id="accountWatchCount">0</strong><span>Saved titles · synced</span></div>
+        <div class="account-stat"><strong id="accountHistoryCount">0</strong><span>Watch history · synced</span></div>
       </div>
       <section class="account-section">
         <p class="account-section-label">Security</p>
@@ -825,7 +825,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
           <button class="account-secondary" type="button" onclick="sendAccountPasswordReset()">Reset password</button>
         </div>
       </section>
-      <p class="account-local-note">Your profile is saved to your CineFrame account. Watchlist and viewing history are currently stored on this device and are not yet synced between devices.</p>
+      <p class="account-local-note">Your profile, My List and Continue Watching are synced to your CineFrame account across devices.</p>
       <button class="account-signout" type="button" onclick="signOutCineFrame()">Sign out of CineFrame</button>
     </div>
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
