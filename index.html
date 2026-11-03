@@ -1129,8 +1129,6 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 'use strict';
 // Requests go through the existing server-side TMDB proxy. Keep TMDB_API_KEY in server environment variables.
 const API_BASE = '/api/tmdb';
-// Optional: paste a TMDB API key (v3 key or v4 read token) ONLY if this page is not served by your own server, e.g. opened as a local file.
-const TMDB_API_KEY = '';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
 const API_PLAYER_BASE = 'https://apiplayer.ru/embed/';
@@ -1254,14 +1252,13 @@ function backdropOf(item,size='w1280'){return item?.backdrop_path?IMG+size+item.
 function imageFallback(img){img.onerror=null;img.removeAttribute('srcset');img.src=FALLBACK_POSTER}
 function normalize(item,type){return {...item,media_type:item.media_type||type}}
 function buildApiUrl(path){
-  if(TMDB_API_KEY){const u=new URL('https://api.themoviedb.org/3'+path);if(TMDB_API_KEY.length<40)u.searchParams.set('api_key',TMDB_API_KEY);return u}
-  if(!/^https?:$/.test(window.location.protocol))throw new Error('This page was opened as a local file, so the /api/tmdb proxy is not reachable. Serve it from your server over http(s), or paste a TMDB API key into TMDB_API_KEY at the top of the script.');
+  if(!/^https?:$/.test(window.location.protocol))throw new Error('Open CineFrame through its local server with npm start so the secure TMDB proxy is available.');
   return new URL(API_BASE+path,window.location.href);
 }
 async function api(path, params={}){
   const url=buildApiUrl(path);url.searchParams.set('language','en-US');
   Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v)});
-  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);if(!res.ok){let detail='';try{const payload=await res.json();detail=payload.status_message||payload.error||payload.message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
+  const res=await fetch(url.toString());if(!res.ok){let detail='';try{const payload=await res.json();detail=payload.status_message||payload.error||payload.message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
 }
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
 function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=>'<div class="movie-card"><div class="poster skeleton"></div><div class="card-copy"><div class="skeleton" style="height:13px;border-radius:4px"></div><div class="skeleton" style="height:10px;width:55%;margin-top:8px;border-radius:4px"></div></div></div>').join('')}
@@ -1616,6 +1613,8 @@ function closePlayer(){closeOverlay('playerOverlay')}
 function recordPlayerProgress(currentTime,duration,forceCloud=false){
   const current=Math.max(0,Number(currentTime)||0);
   const total=Math.max(0,Number(duration)||0);
+  // Ignore initial zero-time snapshots so they cannot erase a saved resume point.
+  if(current<=0&&!forceCloud)return;
   if(total>0){
     $('cineSeek').max=total;
     $('cineSeek').value=Math.min(current,total);
