@@ -1422,6 +1422,28 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   #playerModal .player-footer button{font-size:.76rem;padding-inline:5px}
 }
 
+
+/* Mobile embed sizing and fullscreen action */
+#playerModal .player-frame:fullscreen{
+  width:100vw;height:100dvh;max-height:100dvh;
+  aspect-ratio:auto;border:0;border-radius:0;
+}
+#playerModal .player-frame:fullscreen iframe{width:100%;height:100%}
+@media(max-width:760px){
+  #playerModal .player-frame{
+    width:100%;height:auto;max-height:min(32dvh,210px);
+    aspect-ratio:16/9;flex:0 1 auto;
+  }
+  #playerModal .player-footer>div{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    width:100%;gap:7px;
+  }
+  #playerModal .player-footer button{
+    min-width:0;min-height:42px;padding:8px 5px;
+    font-size:.76rem;white-space:normal;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1466,6 +1488,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
       <span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span>
       <div style="display:flex;gap:8px">
         <button type="button" onclick="restartPlayer()">Reload player</button>
+        <button type="button" onclick="togglePlayerFullscreen()" aria-label="Enter fullscreen">Fullscreen</button>
         <button type="button" onclick="openExternalPlayer()">Open provider ↗</button>
       </div>
     </div>
@@ -2059,7 +2082,7 @@ async function navigatePlayerEpisode(direction){if(!state.selected||mediaType(st
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
 function openExternalPlayer(){if(state.playerUrl)window.open(state.playerUrl,'_blank','noopener,noreferrer')}
-function togglePlayerFullscreen(){const target=$('playerModal');if(!target)return;if(document.fullscreenElement){document.exitFullscreen?.().catch?.(()=>{});return}if(target.requestFullscreen){target.requestFullscreen().catch(()=>{target.classList.toggle('cinema-mode')})}else target.classList.toggle('cinema-mode')}
+function togglePlayerFullscreen(){const frame=$('playerFrame'),modal=$('playerModal');if(document.fullscreenElement){document.exitFullscreen?.().catch?.(()=>{});return}const target=frame||modal;if(target?.requestFullscreen){target.requestFullscreen().catch(()=>{if(modal)modal.classList.toggle('cinema-mode')})}else if(modal)modal.classList.toggle('cinema-mode')}
 function addToHistory(item,season,episode){const previous=getHistory().find(x=>Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item));const sameEpisode=mediaType(item)!=='tv'||(Number(previous?.season)===Number(season)&&Number(previous?.episode)===Number(episode));const entry={id:Number(item.id),media_type:mediaType(item),title:titleOf(item),name:item.name,poster_path:item.poster_path||null,backdrop_path:item.backdrop_path||null,overview:item.overview||'',release_date:item.release_date||null,first_air_date:item.first_air_date||null,genre_ids:Array.isArray(item.genre_ids)?item.genre_ids.slice(0,8):[],vote_average:Number(item.vote_average)||0,vote_count:Number(item.vote_count)||0,watchedAt:Date.now(),season,episode,...(previous&&sameEpisode?{progressSeconds:Number(previous.progressSeconds)||0,durationSeconds:Number(previous.durationSeconds)||0}:{})};const list=getHistory().filter(x=>!(Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)));list.unshift(entry);safeStore.set('cineframe_history',list.slice(0,100));persistLibraryItem('history',entry);renderContinue();schedulePersonalized()}
 function renderContinue(){const list=getHistory();$('continueSection').hidden=!list.length;if(list.length)renderRow('continueRow',list.map(x=>({...x,media_type:mediaType(x)})))}
 function clearWatchHistory(){const list=getHistory();if(!list.length)return;if(!window.confirm('Clear your entire Continue watching history?'))return;safeStore.set('cineframe_history',[]);if(state.auth.client&&state.auth.user&&state.auth.libraryReady)state.auth.client.from('cineframe_watch_history').delete().eq('user_id',state.auth.user.id).then(({error})=>{if(error){console.error(error);toast('Could not clear cloud history')}});renderContinue();schedulePersonalized();toast('Watch history cleared')}
