@@ -1821,7 +1821,7 @@ async function backToPreviousTitle(){
   await openDetails(previous);
 }
 function openOverlay(id){$(id).classList.add('open');document.body.classList.add('locked')}
-function closeOverlay(id){const el=$(id);if(!el)return;el.classList.remove('open');if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}if(id==='playerOverlay'){const current=Math.max(0,Number($('cineSeek').value)||0),duration=Math.max(0,Number($('cineSeek').max)||0);if(current>0&&duration>0)recordPlayerProgress(current,duration,true);clearTimeout(playerLoadTimer);playerLoadTimer=null;playerLoadAttempt++;const frame=$('playerFrame');if(frame){frame.querySelectorAll('iframe,video,audio').forEach(media=>{try{media.pause?.()}catch{};if(media.tagName==='IFRAME')media.src='about:blank'});frame.innerHTML=''}$('playerLoading').classList.add('hidden')}}
+function closeOverlay(id){const el=$(id);if(!el)return;el.classList.remove('open');if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}if(id==='playerOverlay'){const current=Math.max(0,Number($('cineSeek').value)||0),duration=Math.max(0,Number($('cineSeek').max)||0);if(current>0&&duration>0)recordPlayerProgress(current,duration,true);clearTimeout(playerLoadTimer);playerLoadTimer=null;playerLoadAttempt++;const frame=$('playerFrame');if(frame){frame.querySelectorAll('iframe,video,audio').forEach(media=>{try{media.pause?.()}catch{};if(media.tagName==='IFRAME')media.src='about:blank'});frame.innerHTML=''}$('playerLoading')?.classList.add('hidden')}}
 async function openDetailsById(type,id){
   const detailIsOpen=$('detailOverlay')?.classList.contains('open');
   if(detailIsOpen&&state.selected){
@@ -2021,7 +2021,7 @@ function mountPlayer(){
   const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
   state.playerUrl=url;
   prepareProviderConnection(url);
-  $('playerLoading').classList.remove('hidden');
+  $('playerLoading')?.classList.remove('hidden');
   $('playerStatusDot').classList.remove('ready');
   $('playerStatusText').textContent='Connecting to '+state.currentProvider+'…';
   const hasCineControls=['vidrift','framextv'].includes(state.currentProvider);
@@ -2034,7 +2034,7 @@ function mountPlayer(){
     frameLoaded=true;
     clearTimeout(playerLoadTimer);
     playerLoadTimer=null;
-    $('playerLoading').classList.add('hidden');
+    $('playerLoading')?.classList.add('hidden');
     // An iframe load only confirms that the provider page responded; it does not
     // confirm that a playable video stream has started.
     $('playerStatusText').textContent='Provider page loaded · waiting for playback';
@@ -2046,7 +2046,7 @@ function mountPlayer(){
   },{once:true});
   playerLoadTimer=setTimeout(()=>{
     if(attempt!==playerLoadAttempt||frame!==$('externalPlayer'))return;
-    $('playerLoading').classList.add('hidden');
+    $('playerLoading')?.classList.add('hidden');
     if(!frameLoaded)$('playerStatusText').textContent='Provider page is taking longer than expected. Try Reload or switch server.';
   },navigator.connection?.effectiveType==='slow-2g'||navigator.connection?.effectiveType==='2g'?30000:18000);
   $('playerSubtitle').textContent=mediaType(state.selected)==='tv'?'Season '+state.currentSeason+' · Episode '+state.currentEpisode+' · '+state.currentProvider:state.currentProvider;
