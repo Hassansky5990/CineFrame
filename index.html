@@ -1647,6 +1647,24 @@ function changePlayerSpeed(){const speed=Number($('cineSpeed').value)||1;if(stat
 function syncVidriftFullscreen(on){if(state.currentProvider!=='vidrift')return;const frame=$('externalPlayer');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'vidrift:fullscreen-state',on},'https://embed.vidrift.net')}
 let playerLoadTimer=null;
 let playerLoadAttempt=0;
+function prepareProviderConnection(playerUrl){
+  try{
+    const origin=new URL(playerUrl).origin;
+    if(!/^https?:$/.test(new URL(playerUrl).protocol))return;
+    const existing=document.querySelector('link[rel="preconnect"][href="'+origin+'"]');
+    if(!existing){
+      const preconnect=document.createElement('link');
+      preconnect.rel='preconnect';
+      preconnect.href=origin;
+      preconnect.crossOrigin='anonymous';
+      document.head.appendChild(preconnect);
+    }
+    const dns=document.createElement('link');
+    dns.rel='dns-prefetch';
+    dns.href=origin;
+    document.head.appendChild(dns);
+  }catch(error){console.debug('Provider connection hint skipped',error)}
+}
 function mountPlayer(){
   if(!state.selected)return;
   clearTimeout(playerLoadTimer);
@@ -1663,13 +1681,14 @@ function mountPlayer(){
   const resumeSeconds=isSameEpisode?Math.max(0,Number(savedProgress?.progressSeconds)||0):0;
   const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
   state.playerUrl=url;
+  prepareProviderConnection(url);
   $('playerLoading').classList.remove('hidden');
   $('playerStatusDot').classList.remove('ready');
   $('playerStatusText').textContent='Connecting to '+state.currentProvider+'…';
   const hasCineControls=['vidrift','framextv'].includes(state.currentProvider);
   $('cineControls').hidden=!hasCineControls;
   $('cineSpeed').disabled=!hasCineControls;
-  $('playerFrame').innerHTML=`<iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  $('playerFrame').innerHTML=`<iframe id="externalPlayer" fetchpriority="high" loading="eager" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
   const frame=$('externalPlayer');
   frame.addEventListener('load',()=>{
     if(attempt!==playerLoadAttempt||frame!==$('externalPlayer'))return;
@@ -1690,7 +1709,7 @@ function mountPlayer(){
     if(attempt!==playerLoadAttempt||frame!==$('externalPlayer'))return;
     $('playerLoading').classList.add('hidden');
     if(!frameLoaded)$('playerStatusText').textContent='Provider page is taking longer than expected. Try Reload or switch server.';
-  },12000);
+  },navigator.connection?.effectiveType==='slow-2g'||navigator.connection?.effectiveType==='2g'?30000:18000);
   $('playerFootnote').textContent=state.currentProvider==='vidrift'
     ?'CineFrame controls are connected to VidRift. Video playback remains inside the provider frame.'
     :state.currentProvider==='framextv'
