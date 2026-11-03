@@ -7,11 +7,11 @@ if (!packageJson.scripts?.start) {
 }
 
 const html = readFileSync('index.html', 'utf8');
-const scriptTags = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+const scriptTags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
 const inlineScripts = scriptTags.filter(([, attributes]) => {
-  if (/\\bsrc\\s*=/i.test(attributes)) return false;
-  const type = attributes.match(/\\btype\\s*=\\s*["']([^"']+)["']/i)?.[1];
-  return !type || /^(text|application)\\/(javascript|ecmascript)$/i.test(type);
+  if (/\bsrc\s*=/i.test(attributes)) return false;
+  const type = attributes.match(/\btype\s*=\s*["']([^"']+)["']/i)?.[1];
+  return !type || /^(text|application)\/(javascript|ecmascript)$/i.test(type);
 });
 
 if (inlineScripts.length === 0) {
@@ -19,7 +19,7 @@ if (inlineScripts.length === 0) {
 }
 
 inlineScripts.forEach(([, , source], index) => {
-  new Script(source, { filename: `index.html:inline-script-${index + 1}.js` });
+  new Script(source, { filename: \`index.html:inline-script-\${index + 1}.js\` });
 });
 
-console.log(`CineFrame checks passed: package.json, server.js, and ${inlineScripts.length} inline script block(s).`);
+console.log(\`CineFrame checks passed: package.json, server.js, and \${inlineScripts.length} inline script block(s).\`);
