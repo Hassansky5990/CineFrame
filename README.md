@@ -23,7 +23,7 @@ Requirements: Node.js 18.17 or newer.
 
 Run the static source checks with `npm run check`.
 
-The TMDB key is read only by the server. Copy `.env.example` to `.env`, fill in the key, and keep `.env` out of Git. CineFrame intentionally has no browser-side TMDB key fallback.
+The TMDB key is read only by the server. Copy `.env.example` to `.env`, fill in the key, and keep `.env` out of Git. CineFrame intentionally has no browser-side TMDB key fallback. The proxy only exposes the TMDB endpoints and query parameters used by CineFrame, applies a 10-second upstream timeout, and allows short shared caching of public catalog responses.
 
 ## Deploy on Vercel
 
