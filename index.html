@@ -1117,6 +1117,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
       </div>
       <select id="providerSelect" aria-label="Select playback server" onchange="switchProvider()">
         <option value="vidrift">VidRift</option>
+         <option value="vidnest">VidNest</option>
         <option value="apiplayer">ApiPlayer.ru</option>
         <option value="embedheaven">EmbedHeaven</option><option value="framextv">FrameXTV</option>
       </select>
@@ -1589,6 +1590,18 @@ function playSelected(){if(!state.selected)return;launchPlayer(state.selected,st
 function playTrailerSelected(){const trailer=state.videos.find(v=>v.site==='YouTube'&&v.type==='Trailer')||state.videos.find(v=>v.site==='YouTube');if(trailer)playTrailer(trailer.key,trailer.name||'Trailer');else toast('No YouTube trailer was found for this title.')}
 function buildProviderUrl(item,provider,season=1,episode=1){
   const type=mediaType(item),id=Number(item.id);
+  if(provider==='vidnest'){
+    // VidNest's published embed contract uses TMDB IDs for movies and TV episodes.
+    const path=type==='tv'
+      ?'https://vidnest.fun/tv/'+id+'/'+Math.max(1,Number(season)||1)+'/'+Math.max(1,Number(episode)||1)
+      :'https://vidnest.fun/movie/'+id;
+    const url=new URL(path);
+    const saved=getHistory().find(x=>Number(x.id)===id&&mediaType(x)===type);
+    const sameEpisode=type!=='tv'||(Number(saved?.season)===Number(season)&&Number(saved?.episode)===Number(episode));
+    const resumeSeconds=sameEpisode?Math.max(0,Number(saved?.progressSeconds)||0):0;
+    if(resumeSeconds>15)url.searchParams.set('startAt',String(Math.floor(resumeSeconds)));
+    return url.toString();
+  }
   if(provider==='framextv'){
     const path=type==='tv'?'https://framextv.xyz/embed/'+id+'/'+Math.max(1,season)+'/'+Math.max(1,episode):'https://framextv.xyz/embed/'+id;
     const url=new URL(path);
@@ -1682,7 +1695,9 @@ function mountPlayer(){
     ?'CineFrame controls are connected to VidRift. Video playback remains inside the provider frame.'
     :state.currentProvider==='framextv'
       ?'CineFrame controls use FrameXTV’s documented iframe controller. Video decoding still runs inside the FrameXTV frame; a native stream URL is not exposed in its published embed docs.'
-      :'This server does not expose a verified CineFrame control API. Use its built-in playback and subtitle controls.';
+      :state.currentProvider==='vidnest'
+        ?'VidNest provides its own playback, server and subtitle controls. CineFrame passes the selected TMDB title, episode and saved resume position.'
+        :'This server does not expose a verified CineFrame control API. Use its built-in playback and subtitle controls.';
   $('playerSubtitle').textContent=mediaType(state.selected)==='tv'?'Season '+state.currentSeason+' · Episode '+state.currentEpisode+' · '+state.currentProvider:state.currentProvider;
   updatePlayerEpisodeNav();
   $('cinePlayPause').dataset.playing='false';
