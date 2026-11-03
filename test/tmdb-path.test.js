@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isAllowedTmdbPath } from '../lib/tmdb-path.js';
+import { isAllowedTmdbPath, isAllowedTmdbQueryKey } from '../lib/tmdb-path.js';
 
 test('allows the TMDB endpoints used by CineFrame', () => {
   const allowed = [
@@ -42,4 +42,13 @@ test('rejects unknown, malformed, and traversal paths', () => {
     'x'.repeat(161)
   ];
   for (const path of rejected) assert.equal(isAllowedTmdbPath(path), false, path);
+});
+
+test('allows only query parameters required by CineFrame', () => {
+  for (const key of ['language', 'region', 'page', 'query', 'include_adult', 'sort_by', 'with_genres', 'with_original_language', 'vote_count.gte', 'primary_release_date.lte', 'first_air_date.lte']) {
+    assert.equal(isAllowedTmdbQueryKey(key), true, key);
+  }
+  for (const key of ['api_key', 'path', 'append_to_response', 'session_id', 'unknown']) {
+    assert.equal(isAllowedTmdbQueryKey(key), false, key);
+  }
 });
