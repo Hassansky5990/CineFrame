@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isAllowedTmdbPath, isAllowedTmdbQueryKey } from './lib/tmdb-path.js';
 
 const app = express();
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -18,19 +19,18 @@ app.get('/api/tmdb/*', async (req, res) => {
   }
 
   const rawPath = String(req.params[0] || '');
-  const segments = rawPath.split('/');
-  if (!rawPath || segments.some(part => !/^[a-zA-Z0-9_-]+$/.test(part))) {
-    return res.status(400).json({ error: 'Invalid TMDB path.' });
+  if (!isAllowedTmdbPath(rawPath)) {
+    return res.status(400).json({ error: 'TMDB endpoint is not available through CineFrame.' });
   }
 
   const upstream = new URL(
-    segments.map(encodeURIComponent).join('/'),
+    rawPath.split('/').map(encodeURIComponent).join('/'),
     'https://api.themoviedb.org/3/'
   );
   upstream.searchParams.set('api_key', apiKey);
 
   for (const [key, rawValue] of Object.entries(req.query)) {
-    if (key === 'api_key' || key === 'path') continue;
+    if (!isAllowedTmdbQueryKey(key)) continue;
     const values = Array.isArray(rawValue) ? rawValue : [rawValue];
     for (const value of values) {
       if (typeof value === 'string' || typeof value === 'number') {
@@ -40,7 +40,7 @@ app.get('/api/tmdb/*', async (req, res) => {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
+  const timeout = setTimeout(() => controller.abort(), 10000);
   try {
     const response = await fetch(upstream, {
       signal: controller.signal,
@@ -49,7 +49,7 @@ app.get('/api/tmdb/*', async (req, res) => {
     const body = await response.text();
     res.status(response.status);
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
-    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     return res.send(body);
   } catch (error) {
     const timedOut = error?.name === 'AbortError';
