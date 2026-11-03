@@ -38,3 +38,13 @@ CineFrame uses provider-owned embedded players. The app only exposes custom cont
 - Keep `.env` and API credentials out of source control.
 - Do not expose provider tokens or private keys in `index.html`.
 - Treat provider messages and playback progress as untrusted input.
+
+## Account-synced library setup
+
+The account UI uses Supabase Auth. The cloud watchlist and viewing history require a one-time database setup:
+
+1. In Supabase Dashboard, open **SQL Editor** and run `supabase/migrations/202611010001_cineframe_cloud_library.sql`.
+2. In **Authentication → URL Configuration**, allow the production confirmation redirect `https://cineframe-web.vercel.app/?auth=confirmed`. For local testing, also allow `http://localhost:3000/?auth=confirmed`.
+3. Configure the project's email confirmation and password-recovery settings before testing account flows.
+
+Until the migration is applied and the redirect URLs are allowed, local watchlist/history can still use browser storage, but account-synced library features cannot be considered ready. The browser may contain a Supabase publishable key; never put a Supabase `service_role` key in frontend code.
