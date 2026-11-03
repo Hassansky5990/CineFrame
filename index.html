@@ -1145,12 +1145,12 @@ const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
 const getHistory = () => safeStore.get('cineframe_history', []);
 const libraryKey = (item) => `${mediaType(item)}:${Number(item.id)}`;
 function toLibraryRow(item,userId,kind){
-  const base={user_id:userId,item_id:Number(item.id),media_type:mediaType(item),item:normalize(item,mediaType(item)),updated_at:new Date().toISOString()};
+  const base={user_id:userId,item_id:Number(item.id),media_type:mediaType(item),item:normalize(item,mediaType(item)),updated_at:new Date(Number(item.updatedAt)||Date.now()).toISOString()};
   if(kind==='history')return {...base,watched_at:new Date(Number(item.watchedAt)||Date.now()).toISOString(),season:Number(item.season)||null,episode:Number(item.episode)||null};
   return base;
 }
 function fromLibraryRow(row,kind){
-  const item={...(row.item||{}),id:Number(row.item_id),media_type:row.media_type};
+  const item={...(row.item||{}),id:Number(row.item_id),media_type:row.media_type,updatedAt:row.updated_at?new Date(row.updated_at).getTime():0};
   if(kind==='history'){item.watchedAt=row.watched_at?new Date(row.watched_at).getTime():Date.now();item.season=row.season||1;item.episode=row.episode||1;}
   return item;
 }
@@ -1180,7 +1180,12 @@ async function syncCloudLibrary(){
     ]);
     if(watch.error)throw watch.error;if(history.error)throw history.error;
     const watchMap=new Map((watch.data||[]).map(row=>[row.media_type+':'+row.item_id,fromLibraryRow(row,'watchlist')]));
-    getWatchlist().forEach(item=>watchMap.set(libraryKey(item),item));
+    getWatchlist().forEach(item=>{
+      const key=libraryKey(item),cloudItem=watchMap.get(key);
+      const localUpdated=Number(item.updatedAt)||0;
+      const cloudUpdated=Number(cloudItem?.updatedAt)||0;
+      if(!cloudItem||localUpdated>cloudUpdated)watchMap.set(key,item);
+    });
     const historyMap=new Map((history.data||[]).map(row=>[row.media_type+':'+row.item_id,fromLibraryRow(row,'history')]));
     getHistory().forEach(item=>{const key=libraryKey(item),old=historyMap.get(key);if(!old||(Number(item.watchedAt)||0)>(Number(old.watchedAt)||0))historyMap.set(key,item)});
     const mergedWatch=[...watchMap.values()];
@@ -1368,7 +1373,7 @@ async function loadGenres(type){if(state.genres[type]?.length)return state.genre
 async function populateGenreFilter(type){const select=$('genreFilter');if(!select)return;select.innerHTML='<option value="">All genres</option>';const types=type==='all'?['movie','tv']:[type==='anime'?'tv':type];const lists=await Promise.all(types.map(loadGenres));const map=new Map();lists.flat().forEach(g=>{if(!map.has(g.id))map.set(g.id,g.name)});[...map.entries()].sort((a,b)=>a[1].localeCompare(b[1])).forEach(([id,name])=>select.add(new Option(name,id)));}
 function showCatalogError(msg){$('homeSections').innerHTML=`<section class="section" style="padding-top:35px"><div class="error-box"><strong>Could not load TMDB.</strong><p>${escapeHtml(msg)}</p><p class="tiny-note">Check your internet connection and confirm that the TMDB API key is valid. This page requires internet access.</p><button class="secondary" onclick="location.reload()">Retry</button></div></section>`;$('heroOverview').textContent='Connect to the internet to load the movie and TV catalog.'}
 function updateWatchCount(){$('watchCount').textContent=getWatchlist().length}
-function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false,changed;if(index>=0){changed=list.splice(index,1)[0]}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);changed=found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'};list.unshift(changed);added=true}safeStore.set('cineframe_watchlist',list);persistLibraryItem('watchlist',changed,!added);updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
+function toggleWatchlist(id,type,button){const list=getWatchlist();const index=list.findIndex(x=>Number(x.id)===Number(id)&&mediaType(x)===type);let added=false,changed;if(index>=0){changed=list.splice(index,1)[0]}else{const found=state.itemCache[`${type}:${Number(id)}`]||[...state.trending,...state.movies,...state.tv,...state.rated,...(state.searchResults||[]),...(state.categoryItems||[]),...(state.selected?[state.selected]:[])].find(x=>Number(x.id)===Number(id)&&mediaType(x)===type);changed={...(found?normalize(found,type):{id:Number(id),media_type:type,title:'Saved title'}),updatedAt:Date.now()};list.unshift(changed);added=true}safeStore.set('cineframe_watchlist',list);persistLibraryItem('watchlist',changed,!added);updateWatchCount();if(button)button.textContent=added?'✓':'＋';syncWatchButtons();if(state.selected&&Number(state.selected.id)===Number(id))updateDetailListButton();if(state.page==='watchlist')renderWatchlistPage();schedulePersonalized();toast(added?'Added to My List':'Removed from My List')}
 function updateDetailListButton(){if(!state.selected)return;const has=getWatchlist().some(x=>Number(x.id)===Number(state.selected.id)&&mediaType(x)===mediaType(state.selected));$('detailListButton').textContent=has?'✓ In My List':'＋ My List'}
 function toggleSelectedWatchlist(){if(!state.selected)return;toggleWatchlist(state.selected.id,mediaType(state.selected));updateDetailListButton()}
 function updateDetailBackButton(){
