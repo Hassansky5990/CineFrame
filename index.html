@@ -638,7 +638,7 @@ const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
 const API_PLAYER_BASE = 'https://apiplayer.ru/embed/';
 const FALLBACK_POSTER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600"><rect width="100%" height="100%" fill="#19191f"/><text x="50%" y="50%" fill="#777781" font-family="sans-serif" font-size="24" text-anchor="middle">No poster</text></svg>');
-const state = { trending:[], movies:[], tv:[], rated:[], selected:null, hero:null, page:'home', searchTimer:null, searchQuery:'', searchPage:1, searchType:'all', categoryPage:1, categoryType:'movie', categoryItems:[], currentProvider:'vidrift', currentSeason:1, currentEpisode:1, detailHistory:[], episodeItems:[], episodeQuery:'', episodeVisibleCount:12, videos:[], recommendations:[], playerUrl:'', genres:{movie:[],tv:[]}, categoryTotalPages:1, searchTotalPages:1, listingBusy:false, categoryRequestId:0, searchRequestId:0, detailRequestId:0, itemCache:{} };
+const state = { trending:[], movies:[], tv:[], rated:[], selected:null, hero:null, page:'home', searchTimer:null, searchQuery:'', searchPage:1, searchType:'all', categoryPage:1, categoryType:'movie', categoryItems:[], currentProvider:'vidrift', currentSeason:1, currentEpisode:1, detailHistory:[], episodeItems:[], episodeQuery:'', episodeVisibleCount:12, videos:[], recommendations:[], playerUrl:'', playerTimer:null, playerAttemptId:0, genres:{movie:[],tv:[]}, categoryTotalPages:1, searchTotalPages:1, listingBusy:false, categoryRequestId:0, searchRequestId:0, detailRequestId:0, itemCache:{} };
 const $ = id => document.getElementById(id);
 const safeStore = { get(key, fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}} };
 const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
@@ -687,9 +687,17 @@ function buildApiUrl(path){
   return new URL(API_BASE+path,window.location.href);
 }
 async function api(path, params={}){
-  const url=buildApiUrl(path);url.searchParams.set('language','en-US');
-  Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v)});
-  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);if(!res.ok){let detail='';try{detail=(await res.json()).status_message||''}catch{}throw new Error(detail||`TMDB request failed (${res.status})`)}return res.json();
+  const url=buildApiUrl(path);
+  url.searchParams.set('language','en-US');
+  Object.entries(params).forEach(([key,value])=>{
+    if(value!==undefined&&value!==null&&value!=='')url.searchParams.set(key,value);
+  });
+  const res=await fetch(url.toString(),TMDB_API_KEY.length>=40?{headers:{Authorization:'Bearer '+TMDB_API_KEY}}:undefined);
+  let data=null;
+  try{data=await res.json()}catch{}
+  if(!res.ok)throw new Error(data?.error||data?.status_message||data?.message||`TMDB request failed (${res.status})`);
+  if(!data||typeof data!=='object')throw new Error('TMDB returned an invalid response.');
+  return data;
 }
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
 function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=>'<div class="movie-card"><div class="poster skeleton"></div><div class="card-copy"><div class="skeleton" style="height:13px;border-radius:4px"></div><div class="skeleton" style="height:10px;width:55%;margin-top:8px;border-radius:4px"></div></div></div>').join('')}
@@ -767,7 +775,42 @@ function setupHomeSliders(){
   },{passive:true});
 }
 async function init(){['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized()}})}
-async function loadHomeData(){const jobs=[['trending',()=>api('/trending/all/week')],['movies',()=>api('/movie/popular',{region:'US'})],['tv',()=>api('/tv/popular')],['rated',()=>api('/movie/top_rated',{region:'US'})]];const results=await Promise.allSettled(jobs.map(([,load])=>load()));let loaded=0;results.forEach((result,i)=>{const key=jobs[i][0];if(result.status==='fulfilled'){const data=result.value;state[key]=key==='trending'?(data.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path):(data.results||[]).map(x=>normalize(x,key==='movies'?'movie':key==='tv'?'tv':'movie'));loaded++}else{console.warn(`CineFrame ${key} shelf failed`,result.reason);state[key]=[]}});renderRow('trendingRow',state.trending);renderRow('moviesRow',state.movies);renderRow('tvRow',state.tv);renderRow('ratedRow',state.rated);const hero=state.trending.find(x=>x.backdrop_path&&x.overview)||state.movies[0]||state.tv[0];setHero(hero);if(!loaded)showCatalogError('Could not load TMDB shelves. Check your connection and try again.');else{if(loaded<jobs.length)toast('Some shelves could not load. The available titles are still shown.');loadPersonalized()} }
+async function loadHomeData(){
+  const jobs=[
+    ['trending','trendingRow',()=>api('/trending/all/week')],
+    ['movies','moviesRow',()=>api('/movie/popular',{region:'US'})],
+    ['tv','tvRow',()=>api('/tv/popular')],
+    ['rated','ratedRow',()=>api('/movie/top_rated',{region:'US'})]
+  ];
+  let loaded=0,settled=0;
+  jobs.forEach(([key])=>{state[key]=[]});
+  const tasks=jobs.map(([key,rowId,load])=>load().then(data=>{
+    state[key]=key==='trending'
+      ?(data.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path)
+      :(data.results||[]).map(x=>normalize(x,key==='movies'?'movie':key==='tv'?'tv':'movie'));
+    loaded++;
+    renderRow(rowId,state[key]);
+    const candidate=key==='trending'
+      ?state.trending.find(x=>x.backdrop_path&&x.overview)
+      :state[key].find(x=>x.backdrop_path&&x.overview);
+    if(candidate&&(!state.hero||key==='trending'))setHero(candidate);
+  }).catch(error=>{
+    console.warn(`CineFrame ${key} shelf failed`,error);
+    state[key]=[];
+    renderRow(rowId,[]);
+  }).finally(()=>{
+    settled++;
+    if(settled===jobs.length){
+      if(!loaded)showCatalogError('Could not load TMDB shelves. Check your connection and try again.');
+      else{
+        if(loaded<jobs.length)toast('Some shelves could not load. The available titles are still shown.');
+        if(!state.hero)setHero(state.movies[0]||state.tv[0]||state.trending[0]||state.rated[0]);
+        loadPersonalized();
+      }
+    }
+  }));
+  await Promise.allSettled(tasks);
+}
 let personalizedTimer=null;function schedulePersonalized(){clearTimeout(personalizedTimer);personalizedTimer=setTimeout(()=>loadPersonalized(),650)}
 async function loadPersonalized(){const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));if($('forYouSubtitle'))$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);if($('forYouSubtitle'))$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
 async function loadGenres(type){if(state.genres[type]?.length)return state.genres[type];try{const data=await api(`/genre/${type}/list`);state.genres[type]=data.genres||[];return state.genres[type]}catch(e){return []}}
@@ -788,7 +831,24 @@ async function backToPreviousTitle(){
   await openDetails(previous);
 }
 function openOverlay(id){$(id).classList.add('open');document.body.classList.add('locked')}
-function closeOverlay(id){const el=$(id);if(!el)return;el.classList.remove('open');if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}if(id==='playerOverlay'){const frame=$('playerFrame');if(frame){frame.querySelectorAll('iframe,video,audio').forEach(media=>{try{media.pause?.()}catch{};if(media.tagName==='IFRAME')media.src='about:blank'});frame.innerHTML=''}$('playerLoading').classList.add('hidden')}}
+function closeOverlay(id){
+  const el=$(id);if(!el)return;
+  el.classList.remove('open');
+  if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');
+  if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}
+  if(id==='playerOverlay'){
+    clearTimeout(state.playerTimer);state.playerTimer=null;state.playerAttemptId++;
+    const frame=$('playerFrame');
+    if(frame){
+      frame.querySelectorAll('iframe,video,audio').forEach(media=>{
+        try{media.pause?.()}catch{}
+        if(media.tagName==='IFRAME')media.src='about:blank';
+      });
+      frame.innerHTML='';
+    }
+    $('playerLoading').classList.add('hidden');
+  }
+}
 async function openDetailsById(type,id){
   const detailIsOpen=$('detailOverlay')?.classList.contains('open');
   if(detailIsOpen&&state.selected){
@@ -903,7 +963,22 @@ function playSelected(){if(!state.selected)return;launchPlayer(state.selected,st
 function playTrailerSelected(){const trailer=state.videos.find(v=>v.site==='YouTube'&&v.type==='Trailer')||state.videos.find(v=>v.site==='YouTube');if(trailer)playTrailer(trailer.key,trailer.name||'Trailer');else toast('No YouTube trailer was found for this title.')}
 function buildProviderUrl(item,provider,season=1,episode=1){const type=mediaType(item);const id=Number(item.id);if(provider==='vidrift'){const path=type==='tv'?`${VIDRIFT_BASE}/tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`:`${VIDRIFT_BASE}/movie/${id}`;const url=new URL(path);url.searchParams.set('title',titleOf(item));url.searchParams.set('brand','CineFrame');url.searchParams.set('brandColor','e50914');if(item.backdrop_path)url.searchParams.set('poster',backdropOf(item));return url.toString()}if(type==='tv')return `${API_PLAYER_BASE}tv/${id}/${Math.max(1,season)}/${Math.max(1,episode)}`;return `${API_PLAYER_BASE}movie/${id}`}
 function launchPlayer(item,season=1,episode=1){state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=$('providerSelect').value||'vidrift';$('playerTitle').textContent=titleOf(item)+(mediaType(item)==='tv'?` · S${String(season).padStart(2,'0')} E${String(episode).padStart(2,'0')}`:'');$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
-function mountPlayer(){if(!state.selected)return;const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);state.playerUrl=url;$('playerLoading').classList.remove('hidden');$('playerFrame').innerHTML=`<iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;const frame=$('externalPlayer');frame.addEventListener('load',()=>{$('playerLoading').classList.add('hidden')},{once:true});setTimeout(()=>$('playerLoading').classList.add('hidden'),9000);$('playerFootnote').textContent=state.currentProvider==='vidrift'?'VidRift player · provider availability may vary.':'ApiPlayer.ru player · provider availability may vary.'}
+function mountPlayer(){
+  if(!state.selected)return;
+  clearTimeout(state.playerTimer);
+  const attemptId=++state.playerAttemptId;
+  const url=buildProviderUrl(state.selected,state.currentProvider,state.currentSeason,state.currentEpisode);
+  state.playerUrl=url;
+  $('playerLoading').classList.remove('hidden');
+  $('playerFrame').innerHTML=`<iframe id="externalPlayer" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  // Iframe load confirms document load, not that video playback is ready.
+  state.playerTimer=setTimeout(()=>{
+    if(attemptId!==state.playerAttemptId||!$('playerOverlay')?.classList.contains('open'))return;
+    $('playerLoading').classList.add('hidden');
+    toast('The provider has not confirmed playback yet. Try Reload player or switch server.');
+  },12000);
+  $('playerFootnote').textContent=state.currentProvider==='vidrift'?'VidRift player · provider availability may vary.':'ApiPlayer.ru player · provider availability may vary.';
+}
 function switchProvider(){state.currentProvider=$('providerSelect').value;mountPlayer()}
 function restartPlayer(){mountPlayer()}
 function openExternalPlayer(){if(state.playerUrl)window.open(state.playerUrl,'_blank','noopener,noreferrer')}
@@ -923,7 +998,30 @@ function applyListingControls(){if(state.page==='search'){renderSearchResults();
 function renderGridWithFilter(){const f=state.searchType;let items=state.categoryItems||[];items=(f==='all'||f==='anime')?items:items.filter(x=>mediaType(x)===f);const genre=$('genreFilter')?.value;if(genre)items=items.filter(x=>(x.genre_ids||[]).includes(Number(genre)));const sort=$('sortFilter')?.value;if(sort==='title.asc')items=[...items].sort((a,b)=>titleOf(a).localeCompare(titleOf(b)));else if(sort==='vote_average.desc')items=[...items].filter(x=>Number(x.vote_count||0)>=10).sort((a,b)=>(b.vote_average||0)-(a.vote_average||0));else if(sort==='primary_release_date.desc')items=[...items].filter(x=>{const d=mediaType(x)==='tv'?x.first_air_date:x.release_date||x.first_air_date;return typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=new Date().toISOString().slice(0,10)}).sort((a,b)=>{const da=mediaType(a)==='tv'?a.first_air_date:a.release_date||a.first_air_date;const db=mediaType(b)==='tv'?b.first_air_date:b.release_date||b.first_air_date;return db.localeCompare(da)});$('listingCount').textContent=`${items.length} ${items.length===1?'title':'titles'} shown`; $('listingGrid').innerHTML=items.length?items.map(cardMarkup).join(''):'<div class="empty" style="grid-column:1/-1">No titles match these filters.</div>'}
 async function loadMoreResults(){if(state.listingBusy)return;if(state.page==='search'){if(state.searchPage>=state.searchTotalPages)return;state.searchPage++;await runSearch(false)}else{if(state.categoryPage>=state.categoryTotalPages)return;state.categoryPage++;await fetchCategory(false)}}
 function renderSearchResults(){let items=(state.searchResults||[]).filter(x=>state.searchType==='all'||(state.searchType==='anime'?mediaType(x)==='tv'&&(x.genre_ids||[]).includes(16):mediaType(x)===state.searchType));const genre=$('genreFilter')?.value;if(genre)items=items.filter(x=>(x.genre_ids||[]).includes(Number(genre)));const sort=$('sortFilter')?.value;if(sort==='title.asc')items.sort((a,b)=>titleOf(a).localeCompare(titleOf(b)));else if(sort==='vote_average.desc')items=items.filter(x=>Number(x.vote_count||0)>=10).sort((a,b)=>(b.vote_average||0)-(a.vote_average||0));else if(sort==='primary_release_date.desc')items=items.filter(x=>{const d=x.release_date||x.first_air_date;return d&&d<=new Date().toISOString().slice(0,10)}).sort((a,b)=>String(b.release_date||b.first_air_date||'').localeCompare(String(a.release_date||a.first_air_date||'')));$('listingGrid').innerHTML=items.length?items.map(cardMarkup).join(''):'<div class="empty" style="grid-column:1/-1">No results match these filters.</div>'}
-function setupSearch(){$('searchInput').addEventListener('input',e=>{clearTimeout(state.searchTimer);const q=e.target.value.trim();state.searchTimer=setTimeout(()=>{if(q)startSearch(q);else if(state.page==='search')goHome()},300)});$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(state.searchTimer);if(e.target.value.trim())startSearch(e.target.value.trim())}});$('filterbar').addEventListener('click',e=>{const b=e.target.closest('#filterbar [data-filter]');if(!b)return;const type=b.dataset.filter;showCategory(type)});$('genreFilter')?.addEventListener('change',()=>{if(state.page==='category')applyListingControls();else if(state.page==='search')applyListingControls()});$('sortFilter')?.addEventListener('change',()=>applyListingControls())}
+function setupSearch(){
+  $('searchInput').addEventListener('input',e=>{
+    clearTimeout(state.searchTimer);
+    const q=e.target.value.trim();
+    state.searchTimer=setTimeout(()=>{if(q)startSearch(q);else if(state.page==='search')goHome()},300);
+  });
+  $('searchInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();clearTimeout(state.searchTimer);if(e.target.value.trim())startSearch(e.target.value.trim())}
+  });
+  $('filterbar').addEventListener('click',e=>{
+    const b=e.target.closest('#filterbar [data-filter]');
+    if(!b)return;
+    const type=b.dataset.filter;
+    if(state.page==='search'){
+      state.searchType=type;
+      document.querySelectorAll('#filterbar .pill').forEach(p=>p.classList.toggle('active',p.dataset.filter===type));
+      renderSearchResults();
+      return;
+    }
+    showCategory(type);
+  });
+  $('genreFilter')?.addEventListener('change',()=>{if(state.page==='category'||state.page==='search')applyListingControls()});
+  $('sortFilter')?.addEventListener('change',()=>applyListingControls());
+}
 async function startSearch(query){const normalizedQuery=String(query||'').trim();if(!normalizedQuery)return;const requestId=++state.searchRequestId;state.page='search';state.searchQuery=normalizedQuery;state.searchPage=1;state.searchType='all';state.searchTotalPages=1;await populateGenreFilter('all');if(requestId!==state.searchRequestId)return;$('hero').classList.add('hidden');$('homeSections').classList.add('hidden');$('listingPage').classList.remove('hidden');$('filterbar').classList.remove('hidden');$('loadMore').classList.remove('hidden');$('listingTitle').textContent=`Search: “${query}”`;document.querySelectorAll('#filterbar .pill').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));$('listingGrid').innerHTML='<div class="loading-line" style="grid-column:1/-1"></div>';setNavActive('');await runSearch(true,requestId)}
 async function runSearch(reset,requestId=state.searchRequestId){const query=state.searchQuery;const page=state.searchPage;try{const data=await api('/search/multi',{query,page,include_adult:false});if(requestId!==state.searchRequestId||query!==state.searchQuery)return;state.searchTotalPages=data.total_pages||1;let items=(data.results||[]).filter(x=>['movie','tv'].includes(x.media_type)&&x.poster_path);if(reset)state.searchResults=items;else state.searchResults=[...(state.searchResults||[]),...items];state.categoryItems=state.searchResults;$('listingTitle').textContent=`Search: “${state.searchQuery}”`;$('listingCount').textContent=`${data.total_results||state.searchResults.length} results`;renderSearchResults();$('loadMore').hidden=state.searchPage>=state.searchTotalPages}catch(e){if(requestId===state.searchRequestId)$('listingGrid').innerHTML=`<div class="error-box" style="grid-column:1/-1">Search failed: ${escapeHtml(e.message)}</div>`}}
 
