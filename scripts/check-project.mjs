@@ -19,7 +19,7 @@ if (inlineScripts.length === 0) {
 }
 
 inlineScripts.forEach(([, , source], index) => {
-  new Script(source, { filename: \`index.html:inline-script-\${index + 1}.js\` });
+  new Script(source, { filename: 'index.html:inline-script-' + (index + 1) + '.js' });
 });
 
-console.log(\`CineFrame checks passed: package.json, server.js, and \${inlineScripts.length} inline script block(s).\`);
+console.log('CineFrame checks passed: package.json, server.js, and ' + inlineScripts.length + ' inline script block(s).');
