@@ -1641,6 +1641,21 @@ function recordPlayerProgress(currentTime,duration,forceCloud=false){
   safeStore.set('cineframe_history',getHistory().map(item=>
     Number(item.id)===Number(entry.id)&&mediaType(item)===mediaType(entry)?entry:item
   ));
+  const continueCard=$('continueRow')?.querySelector(`.movie-card[data-card-id="${Number(entry.id)}"][data-card-type="${mediaType(entry)}"]`);
+  if(continueCard){
+    let progressBar=continueCard.querySelector('.card-progress');
+    if(!progressBar){
+      progressBar=document.createElement('div');
+      progressBar.className='card-progress';
+      progressBar.setAttribute('role','img');
+      const copy=continueCard.querySelector('.card-copy');
+      if(copy)copy.append(progressBar);
+    }
+    const percent=Math.min(100,Math.max(0,current/total*100));
+    progressBar.setAttribute('aria-label',`Watched ${Math.round(percent)} percent`);
+    progressBar.innerHTML='<span></span>';
+    progressBar.firstElementChild.style.width=percent.toFixed(2)+'%';
+  }
   if(shouldSync)persistLibraryItem('history',entry);
 }
 function handlePlayerMessage(event){
