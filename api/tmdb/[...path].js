@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     });
     const body = await response.text();
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', response.ok ? 'public, s-maxage=60, stale-while-revalidate=300' : 'no-store');
     return res.status(response.status).send(body);
   } catch (error) {
     const timedOut = error?.name === 'AbortError';
