@@ -19,7 +19,7 @@ Requirements: Node.js 18.17 or newer.
    ```sh
    npm start
    ```
-4. Open http://localhost:3000.
+4. Open http://localhost:3000.\n\nRun the static source checks with `npm run check`.
 
 The TMDB key is read by the server and must never be added to the browser code or committed to Git.
 
