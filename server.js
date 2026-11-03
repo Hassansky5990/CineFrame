@@ -49,7 +49,7 @@ app.get('/api/tmdb/*', async (req, res) => {
     const body = await response.text();
     res.status(response.status);
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', response.ok ? 'public, s-maxage=60, stale-while-revalidate=300' : 'no-store');
     return res.send(body);
   } catch (error) {
     const timedOut = error?.name === 'AbortError';
