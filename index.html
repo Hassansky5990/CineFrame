@@ -1477,15 +1477,12 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
         <option value="vidrift">VidRift</option>
         <option value="vidnest">VidNest</option>
         <option value="apiplayer">ApiPlayer.ru</option>
-        <option value="embedheaven">EmbedHeaven</option>
         <option value="framextv">FrameXTV</option>
       </select>
       <button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button>
     </div>
-    <div class="loading-line" id="playerLoading"></div>
     <div class="player-frame" id="playerFrame"><div style="padding:30px;color:#aaa">Choose a title to start playback.</div></div>
     <div class="player-footer">
-      <span id="playerFootnote">External player. Playback and availability are controlled by the provider.</span>
       <div style="display:flex;gap:8px">
         <button type="button" onclick="restartPlayer()">Reload player</button>
         <button type="button" onclick="togglePlayerFullscreen()" aria-label="Enter fullscreen">Fullscreen</button>
@@ -1572,7 +1569,6 @@ const API_BASE = '/api/tmdb';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
 const API_PLAYER_BASE = 'https://apiplayer.ru/embed/';
-const EMBEDHEAVEN_BASE = 'https://player.embedheaven.st';
 const SUPABASE_URL = 'https://kxikramsinkvboizgsjm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Q3wszD5DEZbi3eDsQNAQ7w_moqFLJX7';
 const FALLBACK_POSTER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600"><rect width="100%" height="100%" fill="#19191f"/><text x="50%" y="50%" fill="#777781" font-family="sans-serif" font-size="24" text-anchor="middle">No poster</text></svg>');
@@ -1955,7 +1951,6 @@ function buildProviderUrl(item,provider,season=1,episode=1){
   if(provider==='framextv'){
     const path=type==='tv'?'https://framextv.xyz/embed/'+id+'/'+Math.max(1,season)+'/'+Math.max(1,episode):'https://framextv.xyz/embed/'+id;
     const url=new URL(path);
-    url.searchParams.set('controls','0');
     url.searchParams.set('title',titleOf(item));
     if(item.backdrop_path)url.searchParams.set('poster',backdropOf(item));
     const saved=getHistory().find(x=>Number(x.id)===id&&mediaType(x)===type);
@@ -1974,12 +1969,6 @@ function buildProviderUrl(item,provider,season=1,episode=1){
     url.searchParams.set('hide','progress,play,volume,time,fullscreen');
     if(item.backdrop_path)url.searchParams.set('poster',backdropOf(item));
     return url.toString();
-  }
-  if(provider==='embedheaven'){
-    const isAnime=type==='tv'&&(item.genre_ids||[]).includes(16);
-    const embedType=isAnime?'anime':type==='tv'?'tv':'movie';
-    if(embedType==='tv')return EMBEDHEAVEN_BASE+'/tv/'+id+'/'+Math.max(1,season)+'/'+Math.max(1,episode);
-    return EMBEDHEAVEN_BASE+'/'+embedType+'/'+id;
   }
   if(type==='tv')return API_PLAYER_BASE+'tv/'+id+'/'+Math.max(1,season)+'/'+Math.max(1,episode);
   return API_PLAYER_BASE+'movie/'+id;
@@ -2060,13 +2049,6 @@ function mountPlayer(){
     $('playerLoading').classList.add('hidden');
     if(!frameLoaded)$('playerStatusText').textContent='Provider page is taking longer than expected. Try Reload or switch server.';
   },navigator.connection?.effectiveType==='slow-2g'||navigator.connection?.effectiveType==='2g'?30000:18000);
-  $('playerFootnote').textContent=state.currentProvider==='vidrift'
-    ?'CineFrame controls are connected to VidRift. Video playback remains inside the provider frame.'
-    :state.currentProvider==='framextv'
-      ?'CineFrame controls use FrameXTV’s documented iframe controller. Video decoding still runs inside the FrameXTV frame; a native stream URL is not exposed in its published embed docs.'
-      :state.currentProvider==='vidnest'
-        ?'VidNest provides its own playback, server and subtitle controls. CineFrame passes the selected TMDB title, episode and saved resume position.'
-        :'This server does not expose a verified CineFrame control API. Use its built-in playback and subtitle controls.';
   $('playerSubtitle').textContent=mediaType(state.selected)==='tv'?'Season '+state.currentSeason+' · Episode '+state.currentEpisode+' · '+state.currentProvider:state.currentProvider;
   updatePlayerEpisodeNav();
   $('cinePlayPause').dataset.playing='false';
