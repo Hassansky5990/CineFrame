@@ -33,6 +33,14 @@ Set `TMDB_API_KEY` in the Vercel project environment variables. The `/api/tmdb/*
 
 CineFrame uses provider-owned embedded players. The app only exposes custom controls when a provider integration is verified. An iframe loading is not proof that a video has started, and a provider may fail independently of CineFrame. Native HTML5 playback requires an authorized direct media source and provider permission/support.
 
+## Provider integration
+
+- **VidRift:** Uses the provider's documented `postMessage` API for playback state, progress, pause/resume, seeking, volume and speed. CineFrame sends the last saved position when the player frame loads, records progress locally as it changes, syncs periodic checkpoints to the account library, and saves the last known position on close. See [VidRift integration docs](https://vidrift.net/docs/).
+- **FrameXTV:** Uses the documented `t` timestamp parameter for resume and its iframe messaging interface for supported controls and time updates. See [FrameXTV API docs](https://framextv.cc/api).
+- **EmbedHeaven and APIPlayer:** Remain provider-owned embeds unless an officially documented control interface and permission are verified. CineFrame does not assume a provider's iframe exposes playback telemetry or raw media URLs.
+
+Provider messages are validated against the active iframe window and expected origin. The app does not treat an iframe `load` event as proof that playback has started.
+
 ## Security
 
 - Keep `.env` and API credentials out of source control.
