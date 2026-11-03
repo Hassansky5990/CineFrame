@@ -9,8 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js && node scripts/check-project.mjs && node --test",
-    "test": "node --test"
+    "check": "node --check server.js && node scripts/check-project.mjs && node --test test/*.test.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
