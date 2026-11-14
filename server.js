@@ -10,7 +10,7 @@ const port = Number(process.env.PORT) || 3000;
 
 app.disable('x-powered-by');
 
-app.get('/api/tmdb/*', async (req, res) => {
+app.get(['/api/tmdb/*', '/api/tmdb-proxy'], async (req, res) => {
   const apiKey = process.env.TMDB_API_KEY?.trim();
   if (!apiKey) {
     return res.status(503).json({
@@ -18,7 +18,9 @@ app.get('/api/tmdb/*', async (req, res) => {
     });
   }
 
-  const rawPath = String(req.params[0] || '');
+  // Two accepted transports: the original /api/tmdb/<path> segments and the
+  // flat /api/tmdb-proxy?path=<path> used by the deployed Vercel function.
+  const rawPath = String(req.query.path || req.params[0] || '').replace(/^\/+/, '');
   if (!isAllowedTmdbPath(rawPath)) {
     return res.status(400).json({ error: 'TMDB endpoint is not available through CineFrame.' });
   }

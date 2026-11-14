@@ -1113,7 +1113,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 <script>
 'use strict';
 // Requests go through the existing server-side TMDB proxy. Keep TMDB_API_KEY in server environment variables.
-const API_BASE = '/api/tmdb';
+const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
@@ -1345,7 +1345,11 @@ function imageFallback(img){img.onerror=null;img.removeAttribute('srcset');img.s
 function normalize(item,type){return {...item,media_type:item.media_type||type}}
 function buildApiUrl(path){
   if(!/^https?:$/.test(window.location.protocol))throw new Error('Open CineFrame through its local server with npm start so the secure TMDB proxy is available.');
-  return new URL(API_BASE+path,window.location.href);
+  // The flat /api/tmdb-proxy function is the TMDB transport on Vercel AND the
+  // local server: the nested catch-all (api/tmdb/[...path].js) builds fine but
+  // Vercel's router never matches it, so every /api/tmdb/* call 404s there.
+  // Paths travel in the ?path= query param instead (same allowlist both sides).
+  return new URL(API_BASE+'?path='+encodeURIComponent(path.replace(/^\/+/,'')),window.location.href);
 }
 async function api(path, params={}){
   const url=buildApiUrl(path);url.searchParams.set('language','en-US');
