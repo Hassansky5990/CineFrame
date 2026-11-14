@@ -71,6 +71,24 @@ Reserves (one-line re-add via `PROVIDER_ORDER`): `vixsrc, 2embedcc, vidnest, vid
 
 Providers are third-party embed services and rotate availability constantly — the watchdog + health-ranked failover ladder is the standing mitigation.
 
+## Repository map
+
+| Path | What it is |
+| --- | --- |
+| `index.html` | The entire app — UI, player, providers, library (single-file by design) |
+| `sw.js`, `manifest.webmanifest`, `icon-*.png` | PWA shell: offline shell (stale-while-revalidate), install assets |
+| `api/tmdb-proxy.js` | Vercel serverless TMDB proxy — **the transport the app uses** |
+| `api/tmdb/trending.js`, `api/health.js` | Convenience Vercel functions |
+| `server.js` | Local dev server (`npm start`) — serves the same proxy contract |
+| `lib/tmdb-path.js` | Shared allowlist for TMDB endpoints and query keys |
+| `test/tmdb-path.test.js` | Node test for the allowlist (`npm test`) |
+| `scripts/check-project.mjs` | Static source check (`npm run check`) |
+| `.github/workflows/validate.yml` | CI: runs the checks on every push and PR |
+| `.github/workflows/provider-watchdog.yml` | Daily provider probe (cron + manual run button) |
+| `.github/scripts/provider_check.py` | The probe itself — writes `provider-status.json`, manages outage issues |
+| `provider-status.json` | Latest watchdog probe result (auto-committed daily) |
+| `supabase/` | Cloud library: migrations + auth email templates |
+
 ## Legal note
 
 CineFrame does not host, store, or distribute any media. Discovery metadata comes from TMDB; playback uses third-party public embed services which are unlicensed. Availability is not guaranteed.

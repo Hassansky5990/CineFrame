@@ -1,0 +1,44 @@
+name: Bug report
+description: Something broke in CineFrame
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the report — the more detail, the faster the fix.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Playback / providers
+        - Home shelves / TMDB data
+        - Search
+        - Account / cloud sync
+        - Install / PWA
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Where did it happen?
+      description: e.g. cineframe-web.vercel.app on Brave / Android, Wi-Fi or mobile data
+  - type: checkboxes
+    id: diagnostics
+    attributes:
+      label: Provider issues — share your diagnostics
+      description: The player footer has a Diagnostics button that probes every server from your device.
+      options:
+        - label: I ran Network diagnostics and can paste the latency table below
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, console output, diagnostics table.
