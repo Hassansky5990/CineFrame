@@ -56,3 +56,21 @@ The account UI uses Supabase Auth. The cloud watchlist and viewing history requi
 3. Configure the project's email confirmation and password-recovery settings before testing account flows.
 
 Until the migration is applied and the redirect URLs are allowed, local watchlist/history can still use browser storage, but account-synced library features cannot be considered ready. The browser may contain a Supabase publishable key; never put a Supabase `service_role` key in frontend code.
+
+## What's inside
+
+- **Resilient multi-server player** — 4 active embed providers (VidZee, 2Embed.skin, VidLink, VidSrc.su) plus 7 reserve integrations in code. Every launch uses per-network health stats, and a no-cors reachability probe auto-fails-over instead of trusting a silent iframe load.
+- **Provider watchdog** — a scheduled GitHub Action (`.github/workflows/provider-watchdog.yml`) probes every provider daily and publishes `provider-status.json`; the app auto-deprioritizes dead providers even for first-time visitors. Re-probe manually from the Actions tab (`workflow_dispatch`).
+- **Installable PWA** — manifest + brand icons, offline banner with auto-recovery, Android back-button closes overlays, haptic feedback.
+- **Your library, synced** — optional Supabase account for watchlist + Continue Watching across devices (schema and email templates in `supabase/`).
+
+## Provider ladder
+
+Active: `vidzee → 2embedskin → vidlink → vidsrcsu`
+Reserves (one-line re-add via `PROVIDER_ORDER`): `vixsrc, 2embedcc, vidnest, vidfast, vidsrcto, vidrift, multiembed`
+
+Providers are third-party embed services and rotate availability constantly — the watchdog + health-ranked failover ladder is the standing mitigation.
+
+## Legal note
+
+CineFrame does not host, store, or distribute any media. Discovery metadata comes from TMDB; playback uses third-party public embed services which are unlicensed. Availability is not guaranteed.

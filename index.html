@@ -1148,7 +1148,49 @@ function noteProviderResult(provider,ok){
 }
 function rankedProviders(){
   const stats=getProviderStats();
-  return PROVIDER_ORDER.slice().sort((a,b)=>(stats[a]?.consecBad||0)-(stats[b]?.consecBad||0)||PROVIDER_ORDER.indexOf(a)-PROVIDER_ORDER.indexOf(b));
+  return PROVIDER_ORDER.slice().sort((a,b)=>{
+    // Watchdog penalty: provider-status.json (daily GitHub Action probe) can
+    // mark a provider dead server-side; skip it even for first-time visitors.
+    const wa=providerStatusCache?.[a]?.ok===false?1000:0, wb=providerStatusCache?.[b]?.ok===false?1000:0;
+    if(wa!==wb)return wa-wb;
+    return (stats[a]?.consecBad||0)-(stats[b]?.consecBad||0)||PROVIDER_ORDER.indexOf(a)-PROVIDER_ORDER.indexOf(b);
+  });
+}
+// --- Watchdog feed: provider-status.json from the daily provider-watchdog ---
+// --- GitHub Action. Same-origin first, raw.githubusercontent as fallback. ---
+// --- Entries older than 36h are ignored so a dead watchdog never punishes ---
+// --- healthy providers. ---
+let providerStatusCache=null;
+function loadProviderStatus(){
+  const fresh=data=>{try{return Boolean(data&&data.generated&&(Date.now()-new Date(data.generated).getTime())<36*60*60*1000)}catch{return false}};
+  (async()=>{
+    const urls=['/provider-status.json','https://raw.githubusercontent.com/Hassansky5990/CineFrame/main/provider-status.json'];
+    for(const u of urls){
+      try{
+        const r=await fetch(u,{cache:'no-store'});
+        if(!r.ok)continue;
+        const data=await r.json();
+        if(fresh(data)){providerStatusCache=data.providers||null;return}
+      }catch(e){}
+    }
+  })();
+}
+// Providers whose embed accepts a startAt/seek (VidRift via postMessage).
+// Resuming past 15s prefers one of these over a faster server that would
+// silently restart at 0:00 anyway.
+const STARTAT_PROVIDERS=new Set(['vidlink','vidnest','vidrift','vidfast']);
+function pickLaunchProvider(item,season,episode){
+  const ranked=rankedProviders();
+  if(!ranked.length)return $('providerSelect').value||'vidzee';
+  const saved=getHistory().find(x=>Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item));
+  const sameEpisode=mediaType(item)!=='tv'||(Number(saved?.season)===Number(season)&&Number(saved?.episode)===Number(episode));
+  const resumeSeconds=sameEpisode?Math.max(0,Number(saved?.progressSeconds)||0):0;
+  if(resumeSeconds>15){
+    const canResume=ranked.find(p=>STARTAT_PROVIDERS.has(p));
+    if(canResume&&canResume!==ranked[0])toast(`Resuming on ${providerLabel(canResume)} — ${providerLabel(ranked[0])} can't skip ahead`);
+    return canResume||ranked[0];
+  }
+  return ranked[0];
 }
 const SUPABASE_URL = 'https://kxikramsinkvboizgsjm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Q3wszD5DEZbi3eDsQNAQ7w_moqFLJX7';
@@ -1393,7 +1435,7 @@ async function sendAccountPasswordReset(){if(!state.auth.client||!state.auth.use
 async function sendPasswordReset(){if(!state.auth.client){authFeedback('Supabase is not connected yet.','error');return}const email=$('authEmail').value.trim();if(!email){authFeedback('Enter your email address first.','error');$('authEmail').focus();return}const remaining=authEmailCooldownRemaining();if(remaining){authFeedback(authEmailCooldownMessage(),'error');return}const button=document.querySelector('.auth-link');if(button){button.disabled=true;button.textContent='Sending…'}try{const {error}=await state.auth.client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});if(error)throw error;startAuthEmailCooldown(60);authFeedback('If this address is eligible, password reset instructions have been sent. Check your inbox and spam folder.','success')}catch(error){authFeedback(authEmailErrorMessage(error),'error');if(/rate.?limit|too many requests|over_email_send_rate_limit/i.test(String(error?.message||'')))startAuthEmailCooldown(60)}finally{if(button){button.disabled=false;button.textContent='Forgot password?'}}}
 async function signOutCineFrame(){if(!state.auth.client)return;try{const {error}=await state.auth.client.auth.signOut();if(error)throw error;state.auth.user=null;renderAccountButton();renderAuthPanel();closeOverlay('authOverlay');state.auth.libraryReady=false;if(state.auth.libraryChannel){await state.auth.client.removeChannel(state.auth.libraryChannel);state.auth.libraryChannel=null}safeStore.set('cineframe_watchlist',[]);safeStore.set('cineframe_history',[]);renderLibraryViews();toast('Signed out')}catch(error){$('authAccountFeedback').textContent=error?.message||'Could not sign out. Please try again.'}}
 
-async function init(){initializeAuth();initNetworkGuard();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{if(document.hidden)return;if($('hero')?.matches(':hover,:focus-within'))return;const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);
+async function init(){initializeAuth();initNetworkGuard();loadProviderStatus();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{if(document.hidden)return;if($('hero')?.matches(':hover,:focus-within'))return;const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);
 {
   const st=$('playerStatusText'),vis=$('playerStatusVisible'),dot=$('playerStatusDot'),vd=$('playerStatusDotVisible');
   if(st&&vis)new MutationObserver(()=>{vis.textContent=st.textContent}).observe(st,{childList:true,characterData:true,subtree:true});
@@ -1649,7 +1691,7 @@ function buildProviderUrl(item,provider,season=1,episode=1){
 // that failed recently sink until they respond again) instead of always the
 // static default — the bench's whole point was that the best server differs per
 // network, and the health memory knows YOUR network.
-function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=rankedProviders()[0]||$('providerSelect').value||'vidzee';const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`Season ${season} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
+function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=pickLaunchProvider(item,season,episode);const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`Season ${season} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
 function updatePlayerEpisodeNav(){const isTv=Boolean(state.selected&&mediaType(state.selected)==='tv');$('playerEpisodeNav').hidden=!isTv;if(isTv){$('playerEpisodeLabel').textContent=`Season ${state.currentSeason} · Episode ${state.currentEpisode}`;$('previousEpisodeButton').disabled=state.currentSeason===1&&state.currentEpisode===1;$('nextEpisodeButton').disabled=false;}}
 function formatPlayerTime(value){const n=Math.max(0,Math.floor(Number(value)||0));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
 function sendVidriftCommand(type,extra={}){const frame=$('externalPlayer');if(!frame?.contentWindow||state.currentProvider!=='vidrift')return;frame.contentWindow.postMessage({type,...extra},'https://embed.vidrift.net')}
