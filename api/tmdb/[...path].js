@@ -48,7 +48,10 @@ export default async function handler(req, res) {
     const body = await response.text();
 
     res.setHeader("Content-Type", "application/json");
-    res.setHeader("Cache-Control", "no-store");
+    // TMDB responses for popular/trending/discover endpoints are stable for
+    // minutes; let Vercel's edge cache absorb repeat requests instead of
+    // burning the TMDB rate-limit budget on every visit.
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 
     return res.status(response.status).send(body);
   } catch {
