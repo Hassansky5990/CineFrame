@@ -1,0 +1,25 @@
+name: Provider watchdog
+
+on:
+  schedule:
+    - cron: '37 4 * * *' # daily probe, off the top of the hour
+  workflow_dispatch: {}   # manual re-probe button
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Probe providers, publish status, manage outage issues
+        run: python .github/scripts/provider_check.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
