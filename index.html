@@ -878,6 +878,25 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   background:rgba(255,255,255,.05);color:#fff;font-weight:600;font-size:.76rem;cursor:pointer;
 }
 #playerModal .player-error button:hover{background:rgba(255,255,255,.13)}
+/* network diagnostics overlay */
+.diag-modal{width:min(560px,94vw);max-height:86dvh;overflow:auto}
+.diag-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.diag-head strong{font-size:1rem;color:#fff}
+.diag-summary{font-size:.8rem;color:var(--muted);line-height:1.6;margin:6px 0 14px}
+.diag-row{display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.8rem;min-height:44px}
+.diag-row:first-child{border-top:1px solid rgba(255,255,255,.06)}
+.diag-row.best{background:rgba(126,231,135,.06)}
+.diag-name{flex:1;font-weight:600;color:#fff;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-badge{flex:none;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--muted)}
+.diag-badge.live{color:#7ee787}
+.diag-badge.wd-dead{color:#ff7b72}
+.diag-state{flex:none;color:var(--muted)}
+.diag-state.ok{color:#7ee787}
+.diag-state.bad{color:#ff7b72}
+.diag-lat{flex:none;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;color:#fff}
+.diag-use{flex:none;min-height:30px;padding:0 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.05);color:#fff;font-weight:600;font-size:.72rem;cursor:pointer}
+.diag-use:hover{background:rgba(255,255,255,.13)}
+.diag-note{margin-top:14px;font-size:.75rem;color:var(--muted);line-height:1.7}
 /* fullscreen + cinema fallback */
 .player-modal.cinema-mode{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0}
 .player-modal.cinema-mode .player-frame{max-height:none;flex:1;aspect-ratio:auto;margin:12px 14px 0;min-height:0}
@@ -1016,6 +1035,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <div class="player-footer">
       <div class="player-footer-group">
         <button type="button" onclick="restartPlayer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>Reload player</button>
+        <button type="button" onclick="openNetDiag()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Diagnostics</button>
         <button type="button" onclick="togglePlayerFullscreen()" aria-label="Enter fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/></svg>Fullscreen</button>
         <button type="button" onclick="openExternalPlayer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg>Open provider</button>
       </div>
@@ -1025,6 +1045,14 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
       <span id="playerStatusDot"></span><span id="playerStatusText">Waiting for a title</span>
       <strong id="playerInfoTitle"></strong>
     </div>
+  </div>
+</div>
+<div class="overlay" id="netDiagOverlay" aria-modal="true" role="dialog" aria-label="Network diagnostics">
+  <div class="modal diag-modal" role="document">
+    <div class="diag-head"><strong>Network diagnostics</strong><button class="close" style="position:static;float:none;margin:0;flex:none" type="button" onclick="closeOverlay('netDiagOverlay')" aria-label="Close diagnostics">×</button></div>
+    <p class="diag-summary" id="diagSummary">Checks every server directly from your browser — which servers work on <em>your</em> connection?</p>
+    <div id="diagTable"></div>
+    <p class="diag-note" id="diagNote"></p>
   </div>
 </div>
 <div class="overlay" id="trailerOverlay" aria-modal="true" role="dialog" aria-label="Trailer"><div class="modal player-modal"><div class="player-top"><strong id="trailerTitle">Trailer</strong><button class="close" style="position:static;float:none;margin:0" onclick="closeOverlay('trailerOverlay')" aria-label="Close trailer">×</button></div><div class="player-frame" id="trailerFrame"></div></div></div>
@@ -1331,7 +1359,7 @@ let suppressPopBack=false;
 // returns it celebrates + auto-reloads home shelves if TMDB never loaded.
 function initNetworkGuard(){
   const banner=$('netBanner');let offline=!navigator.onLine;
-  const sync=first=>{const up=navigator.onLine!==false;banner.classList.toggle('show',!up);if(!up)offline=true;else if(offline){offline=false;if(!first){toast('Back online');if(!state.trending.length)loadHomeData()}}};
+  const sync=first=>{const up=navigator.onLine!==false;banner.classList.toggle('show',!up);if(!up)offline=true;else if(offline){offline=false;if(!first){toast('Back online');if(!state.trending.length)loadHomeData();retryFailedPlayer()}}};
   window.addEventListener('online',()=>sync(false));
   window.addEventListener('offline',()=>sync(false));
   sync(true);
@@ -1691,7 +1719,7 @@ function buildProviderUrl(item,provider,season=1,episode=1){
 // that failed recently sink until they respond again) instead of always the
 // static default — the bench's whole point was that the best server differs per
 // network, and the health memory knows YOUR network.
-function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=pickLaunchProvider(item,season,episode);const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`Season ${season} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
+function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=pickLaunchProvider(item,season,episode);const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`Season ${season} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
 function updatePlayerEpisodeNav(){const isTv=Boolean(state.selected&&mediaType(state.selected)==='tv');$('playerEpisodeNav').hidden=!isTv;if(isTv){$('playerEpisodeLabel').textContent=`Season ${state.currentSeason} · Episode ${state.currentEpisode}`;$('previousEpisodeButton').disabled=state.currentSeason===1&&state.currentEpisode===1;$('nextEpisodeButton').disabled=false;}}
 function formatPlayerTime(value){const n=Math.max(0,Math.floor(Number(value)||0));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
 function sendVidriftCommand(type,extra={}){const frame=$('externalPlayer');if(!frame?.contentWindow||state.currentProvider!=='vidrift')return;frame.contentWindow.postMessage({type,...extra},'https://embed.vidrift.net')}
@@ -1736,8 +1764,107 @@ function showAllServersDown(){
   $('playerLoading')?.classList.add('hidden');
   $('playerStatusDot').classList.remove('ready');
   const buttons=PROVIDER_ORDER.map(p=>`<button type="button" onclick="switchToProvider('${p}')">Retry ${escapeHtml(providerLabel(p))}</button>`).join('');
-  $('playerFrame').innerHTML=`<div class="player-error"><strong>All servers are unreachable from your connection</strong><span class="tiny-note">Every server was tried without a response. The embed servers are usually up — when ALL of them fail like this, something on this network or browser is blocking their domains (carrier DNS/filtering, or browser shields like Brave). Try different Wi-Fi or mobile data, another DNS, or lower your browser's shields for this site — then Retry. Retrying often helps.</span><div class="row">${buttons}</div><div class="row"><button type="button" onclick="openExternalPlayer()">Open provider in new tab ↗</button></div></div>`;
+  $('playerFrame').innerHTML=`<div class="player-error"><strong>All servers are unreachable from your connection</strong><span class="tiny-note">Every server was tried without a response. The embed servers are usually up — when ALL of them fail like this, something on this network or browser is blocking their domains (carrier DNS/filtering, or browser shields like Brave). Try different Wi-Fi or mobile data, another DNS, or lower your browser's shields for this site — then Retry. Retrying often helps.</span><div class="row">${buttons}</div><div class="row"><button type="button" onclick="openNetDiag()">Network diagnostics</button><button type="button" onclick="openExternalPlayer()">Open provider in new tab ↗</button></div></div>`;
   $('playerStatusText').textContent='All servers are currently unreachable';
+}
+// ---- Network diagnostics: probe ALL providers from the visitor's browser ----
+// The watchdog (GitHub Actions) reports what a datacenter sees; this panel
+// reports what THIS network sees — carrier DNS filtering, browser shields and
+// regional blocks all differ. Each provider is probed on its movie AND TV
+// route with a no-cors fetch (rejects only on real network-level failure:
+// DNS, connect, TLS), timed with performance.now().
+const DIAG_PROVIDERS=['vidzee','2embedskin','vidlink','vidsrcsu','vixsrc','2embedcc','vidnest','vidfast','vidsrcto','vidrift','multiembed'];
+const DIAG_MOVIE={id:27205,title:'Inception',name:'Inception',media_type:'movie'};
+const DIAG_TV={id:32118,title:'Generator Rex',name:'Generator Rex',media_type:'tv'};
+const netDiag={running:false};
+function diagBadges(p){
+  const badges=[];
+  if(PROVIDER_ORDER.includes(p))badges.push('<span class="diag-badge live">Active</span>');
+  const wd=providerStatusCache?.[p];
+  if(wd?.ok===false)badges.push('<span class="diag-badge wd-dead">Watchdog: dead</span>');
+  return badges.join('');
+}
+function diagUrl(provider,kind){
+  const item=kind==='tv'?DIAG_TV:DIAG_MOVIE;
+  return buildProviderUrl(item,provider,2,5);
+}
+function diagProbeOnce(url,timeout=8000){
+  return new Promise(resolve=>{
+    const t0=performance.now();
+    let settled=false;
+    const done=ok=>{if(!settled){settled=true;resolve({ok,latency:Math.round(performance.now()-t0)})}};
+    const timer=setTimeout(()=>done(false),timeout);
+    fetch(url,{mode:'no-cors'}).then(()=>done(true)).catch(()=>done(false));
+  });
+}
+function openNetDiag(){openOverlay('netDiagOverlay');runNetDiag()}
+function diagResultCell(results){
+  const okResults=results.filter(r=>r&&r.ok);
+  const arrived=results.filter(Boolean).length;
+  if(okResults.length){
+    const ms=Math.min(...okResults.map(r=>r.latency));
+    return `<span class="diag-state ok">Responds</span><span class="diag-lat">${ms>=1000?(ms/1000).toFixed(1)+' s':ms+' ms'}</span>`;
+  }
+  if(arrived===results.length)return '<span class="diag-state bad">No response</span><span class="diag-lat">—</span>';
+  return '<span class="diag-state">Probing…</span><span class="diag-lat">—</span>';
+}
+function renderDiagRow(p,results){
+  const el=$('diagRow_'+p);
+  if(!el)return;
+  const usable=results.some(r=>r&&r.ok)&&PROVIDER_ORDER.includes(p)&&state.selected;
+  el.innerHTML=`<span class="diag-name">${escapeHtml(providerLabel(p))}</span>${diagBadges(p)}${diagResultCell(results)}${usable?`<button class="diag-use" type="button" onclick="diagUse('${p}')">Use</button>`:''}`;
+}
+function runNetDiag(){
+  if(netDiag.running)return;
+  netDiag.running=true;
+  const table=$('diagTable'),summary=$('diagSummary'),note=$('diagNote');
+  const results={};
+  table.innerHTML=DIAG_PROVIDERS.map(p=>{results[p]=[null,null];return `<div class="diag-row" id="diagRow_${p}"><span class="diag-name">${escapeHtml(providerLabel(p))}</span>${diagBadges(p)}<span class="diag-state">Probing…</span><span class="diag-lat">—</span></div>`}).join('');
+  summary.textContent=`Probing ${DIAG_PROVIDERS.length} servers (movie + TV route each) from your connection…`;
+  note.textContent='';
+  let settled=0;
+  DIAG_PROVIDERS.forEach(p=>{
+    ['movie','tv'].forEach((kind,slot)=>{
+      diagProbeOnce(diagUrl(p,kind)).then(r=>{
+        results[p][slot]=r;
+        if($('netDiagOverlay')?.classList.contains('open'))renderDiagRow(p,results[p]);
+        settled++;
+        if(settled===DIAG_PROVIDERS.length*2){
+          netDiag.running=false;
+          const alive=DIAG_PROVIDERS.filter(p=>results[p].some(x=>x.ok));
+          if(alive.length){
+            const ranked=alive.map(p=>({p,ms:Math.min(...results[p].filter(x=>x.ok).map(x=>x.latency))})).sort((a,b)=>a.ms-b.ms);
+            const best=ranked[0];
+            summary.textContent=`${alive.length} of ${DIAG_PROVIDERS.length} servers respond from your connection · fastest: ${providerLabel(best.p)} (${best.ms>=1000?(best.ms/1000).toFixed(1)+' s':best.ms+' ms'})`;
+            DIAG_PROVIDERS.forEach(q=>{const row=$('diagRow_'+q);if(row)row.classList.toggle('best',q===best.p)});
+          }else{
+            summary.textContent='No server responded — this network is blocking the embed domains (carrier DNS/filtering or browser shields). Try mobile data or a different DNS.';
+          }
+          note.textContent='Latency is the direct response time from your device. "Active" rows are in the current ladder; the Watchdog badge is the daily server-side probe\'s verdict — it can disagree with your network, and yours wins. Reachable does not always mean playable: a server can respond and still have no sources for a given title.';
+        }
+      });
+    });
+  });
+}
+function diagUse(p){
+  if(!PROVIDER_ORDER.includes(p)||!state.selected)return;
+  closeOverlay('netDiagOverlay');
+  state.playerFailoverTried=[];
+  toast(`Switching to ${providerLabel(p)}`);
+  switchToProvider(p);
+}
+// ---- Auto-recovery on reconnect ----
+// A player that already failed on this connection (probe dead or frame never
+// loaded) is almost always fine once connectivity returns: retry it
+// automatically instead of waiting for the user to notice and tap Retry.
+// Healthy playback is never interrupted — only state.playerFailed mounts.
+function retryFailedPlayer(){
+  if(!$('playerOverlay')?.classList.contains('open'))return;
+  if(!state.selected||!state.playerFailed)return;
+  state.playerFailed=false;
+  state.playerFailoverTried=[];
+  toast(`Connection restored — retrying ${providerLabel(state.currentProvider)}`);
+  mountPlayer();
 }
 function prepareProviderConnection(playerUrl){
   try{
@@ -1829,6 +1956,7 @@ function mountPlayer(){
     probeProviderReachable(url).then(reachable=>{
       if(attempt!==playerLoadAttempt||frame!==$('externalPlayer'))return;
       if(!reachable){
+        state.playerFailed=true;
         $('playerStatusText').textContent='No response from '+providerLabel(state.currentProvider)+' on your connection — switching…';
         failoverToNextServer(state.currentProvider);
         return;
@@ -1837,6 +1965,7 @@ function mountPlayer(){
       // not confirm that a playable video stream has started.
       $('playerStatusText').textContent='Provider page loaded · waiting for playback';
       noteProviderResult(state.currentProvider,true);
+      state.playerFailed=false;
       state.playerFailoverTried=[];
       if(state.currentProvider==='vidrift'){
         sendVidriftCommand('vidrift:get-state');
@@ -1859,7 +1988,7 @@ function mountPlayer(){
   playerLoadTimer=setTimeout(()=>{
     if(attempt!==playerLoadAttempt||frame!==$('externalPlayer'))return;
     $('playerLoading')?.classList.add('hidden');
-    if(!frameLoaded){failoverToNextServer(state.currentProvider);return}
+    if(!frameLoaded){state.playerFailed=true;failoverToNextServer(state.currentProvider);return}
   },navigator.connection?.effectiveType==='slow-2g'||navigator.connection?.effectiveType==='2g'?28000:14000);
   $('playerSubtitle').textContent=mediaType(state.selected)==='tv'?'Season '+state.currentSeason+' · Episode '+state.currentEpisode+' · '+state.currentProvider:state.currentProvider;
   updatePlayerEpisodeNav();
