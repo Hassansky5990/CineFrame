@@ -1417,6 +1417,26 @@ async function api(path, params={}){
 }
 const apiMemo=new Map();
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2300)}
+// Hidden viewport diagnostic: visit with ?debug in the URL to see exactly
+// which layout the device is running and why. Ships no UI in normal use.
+function cineViewportDebug(){
+  const mqMobile=matchMedia('(max-width:760px)').matches;
+  const nav=document.querySelector('.mobile-nav');
+  const navShown=Boolean(nav)&&getComputedStyle(nav).display!=='none';
+  const verdict=(mqMobile&&navShown)?'MOBILE layout ACTIVE ✓':'DESKTOP layout ACTIVE ✗';
+  const row=(k,v)=>`<div style="margin-top:4px"><b>${k}:</b> ${v}</div>`;
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:56px;background:#111;border:1px solid #ffffff55;border-radius:12px;padding:12px 14px;font:12px/1.5 ui-monospace,monospace;color:#fff';
+  d.innerHTML=`<b style="color:#ffd60a;font-size:14px">${verdict}</b>`
+    +row('window.innerWidth × innerHeight',innerWidth+' × '+innerHeight+' CSS px')
+    +row('screen.width',screen.width)
+    +row('devicePixelRatio',devicePixelRatio)
+    +row('physical width ≈',Math.round(innerWidth*devicePixelRatio)+' device px')
+    +row('mobile-nav (bottom bar) visible',navShown?'yes':'no')
+    +row('user agent',navigator.userAgent.slice(0,80));
+  document.body.appendChild(d);
+}
+if(/[?&]debug(&|=|$)/.test(location.search))addEventListener('load',cineViewportDebug,{once:true});
 // ---- Data Saver: lighter images + calmer home on metered/slow connections.
 // Honors the OS-level saveData hint automatically; manual toggle persists.
 function isDataSaver(){return Boolean(safeStore.get('cineframe_data_saver',false)||navigator.connection?.saveData)}
