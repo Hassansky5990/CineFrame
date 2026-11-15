@@ -1858,12 +1858,14 @@ function buildProviderUrl(item,provider,season=1,episode=1){
 // that failed recently sink until they respond again) instead of always the
 // static default — the bench's whole point was that the best server differs per
 // network, and the health memory knows YOUR network.
-function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=pickLaunchProvider(item,season,episode);const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`Season ${season} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();populatePlayerSeasons();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
-function updatePlayerEpisodeNav(){const isTv=Boolean(state.selected&&mediaType(state.selected)==='tv');$('playerEpisodeNav').hidden=!isTv;if(isTv){$('playerEpisodeLabel').textContent=`Season ${state.currentSeason} · Episode ${state.currentEpisode}`;$('previousEpisodeButton').disabled=state.currentSeason===1&&state.currentEpisode===1;$('nextEpisodeButton').disabled=false;}}
+// Season 0 is TMDB's specials season — say "Specials" instead of "Season 0".
+function seasonLabel(n){n=Number(n);return n===0?'Specials':`Season ${n}`}
+function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize(item,mediaType(item));state.currentSeason=season;state.currentEpisode=episode;state.currentProvider=pickLaunchProvider(item,season,episode);const title=titleOf(item);const isTv=mediaType(item)==='tv';$('playerTitle').textContent=title;$('playerSubtitle').textContent=isTv?`${seasonLabel(season)} · Episode ${episode}`:'CineFrame player';$('playerInfoTitle').textContent=title;$('playerInfoMeta').textContent=[yearOf(item),isTv?'Series':'Movie',ratingOf(item)==='NR'?'Not rated':`★ ${ratingOf(item)}`].join('  ·  ');state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;updatePlayerEpisodeNav();$('providerSelect').value=state.currentProvider;mountPlayer();populatePlayerSeasons();closeOverlay('detailOverlay');openOverlay('playerOverlay');addToHistory(item,season,episode)}
+function updatePlayerEpisodeNav(){const isTv=Boolean(state.selected&&mediaType(state.selected)==='tv');$('playerEpisodeNav').hidden=!isTv;if(isTv){$('playerEpisodeLabel').textContent=`${seasonLabel(state.currentSeason)} · Episode ${state.currentEpisode}`;$('previousEpisodeButton').disabled=state.currentSeason===1&&state.currentEpisode===1;$('nextEpisodeButton').disabled=false;}}
 // Season picker: populated from the show's season list once the player opens
 // for a series; switching remounts at the first episode of that season.
-async function populatePlayerSeasons(){const sel=$('playerSeasonSelect');if(!sel)return;if(!state.selected||mediaType(state.selected)!=='tv'){sel.hidden=true;return}try{const show=await api(`/tv/${Number(state.selected.id)}`);const seasons=(show.seasons||[]).filter(x=>Number(x.episode_count)>0).sort((a,b)=>Number(a.season_number)-Number(b.season_number));state.seasonList=seasons.map(x=>Number(x.season_number));state.seasonEpisodeCounts=Object.fromEntries(seasons.map(x=>[Number(x.season_number),Number(x.episode_count)]));sel.innerHTML=seasons.map(x=>`<option value="${Number(x.season_number)}">Season ${Number(x.season_number)}</option>`).join('');sel.hidden=seasons.length<2;const has=[...sel.options].some(o=>Number(o.value)===state.currentSeason);sel.value=String(has?state.currentSeason:(seasons[0]?seasons[0].season_number:state.currentSeason))}catch{sel.hidden=true}}
-function onPlayerSeasonChange(){const value=Number($('playerSeasonSelect')?.value)||0;if(!value||!state.selected||value===state.currentSeason)return;state.currentSeason=value;state.currentEpisode=1;state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;$('playerSubtitle').textContent=`Season ${value} · Episode 1 · ${state.currentProvider}`;mountPlayer();updatePlayerEpisodeNav();toast(`Season ${value} · Episode 1`)}
+async function populatePlayerSeasons(){const sel=$('playerSeasonSelect');if(!sel)return;if(!state.selected||mediaType(state.selected)!=='tv'){sel.hidden=true;return}try{const show=await api(`/tv/${Number(state.selected.id)}`);const seasons=(show.seasons||[]).filter(x=>Number(x.episode_count)>0).sort((a,b)=>Number(a.season_number)-Number(b.season_number));state.seasonList=seasons.map(x=>Number(x.season_number));state.seasonEpisodeCounts=Object.fromEntries(seasons.map(x=>[Number(x.season_number),Number(x.episode_count)]));sel.innerHTML=seasons.map(x=>`<option value="${Number(x.season_number)}">${seasonLabel(x.season_number)}</option>`).join('');sel.hidden=seasons.length<2;const has=[...sel.options].some(o=>Number(o.value)===state.currentSeason);sel.value=String(has?state.currentSeason:(seasons[0]?seasons[0].season_number:state.currentSeason))}catch{sel.hidden=true}}
+function onPlayerSeasonChange(){const value=Number($('playerSeasonSelect')?.value)||0;if(!value||!state.selected||value===state.currentSeason)return;state.currentSeason=value;state.currentEpisode=1;state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;$('playerSubtitle').textContent=`${seasonLabel(value)} · Episode 1 · ${state.currentProvider}`;mountPlayer();updatePlayerEpisodeNav();toast(`${seasonLabel(value)} · Episode 1`)}
 // Up Next: when VidRift signals an episode ended, surface a one-tap
 // "Play next" instead of making the visitor hunt for the Next button.
 // Label comes from the season counts stashed by populatePlayerSeasons();
@@ -1871,9 +1873,9 @@ function onPlayerSeasonChange(){const value=Number($('playerSeasonSelect')?.valu
 function upNextLabel(){
   const counts=state.seasonEpisodeCounts||{};
   const total=Number(counts[state.currentSeason])||0;
-  if(total&&state.currentEpisode<total)return `Season ${state.currentSeason} · Episode ${state.currentEpisode+1}`;
+  if(total&&state.currentEpisode<total)return `${seasonLabel(state.currentSeason)} · Episode ${state.currentEpisode+1}`;
   const next=(state.seasonList||[]).find(s=>Number(s)>state.currentSeason);
-  if(next)return `Season ${Number(next)} · Episode 1`;
+  if(next)return `${seasonLabel(next)} · Episode 1`;
   return '';
 }
 function showUpNext(){
@@ -2268,7 +2270,7 @@ function handlePlayerMessage(event){
     state.currentEpisode=Math.max(1,Number(data.episode)||state.currentEpisode);
     addToHistory(state.selected,state.currentSeason,state.currentEpisode);
     updatePlayerEpisodeNav();
-    $('playerSubtitle').textContent=`Season ${state.currentSeason} · Episode ${state.currentEpisode} · VidRift`;
+    $('playerSubtitle').textContent=`${seasonLabel(state.currentSeason)} · Episode ${state.currentEpisode} · VidRift`;
     return;
   }
   if(data.type==='vidrift:state'){

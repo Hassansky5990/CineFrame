@@ -4,6 +4,14 @@ on:
   schedule:
     - cron: '37 4 * * *' # daily probe, off the top of the hour
   workflow_dispatch: {}   # manual re-probe button
+  push:
+    branches: [main]
+    paths:
+      # Register/refresh the schedule after any run, and re-probe when the
+      # watchdog itself changes. The probe's own commit touches ONLY
+      # provider-status.json, so this can never loop.
+      - '.github/workflows/provider-watchdog.yml'
+      - '.github/scripts/**'
 
 permissions:
   contents: write
