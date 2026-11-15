@@ -119,7 +119,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .skeleton{background:linear-gradient(110deg,#1c1c1e 8%,#2c2c2e 18%,#1c1c1e 33%);background-size:200% 100%;animation:shine 1.4s linear infinite}
 
 /* Browse, search and My List */
-.search-page{padding:120px var(--gutter) 0;min-height:70vh}
+.search-page{padding:120px var(--gutter) 0;min-height:min(70vh,620px)}
 .search-page .section-heading{padding:0}
 .search-page h2{font-size:clamp(1.9rem,3.6vw,3rem);letter-spacing:-.045em}.search-page h2:after{content:none}
 .filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0 32px}
@@ -930,7 +930,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   .filterbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:16px 0 24px}
   .pill-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0}
   .pill-row::-webkit-scrollbar{display:none}
-  .pill-row .pill{flex:none;white-space:nowrap}
+  .pill-row .pill{flex:none;width:auto;white-space:nowrap}
   .genre-chips{flex:none;overflow-x:auto;scrollbar-width:none;min-width:0}
   .genre-chips::-webkit-scrollbar{display:none}
   .gchip{min-height:36px}
