@@ -1,94 +1,79 @@
 # CineFrame
 
-CineFrame is a single-page movie and series discovery interface powered by TMDB. Playback is provided by the configured external embed providers; provider capabilities and availability can vary.
+**Browse and watch movies and TV shows right in your browser — no install, no account required.**
 
-## Run locally
+▶ **Open it here: [cineframe-web.vercel.app](https://cineframe-web.vercel.app)**
 
-Requirements: Node.js 18.17 or newer.
+CineFrame is a fast, clean way to watch anything from TMDB's huge catalog — trending titles, movies, shows and anime, instant search, your own watchlist. Pick something, press play, and the built-in multi-server player does the work of finding a stream that actually plays on your connection.
 
-1. Install dependencies:
-   ```sh
-   npm install
-   ```
-2. Create a server-side `.env` file in the project root:
-   ```env
-   TMDB_API_KEY=your_tmdb_api_key
-   PORT=3000
-   ```
-3. Start CineFrame:
-   ```sh
-   npm start
-   ```
-4. Open http://localhost:3000.
+## What you get
 
-Run the static source checks with `npm run check`.
+- **A player that doesn't give up** — streams come from several public embed servers. If one is dead or slow on your network, CineFrame notices and automatically fails over to the next one instead of leaving you staring at a black screen.
+- **Continue watching** — your place is remembered per episode, and resume prefers servers that can skip ahead, so you don't get dumped back at 0:00.
+- **Your list, optionally in the cloud** — sign in with an email account and your watchlist and history follow you between devices. Everything also works fine without ever signing in.
+- **Installable app** — it's a PWA: on Android, use the install prompt or "Add to Home Screen" and CineFrame runs full-screen like a native app, with an offline banner when your connection drops.
+- **Network diagnostics** — one tap in the player (footer → Diagnostics) shows every stream server with its live response time on *your* network, so you always know which servers work where you are.
+- **Small stuff that matters** — Android back button closes menus instead of leaving the app, haptic feedback, instant search, dark UI that's easy at night.
 
-The TMDB key is read only by the server. Copy `.env.example` to `.env`, fill in the key, and keep `.env` out of Git. CineFrame intentionally has no browser-side TMDB key fallback. The proxy only exposes the TMDB endpoints and query parameters used by CineFrame, applies a 10-second upstream timeout, and allows short shared caching of public catalog responses.
+## How watching works
 
-## Deploy on Vercel
+1. Open [cineframe-web.vercel.app](https://cineframe-web.vercel.app)
+2. Browse the shelves or search for a title
+3. Press **Play** — the player picks the healthiest server automatically
+4. If a server misbehaves, it fails over on its own; you can also pick one manually with **Switch server**, or run **Diagnostics** to see the full picture
 
-Set `TMDB_API_KEY` in the Vercel project environment variables. The `/api/tmdb/*` rewrite is handled by the Vercel function in `api/tmdb-proxy.js`. Redeploy after changing environment variables.
+## About the stream sources
 
-## Playback notes
+Playback is handled by third-party public embed services (VidZee, 2Embed, VidLink, VidSrc.su in today's active lineup, with more kept in reserve). A scheduled watchdog probes all of them every day, publishes the results, and the app automatically avoids anything that's down — even for first-time visitors.
 
-CineFrame uses provider-owned embedded players. The app only exposes custom controls when a provider integration is verified. An iframe loading is not proof that a video has started, and a provider may fail independently of CineFrame. Native HTML5 playback requires an authorized direct media source and provider permission/support.
+CineFrame does not host, store, or distribute any media. Title information and artwork come from TMDB; video streams come from those external services, and their availability can change at any time.
 
-## Provider integration
+---
 
-- **VidRift:** Uses the provider's documented `postMessage` API for playback state, progress, pause/resume, seeking, volume and speed. CineFrame sends the last saved position when the player frame loads, records progress locally as it changes, syncs periodic checkpoints to the account library, and saves the last known position on close. See [VidRift integration docs](https://vidrift.net/docs/).
-- **FrameXTV:** Uses the documented `t` timestamp parameter for resume and its iframe messaging interface for supported controls and time updates. See [FrameXTV API docs](https://framextv.cc/api).
-- **EmbedHeaven and APIPlayer:** Remain provider-owned embeds unless an officially documented control interface and permission are verified. CineFrame does not assume a provider's iframe exposes playback telemetry or raw media URLs.
+<details>
+<summary><strong>For developers — run it locally, repo map</strong></summary>
 
-Provider messages are validated against the active iframe window and expected origin. The app does not treat an iframe `load` event as proof that playback has started.
+### Run locally
 
-## Security
+Requirements: Node.js 18.17+.
 
-- Keep `.env` and API credentials out of source control.
-- Do not expose provider tokens or private keys in `index.html`.
-- Treat provider messages and playback progress as untrusted input.
+```sh
+npm install
+```
 
-## Account-synced library setup
+Create a `.env` in the project root:
 
-The account UI uses Supabase Auth. The cloud watchlist and viewing history require a one-time database setup:
+```env
+TMDB_API_KEY=your_tmdb_api_key
+PORT=3000
+```
 
-1. In Supabase Dashboard, open **SQL Editor** and run `supabase/migrations/202611010001_cineframe_cloud_library.sql`.
-2. In **Authentication → URL Configuration**, allow the production confirmation redirect `https://cineframe-web.vercel.app/?auth=confirmed`. For local testing, also allow `http://localhost:3000/?auth=confirmed`.
-3. Configure the project's email confirmation and password-recovery settings before testing account flows.
+Then:
 
-Until the migration is applied and the redirect URLs are allowed, local watchlist/history can still use browser storage, but account-synced library features cannot be considered ready. The browser may contain a Supabase publishable key; never put a Supabase `service_role` key in frontend code.
+```sh
+npm start        # http://localhost:3000
+npm run check    # static source checks
+npm test         # allowlist unit tests
+```
 
-## What's inside
+The TMDB key lives only in server-side environment variables — the browser never sees it.
 
-- **Resilient multi-server player** — 4 active embed providers (VidZee, 2Embed.skin, VidLink, VidSrc.su) plus 7 reserve integrations in code. Every launch uses per-network health stats, and a no-cors reachability probe auto-fails-over instead of trusting a silent iframe load.
-- **Provider watchdog** — a scheduled GitHub Action (`.github/workflows/provider-watchdog.yml`) probes every provider daily and publishes `provider-status.json`; the app auto-deprioritizes dead providers even for first-time visitors. Re-probe manually from the Actions tab (`workflow_dispatch`).
-- **Installable PWA** — manifest + brand icons, offline banner with auto-recovery, Android back-button closes overlays, haptic feedback.
-- **Your library, synced** — optional Supabase account for watchlist + Continue Watching across devices (schema and email templates in `supabase/`).
-
-## Provider ladder
-
-Active: `vidzee → 2embedskin → vidlink → vidsrcsu`
-Reserves (one-line re-add via `PROVIDER_ORDER`): `vixsrc, 2embedcc, vidnest, vidfast, vidsrcto, vidrift, multiembed`
-
-Providers are third-party embed services and rotate availability constantly — the watchdog + health-ranked failover ladder is the standing mitigation.
-
-## Repository map
+### Repository map
 
 | Path | What it is |
 | --- | --- |
 | `index.html` | The entire app — UI, player, providers, library (single-file by design) |
 | `sw.js`, `manifest.webmanifest`, `icon-*.png` | PWA shell: offline shell (stale-while-revalidate), install assets |
-| `api/tmdb-proxy.js` | Vercel serverless TMDB proxy — **the transport the app uses** |
+| `api/tmdb-proxy.js` | Vercel serverless TMDB proxy — the transport the app uses |
 | `api/tmdb/trending.js`, `api/health.js` | Convenience Vercel functions |
 | `server.js` | Local dev server (`npm start`) — serves the same proxy contract |
 | `lib/tmdb-path.js` | Shared allowlist for TMDB endpoints and query keys |
-| `test/tmdb-path.test.js` | Node test for the allowlist (`npm test`) |
+| `test/tmdb-path.test.js` | Node test for the allowlist |
 | `scripts/check-project.mjs` | Static source check (`npm run check`) |
 | `.github/workflows/validate.yml` | CI: runs the checks on every push and PR |
 | `.github/workflows/provider-watchdog.yml` | Daily provider probe (cron + manual run button) |
-| `.github/scripts/provider_check.py` | The probe itself — writes `provider-status.json`, manages outage issues |
+| `.github/scripts/provider_check.py` | The probe — writes `provider-status.json`, manages outage issues |
 | `provider-status.json` | Latest watchdog probe result (auto-committed daily) |
 | `supabase/` | Cloud library: migrations + auth email templates |
 
-## Legal note
-
-CineFrame does not host, store, or distribute any media. Discovery metadata comes from TMDB; playback uses third-party public embed services which are unlicensed. Availability is not guaranteed.
+</details>
