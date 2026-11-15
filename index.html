@@ -96,7 +96,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .popular-arrow:hover:not(:disabled){background:var(--gold);border-color:var(--gold);color:#000;transform:translateY(-1px)}
 .popular-arrow:disabled{opacity:.28;cursor:default}
 .home-shelf .row-scroll{scroll-behavior:smooth}
-@media(max-width:760px){.popular-tools{gap:8px}.popular-progress{width:28px}.popular-count{min-width:35px;font-size:.66rem}.popular-arrow{width:40px;height:40px}.popular-arrows{gap:5px}}
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){.popular-tools{gap:8px}.popular-progress{width:28px}.popular-count{min-width:35px;font-size:.66rem}.popular-arrow{width:40px;height:40px}.popular-arrows{gap:5px}}
 .row-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(190px,18vw,252px);gap:var(--gap);overflow-x:auto;overflow-y:hidden;padding:26px var(--gutter) 40px;margin:-10px 0 -14px;scroll-snap-type:x proximity;scroll-padding-inline:var(--gutter);scrollbar-width:none;overscroll-behavior-inline:contain;align-items:start;min-width:0}
 .row-scroll::-webkit-scrollbar{display:none}
 @media(hover:hover) and (pointer:fine){.home-shelf{position:relative}.home-shelf .section-heading h2:after{content:none}.shelf-open-all{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:9px;padding:0;border:1px solid #ffffff20;border-radius:50%;background:#ffffff08;color:#a7a7ad;vertical-align:middle;transition:background .2s,border-color .2s,color .2s,transform .2s}.shelf-open-all svg{display:block;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.shelf-open-all{flex:0 0 auto;line-height:0}.shelf-open-all:hover{background:#ffffff16;border-color:#ffffff45;color:#fff;transform:translateX(2px)}.shelf-open-all:focus-visible{outline:2px solid #fff;outline-offset:3px}}
@@ -141,7 +141,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .episode-still{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:var(--panel)}
 .episode-copy{min-width:0}.episode-title{font-size:.96rem;font-weight:700;line-height:1.35}.episode-meta{margin-top:5px;color:var(--muted);font-size:.78rem}.episode-overview{margin:7px 0 0;color:var(--soft);font-size:.84rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .episode-empty{padding:14px;border:1px solid var(--hair);border-radius:12px;color:var(--muted);font-size:.88rem}
-@media(max-width:760px){.episode-tools{align-items:stretch;flex-direction:column;gap:8px}.episode-search-wrap{max-width:none;width:100%;height:42px}.episode-count{align-self:flex-end}.episode-card{grid-template-columns:112px minmax(0,1fr);gap:10px;padding:9px}.episode-title{font-size:.88rem}.episode-overview{font-size:.78rem;-webkit-line-clamp:2}}
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){.episode-tools{align-items:stretch;flex-direction:column;gap:8px}.episode-search-wrap{max-width:none;width:100%;height:42px}.episode-count{align-self:flex-end}.episode-card{grid-template-columns:112px minmax(0,1fr);gap:10px;padding:9px}.episode-title{font-size:.88rem}.episode-overview{font-size:.78rem;-webkit-line-clamp:2}}
 .filter-control{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.84rem;font-weight:500}
 .filter-control select,.selects select,.player-top select{background:var(--panel2);color:#fff;border:1px solid var(--hair);border-radius:12px;padding:9px 12px;font-size:.86rem}
 .filter-control select{max-width:190px}.filter-control select:hover,.filter-control select:focus,.selects select:hover{border-color:#ffffff59}
@@ -299,7 +299,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 @media(max-width:1000px){.nav{position:static;transform:none;margin-left:auto}.searchwrap{margin-left:0;width:min(210px,24vw)}.row-scroll{grid-auto-columns:clamp(180px,24vw,225px)}}
 @media(max-width:900px){.row-scroll{grid-auto-columns:clamp(165px,28vw,210px)}}
 @media(hover:none){.movie-card:hover,.movie-card:focus-within{transform:none}.movie-card:before{display:none}.card-watch{opacity:1;transform:none;width:40px;height:40px;top:5px;right:5px;font-size:18px}}
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
 :root{--gap:12px}
 .topbar{padding:10px 14px;gap:8px}.brand span:last-child{display:none}.nav{display:none}
 .searchwrap{width:auto;flex:1;margin-left:0}.searchwrap input{height:38px}.watch-btn{height:38px;padding:0 8px 0 12px;gap:6px}.watch-btn .watch-label{display:none}
@@ -328,7 +328,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .recommend-tools .popular-arrow svg{width:14px;height:14px}
 #detailOverlay #recommendRow{scroll-behavior:smooth;scroll-snap-type:x mandatory}
 #detailOverlay #recommendRow .movie-card{scroll-snap-align:start}
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   .recommend-heading{align-items:center;gap:8px}
   .recommend-heading .subhead{font-size:1.16rem;margin:30px 0 12px}
   .recommend-tools{gap:5px}
@@ -384,7 +384,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   font-size:.8rem!important;
   line-height:1.4!important;
 }
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   #detailOverlay #recommendRow{
     grid-auto-columns:clamp(150px,50vw,195px)!important;
     gap:14px!important;
@@ -396,7 +396,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 
 /* Mobile alignment pass: consistent button sizing, spacing and control rows. */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   button{ -webkit-tap-highlight-color:transparent; }
   .hero .actions{
     display:grid;
@@ -537,7 +537,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 
 /* Refined mobile sizing: keep detail actions unchanged and slightly reduce oversized controls. */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   .hero .actions{max-width:420px;gap:8px}
   .hero .actions button{min-height:48px;padding:0 10px;font-size:.94rem;font-weight:650}
   .hero .actions .action-icon{width:19px;height:19px;flex-basis:19px}
@@ -569,7 +569,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 
 /* Mobile detail popup buttons — match reference proportions */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   #detailOverlay .detail-hero{height:440px;padding:0 22px 28px;min-height:440px}
   #detailOverlay .detail-copy{width:100%;max-width:none}
   #detailOverlay .detail-copy .actions{
@@ -625,7 +625,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 
 /* Correct detail action row width: stretch the copy block inside the hero flex layout */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   #detailOverlay .detail-hero{
     display:flex!important;
     align-items:flex-end!important;
@@ -665,7 +665,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   flex:0 0 22px;
   margin:0 auto;
 }
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   #detailOverlay .close{
     display:grid!important;
     place-items:center!important;
@@ -902,7 +902,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .diag-note{margin-top:14px;font-size:.75rem;color:var(--muted);line-height:1.7}
 /* data saver + phase 2 polish */
 #dataSaverButton[aria-pressed="true"]{background:#fff;color:#000}
-@media(max-width:760px){.data-saver-btn .account-label{display:none}}
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){.data-saver-btn .account-label{display:none}}
 .search-recents{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:60;background:#19191c;border:1px solid #ffffff20;border-radius:14px;padding:10px;box-shadow:0 18px 50px #000a}
 .sr-head{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
 .sr-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -926,7 +926,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .player-upnext .upnext-dismiss{border:1px solid var(--hair);background:rgba(255,255,255,.05);color:var(--soft);min-width:36px;padding:0;font-weight:400;font-size:.9rem}
 /* listing controls: clean stacked rows on mobile — pills scroll on one line,
    genre chips get their own full-width line, count sits beside the heading */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   .filterbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:16px 0 24px}
   .pill-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0}
   .pill-row::-webkit-scrollbar{display:none}
@@ -947,7 +947,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 #playerModal .player-frame:fullscreen iframe{width:100%;height:100%}
 #playerModal [hidden]{display:none!important}
 /* mobile: full-bleed theatre */
-@media(max-width:760px){
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   #playerOverlay{padding:0}
   #playerModal.player-modal{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0;box-shadow:none}
   #playerModal .player-top{min-height:58px;gap:9px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
@@ -1270,6 +1270,10 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Q3wszD5DEZbi3eDsQNAQ7w_moqFLJX7
 const FALLBACK_POSTER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600"><rect width="100%" height="100%" fill="#19191f"/><text x="50%" y="50%" fill="#777781" font-family="sans-serif" font-size="24" text-anchor="middle">No poster</text></svg>');
 const state = { trending:[], movies:[], tv:[], rated:[], selected:null, hero:null, page:'home', searchTimer:null, searchQuery:'', searchPage:1, searchType:'all', categoryPage:1, categoryType:'movie', categoryItems:[], currentProvider:'vidzee', currentSeason:1, currentEpisode:1, detailHistory:[], episodeItems:[], episodeQuery:'', episodeVisibleCount:12, videos:[], recommendations:[], playerUrl:'', genres:{movie:[],tv:[]}, categoryTotalPages:1, searchTotalPages:1, listingBusy:false, categoryRequestId:0, searchRequestId:0, detailRequestId:0, itemCache:{},playerFailoverTried:[],playerGotSignal:false, auth:{client:null,user:null,mode:'signin',busy:false,configured:false,libraryReady:false,libraryChannel:null,emailCooldownUntil:0} };
 const $ = id => document.getElementById(id);
+// Phone-first layout: treat any touch device at phone/tablet width as the
+// mobile app layout, even if the browser is emulating a desktop viewport
+// (e.g. "Desktop site" mode). Desktop browsers keep the desktop layout.
+function isPhoneLayout(){return matchMedia('(max-width:760px)').matches||matchMedia('(max-width:1024px) and (pointer:coarse)').matches}
 const safeStore = { get(key, fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}} };
 const getWatchlist = () => safeStore.get('cineframe_watchlist', []);
 const getHistory = () => safeStore.get('cineframe_history', []);
@@ -1420,7 +1424,8 @@ function toast(message){const t=$('toast');t.textContent=message;t.classList.add
 // Hidden viewport diagnostic: visit with ?debug in the URL to see exactly
 // which layout the device is running and why. Ships no UI in normal use.
 function cineViewportDebug(){
-  const mqMobile=matchMedia('(max-width:760px)').matches;
+  const mqMobile=isPhoneLayout();
+  const coarse=matchMedia('(pointer:coarse)').matches;
   const nav=document.querySelector('.mobile-nav');
   const navShown=Boolean(nav)&&getComputedStyle(nav).display!=='none';
   const verdict=(mqMobile&&navShown)?'MOBILE layout ACTIVE ✓':'DESKTOP layout ACTIVE ✗';
@@ -1431,6 +1436,7 @@ function cineViewportDebug(){
     +row('window.innerWidth × innerHeight',innerWidth+' × '+innerHeight+' CSS px')
     +row('screen.width',screen.width)
     +row('devicePixelRatio',devicePixelRatio)
+    +row('touch device (pointer:coarse)',coarse?'yes':'no')
     +row('physical width ≈',Math.round(innerWidth*devicePixelRatio)+' device px')
     +row('mobile-nav (bottom bar) visible',navShown?'yes':'no')
     +row('user agent',navigator.userAgent.slice(0,80));
@@ -1460,7 +1466,7 @@ function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=
 function cardMarkup(item){const id=Number(item.id);const type=mediaType(item);state.itemCache[`${type}:${id}`]=normalize(item,type);const inList=getWatchlist().some(x=>Number(x.id)===id&&mediaType(x)===type);const ds=isDataSaver();const progressSeconds=Math.max(0,Number(item.progressSeconds)||0),durationSeconds=Math.max(0,Number(item.durationSeconds)||0);const progress=durationSeconds>0&&progressSeconds>0?Math.min(100,progressSeconds/durationSeconds*100):0;const subline=type==='tv'&&Number(item.season)>0&&Number(item.episode)>0?`S${Number(item.season)} · E${Number(item.episode)}`:null;return `<article class="movie-card" data-card-id="${id}" data-card-type="${type}"><button class="card-open" type="button" aria-label="Details for ${escapeHtml(titleOf(item))}" onclick="openDetailsById('${type}',${id})"><img class="poster" src="${posterOf(item,ds?'w185':'w342')}" srcset="${item?.poster_path&&!ds?`${IMG}w342${item.poster_path} 342w, ${IMG}w500${item.poster_path} 500w, ${IMG}w780${item.poster_path} 780w`:''}" sizes="${ds?'154px':'(max-width:760px) 44vw, 252px'}" alt="" loading="lazy" decoding="async" fetchpriority="low" onerror="imageFallback(this)"><div class="card-copy"><div class="card-title">${escapeHtml(titleOf(item))}</div><div class="card-meta"><span>${subline||yearOf(item)}</span><span class="score">${subline?'Continue episode':`★ ${ratingOf(item)}`}</span></div>${progress>0?`<div class="card-progress" role="img" aria-label="Watched ${Math.round(progress)} percent"><span style="width:${progress.toFixed(2)}%"></span></div>`:''}</div></button><button class="card-watch" onclick="toggleWatchlist(${id},'${type}',this)" aria-label="${inList?'Remove from':'Add to'} My List">${inList?'✓':'＋'}</button></article>`}
 function renderRow(id,items){$(id).innerHTML=items?.length?items.slice(0,20).map(cardMarkup).join(''):'<div class="empty">No titles found.</div>';updateShelfForRow(id);syncWatchButtons()} 
 function syncWatchButtons(){document.querySelectorAll('.movie-card[data-card-id]').forEach(card=>{const id=card.dataset.cardId,type=card.dataset.cardType;const saved=getWatchlist().some(x=>Number(x.id)===Number(id)&&mediaType(x)===type);const button=card.querySelector('.card-watch');if(button){button.textContent=saved?'✓':'＋';button.setAttribute('aria-label',saved?'Remove from My List':'Add to My List')}})}
-function setHero(item){if(!item)return;state.hero=item;const back=backdropOf(item,isDataSaver()?'w300':window.matchMedia('(max-width:760px)').matches?'w780':'w1280');$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">${ratingOf(item)==='NR'?'NR':`★ ${ratingOf(item)}`}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent='Play';}
+function setHero(item){if(!item)return;state.hero=item;const back=backdropOf(item,isDataSaver()?'w300':isPhoneLayout()?'w780':'w1280');$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">${ratingOf(item)==='NR'?'NR':`★ ${ratingOf(item)}`}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent='Play';}
 function shelfScrollStep(row){
   const card=row?.querySelector('.movie-card');
   const gap=parseFloat(getComputedStyle(row).columnGap)||20;
