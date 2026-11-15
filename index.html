@@ -839,7 +839,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 #playerModal #playerEpisodeNav button:not(:disabled):hover{background:rgba(255,255,255,.12)}
 #playerModal #playerEpisodeNav span{flex:1;min-width:0;text-align:center;color:#9a9aa4;font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #playerModal #cineControls{display:grid;gap:10px;padding:11px 12px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.02)}
-#playerModal #cineControls[hidden]{display:none}
+#playerModal #cineControls[hidden]{display:none} #playerModal .cine-note{grid-column:1/-1;font-size:.7rem;line-height:1.55;color:#9a9aa4}
 #playerModal .pc-seek-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;color:#c9c9d1;font-size:.72rem;font-variant-numeric:tabular-nums}
 #playerModal .pc-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 #playerModal .pc-group{display:flex;align-items:center;gap:10px}
@@ -1059,7 +1059,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
       <div id="playerUpNext" class="player-upnext" hidden><span id="playerUpNextLabel"></span><button id="playerUpNextButton" type="button" onclick="playUpNext()">Play next</button><button type="button" class="upnext-dismiss" onclick="dismissUpNext()" aria-label="Dismiss up next">×</button></div>
       <div id="cineControls" hidden>
         <div class="pc-seek-row"><span id="cineCurrentTime">00:00</span><input id="cineSeek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek position"><span id="cineDuration">00:00</span></div>
-        <div class="pc-row"><div class="pc-group"><button id="cinePlayPause" type="button">Play</button><input id="cineVolume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume"></div><select id="cineSpeed" aria-label="Playback speed"><option value="1">1×</option></select></div>
+        <div class="pc-row"><div class="pc-group"><button id="cinePlayPause" type="button">Play</button><input id="cineVolume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume"></div><select id="cineSpeed" aria-label="Playback speed"><option value="1">1×</option></select></div><span id="cineControlsNote" class="cine-note" role="note"></span>
       </div>
     </div>
     <div class="player-footer">
@@ -1138,7 +1138,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.5.0</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.0</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1146,7 +1146,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1408,7 +1408,7 @@ function toast(message){const t=$('toast');t.textContent=message;t.classList.add
 function isDataSaver(){return Boolean(safeStore.get('cineframe_data_saver',false)||navigator.connection?.saveData)}
 function applyDataSaverClass(){const on=isDataSaver();document.body.classList.toggle('data-saver',on);const b=$('dataSaverButton');if(b){b.setAttribute('aria-pressed',String(on));b.title=on?'Data Saver is on (tap to turn off)':'Data Saver — smaller images, fewer requests'}}
 function toggleDataSaver(){const on=!isDataSaver();safeStore.set('cineframe_data_saver',on);applyDataSaverClass();if(state.hero)setHero(state.hero);renderContinue();buzz(12);toast(on?'Data Saver on — smaller posters, calmer home':'Data Saver off — full quality')}
-function checkWhatsNew(){try{const seen=safeStore.get('cineframe_seen_version','');safeStore.set('cineframe_seen_version',APP_VERSION);if(seen&&seen!==APP_VERSION)setTimeout(()=>toast(`Updated to v${APP_VERSION} — Data Saver, season picker, recent searches`),2600)}catch{}}
+function checkWhatsNew(){try{const seen=safeStore.get('cineframe_seen_version','');safeStore.set('cineframe_seen_version',APP_VERSION);if(seen&&seen!==APP_VERSION)setTimeout(()=>toast(`Updated to v${APP_VERSION} — equal player console for every server`),2600)}catch{}}
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
 let suppressPopBack=false;
 // Connectivity guard: shows the offline banner, and when the connection
@@ -1887,13 +1887,41 @@ function showUpNext(){
 function dismissUpNext(){const bar=$('playerUpNext');if(bar)bar.hidden=true}
 function playUpNext(){dismissUpNext();navigatePlayerEpisode(1)}
 function formatPlayerTime(value){const n=Math.max(0,Math.floor(Number(value)||0));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
-function sendVidriftCommand(type,extra={}){const frame=$('externalPlayer');if(!frame?.contentWindow||state.currentProvider!=='vidrift')return;frame.contentWindow.postMessage({type,...extra},'https://embed.vidrift.net')}
-function togglePlayerPlayback(){const playing=$('cinePlayPause').dataset.playing==='true';sendVidriftCommand(playing?'vidrift:pause':'vidrift:play');$('cinePlayPause').dataset.playing=playing?'false':'true';$('cinePlayPause').textContent=playing?'Play':'Pause'}
-function skipPlayer(seconds){sendVidriftCommand('vidrift:skip',{seconds:Number(seconds)})}
-function seekPlayerTo(seconds){sendVidriftCommand('vidrift:resume',{currentTime:Number(seconds)})}
-function setPlayerVolume(volume){sendVidriftCommand('vidrift:set',{volume:Number(volume)})}
-function changePlayerSpeed(){const speed=Number($('cineSpeed').value)||1;if(state.currentProvider==='vidrift')sendVidriftCommand('vidrift:set',{speed})}
-function syncVidriftFullscreen(on){if(state.currentProvider!=='vidrift')return;const frame=$('externalPlayer');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'vidrift:fullscreen-state',on},'https://embed.vidrift.net')}
+// --- Equal playback interface ----------------------------------------------
+// Every server gets the SAME console. What differs — visibly, with a reason —
+// is which controls each embed can actually accept. Capabilities follow the
+// server's own published postMessage protocol (verified against its embed
+// bundle), not favoritism: VidRift documents a full two-way API. Closed
+// embeds get the identical console with the controls disabled and an inline
+// explanation; their in-player controls keep working either way.
+const PROVIDER_API={
+  // To grant a future provider the full console, verify its protocol against
+  // its own embed bundle, then add {origin, control:true} here.
+  vidrift:{origin:'https://embed.vidrift.net',control:true},
+};
+function providerApi(provider){return PROVIDER_API[provider]||null}
+function sendPlayerCommand(type,extra={}){
+  const api=providerApi(state.currentProvider);
+  const frame=$('externalPlayer');
+  if(!api?.control||!frame?.contentWindow)return;
+  frame.contentWindow.postMessage({type,...extra},api.origin);
+}
+function applyConsoleCapability(){
+  const live=Boolean(providerApi(state.currentProvider)?.control);
+  $('cineControls').hidden=false;
+  $('cinePlayPause').disabled=!live;
+  $('cineSeek').disabled=!live;
+  $('cineVolume').disabled=!live;
+  $('cineSpeed').disabled=!live;
+  const note=$('cineControlsNote');
+  if(note)note.textContent=live?'':'This server does not expose remote playback control — use the controls inside its own player, or switch servers below.';
+}
+function togglePlayerPlayback(){const playing=$('cinePlayPause').dataset.playing==='true';sendPlayerCommand(playing?'vidrift:pause':'vidrift:play');$('cinePlayPause').dataset.playing=playing?'false':'true';$('cinePlayPause').textContent=playing?'Play':'Pause'}
+function skipPlayer(seconds){sendPlayerCommand('vidrift:skip',{seconds:Number(seconds)})}
+function seekPlayerTo(seconds){sendPlayerCommand('vidrift:resume',{currentTime:Number(seconds)})}
+function setPlayerVolume(volume){sendPlayerCommand('vidrift:set',{volume:Number(volume)})}
+function changePlayerSpeed(){const speed=Number($('cineSpeed').value)||1;sendPlayerCommand('vidrift:set',{speed})}
+function syncVidriftFullscreen(on){sendPlayerCommand('vidrift:fullscreen-state',{on})}
 let playerLoadTimer=null;
 let playerLoadAttempt=0;
 let playerHintTimer=null;
@@ -2105,9 +2133,7 @@ function mountPlayer(){
   $('playerStatusDot').classList.remove('ready');
   $('playerStatusText').textContent='Connecting to '+providerLabel(state.currentProvider)+'…';
   prewarmNextProviders();
-  const hasCineControls=state.currentProvider==='vidrift';
-  $('cineControls').hidden=!hasCineControls;
-  $('cineSpeed').disabled=!hasCineControls;
+  applyConsoleCapability();
   $('playerFrame').innerHTML=`<iframe id="externalPlayer" fetchpriority="high" loading="eager" src="${escapeHtml(url)}" title="${escapeHtml(titleOf(state.selected))} video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
   const frame=$('externalPlayer');
   frame.addEventListener('load',()=>{
@@ -2133,9 +2159,9 @@ function mountPlayer(){
       noteProviderResult(state.currentProvider,true);
       state.playerFailed=false;
       state.playerFailoverTried=[];
-      if(state.currentProvider==='vidrift'){
-        sendVidriftCommand('vidrift:get-state');
-        if(resumeSeconds>15)sendVidriftCommand('vidrift:resume',{currentTime:resumeSeconds});
+      if(providerApi(state.currentProvider)?.control){
+        sendPlayerCommand('vidrift:get-state');
+        if(resumeSeconds>15)sendPlayerCommand('vidrift:resume',{currentTime:resumeSeconds});
         syncVidriftFullscreen(Boolean(document.fullscreenElement));
       }
       // If the page loaded but never reports playback, nudge the user to another
@@ -2145,10 +2171,10 @@ function mountPlayer(){
         if(attempt!==playerLoadAttempt||!state.selected)return;
         if(!$('playerOverlay')?.classList.contains('open'))return;
         if(state.playerGotSignal)return;
-        $('playerStatusText').textContent=state.currentProvider==='vidrift'
+        $('playerStatusText').textContent=providerApi(state.currentProvider)?.control
           ?'Server loaded but no playback signal — use Switch server if nothing plays.'
           :'If nothing plays, this server may not have sources — use Switch server.';
-      },state.currentProvider==='vidrift'?12000:15000);
+      },providerApi(state.currentProvider)?.control?12000:15000);
     });
   },{once:true});
   playerLoadTimer=setTimeout(()=>{
@@ -2227,7 +2253,8 @@ function handlePlayerMessage(event){
   const frame=$('externalPlayer');
   if(!frame?.contentWindow||event.source!==frame.contentWindow)return;
 
-  if(state.currentProvider!=='vidrift'||event.origin!=='https://embed.vidrift.net')return;
+  const api=providerApi(state.currentProvider);
+  if(!api||event.origin!==api.origin)return;
   const data=event.data;
   if(!data||typeof data!=='object'||typeof data.type!=='string')return;
   state.playerGotSignal=true;
@@ -2248,6 +2275,7 @@ function handlePlayerMessage(event){
     const current=Math.max(0,Number(data.currentTime)||0);
     const duration=Math.max(0,Number(data.duration)||0);
     recordPlayerProgress(current,duration);
+    if(duration>0&&current>0&&duration-current<=Math.max(45,duration*0.03))showUpNext();
     if(typeof data.paused==='boolean'){
       $('cinePlayPause').dataset.playing=String(!data.paused);
       $('cinePlayPause').textContent=data.paused?'Play':'Pause';
@@ -2258,6 +2286,7 @@ function handlePlayerMessage(event){
     const current=Math.max(0,Number(data.currentTime)||0);
     const duration=Math.max(0,Number(data.duration)||0);
     recordPlayerProgress(current,duration);
+    if(duration>0&&current>0&&duration-current<=Math.max(45,duration*0.03))showUpNext();
     $('cinePlayPause').dataset.playing='true';
     $('cinePlayPause').textContent='Pause';
     if(current>0){
