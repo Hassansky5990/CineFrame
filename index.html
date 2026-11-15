@@ -879,7 +879,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 }
 #playerModal .player-error button:hover{background:rgba(255,255,255,.13)}
 /* network diagnostics overlay */
-.diag-modal{width:min(560px,94vw);max-height:86dvh;overflow:auto}
+.diag-modal{align-self:center;margin:auto;width:min(560px,calc(100vw - 32px));height:auto;max-height:min(760px,calc(100dvh - 32px));overflow:auto;padding:22px 18px 24px;background:#19191c;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 30px 100px #000b}
 .diag-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
 .diag-head strong{font-size:1rem;color:#fff}
 .diag-summary{font-size:.8rem;color:var(--muted);line-height:1.6;margin:6px 0 14px}
