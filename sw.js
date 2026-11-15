@@ -5,7 +5,7 @@
      from cache and refreshed in the background for the next visit.
    - TMDB, provider embeds, Supabase and every cross-origin request are
      never intercepted. Non-navigation requests pass through untouched. */
-const CACHE = 'cineframe-shell-v3';
+const CACHE = 'cineframe-shell-v4';
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -30,6 +30,13 @@ self.addEventListener('activate', (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
+    // One-time refresh on update: the just-installed worker already precached
+    // the current shell, so reloading open tabs here means a deploy lands on
+    // the first visit instead of the visit after next. Runs once per version.
+    const windows = await self.clients.matchAll({ type: 'window' });
+    windows.forEach((client) => {
+      try { client.navigate(client.url).catch(() => {}); } catch (_) {}
+    });
   })());
 });
 

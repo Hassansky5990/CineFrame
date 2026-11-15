@@ -937,6 +937,14 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   .search-page .section-heading{grid-template-columns:minmax(0,1fr) auto;gap:10px}
   .search-page .section-heading h2{font-size:1.35rem;line-height:1.25;letter-spacing:-.02em}
   .search-page .section-sub{white-space:nowrap}
+  /* Hardening: the listing page must always span the full viewport width on
+     phones. If any ancestor or wrapper ever constrains its containing block,
+     the section, grid and cards would shrink to a fraction of the screen.
+     Pinning all three to the viewport width makes the layout self-correcting. */
+  #listingPage.search-page{width:100vw;max-width:100vw}
+  #listingPage .results-grid{width:100%;max-width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #listingPage .results-grid>.movie-card{width:100%;max-width:100%;min-width:0}
+  #listingPage .results-grid>.movie-card .poster{width:100%;max-width:100%}
 }
 /* fullscreen + cinema fallback */
 .player-modal.cinema-mode{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0}
@@ -1152,7 +1160,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.0</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.1</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1160,7 +1168,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.6.1';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1429,18 +1437,30 @@ function cineViewportDebug(){
   const nav=document.querySelector('.mobile-nav');
   const navShown=Boolean(nav)&&getComputedStyle(nav).display!=='none';
   const verdict=(mqMobile&&navShown)?'MOBILE layout ACTIVE ✓':'DESKTOP layout ACTIVE ✗';
-  const row=(k,v)=>`<div style="margin-top:4px"><b>${k}:</b> ${v}</div>`;
+  const row=(k,v)=>`<div style="margin-top:2px"><b>${k}:</b> ${v}</div>`;
+  const bar=(w,c)=>`<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="display:inline-block;height:8px;width:${w}px;background:${c}"></span><span style="opacity:.7">${w}px</span></div>`;
   const d=document.createElement('div');
-  d.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:56px;background:#111;border:1px solid #ffffff55;border-radius:12px;padding:12px 14px;font:12px/1.5 ui-monospace,monospace;color:#fff';
-  d.innerHTML=`<b style="color:#ffd60a;font-size:14px">${verdict}</b>`
-    +row('window.innerWidth × innerHeight',innerWidth+' × '+innerHeight+' CSS px')
-    +row('screen.width',screen.width)
-    +row('devicePixelRatio',devicePixelRatio)
-    +row('touch device (pointer:coarse)',coarse?'yes':'no')
-    +row('physical width ≈',Math.round(innerWidth*devicePixelRatio)+' device px')
-    +row('mobile-nav (bottom bar) visible',navShown?'yes':'no')
-    +row('user agent',navigator.userAgent.slice(0,80));
+  d.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:56px;background:#111;border:1px solid #ffffff55;border-radius:12px;padding:10px 12px;font:11px/1.4 ui-monospace,monospace;color:#fff;max-height:74vh;overflow:auto';
+  d.innerHTML=`<b style="color:#ffd60a;font-size:13px">${verdict}</b>`
+    +row('innerWidth × innerHeight',innerWidth+' × '+innerHeight+' CSS px')
+    +row('screen · dpr · pinch scale',screen.width+' · '+devicePixelRatio+' · '+(window.visualViewport?visualViewport.scale.toFixed(2):'-'))
+    +row('coarse pointer · mobile MQ',(coarse?'yes':'no')+' · '+(mqMobile?'yes':'no'))
+    +row('mobile-nav visible · ua',(navShown?'yes':'no')+' · '+navigator.userAgent.slice(0,52))
+    +`<div style="margin-top:6px;border-top:1px solid #ffffff2a;padding-top:6px">ruler (CSS px):</div>`
+    +bar(100,'#ffd60a')+bar(200,'#30d158')+bar(300,'#0a84ff')
+    +`<div id="cineDebugOut" style="white-space:pre-line;margin-top:8px;color:#c7ffb2">— open Movies/Shows/Search, then tap Measure —</div>`
+    +`<button type="button" onclick="cineDebugMeasure()" style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Measure page</button>`;
   document.body.appendChild(d);
+}
+function cineDebugMeasure(){
+  const out=document.getElementById('cineDebugOut');if(!out)return;
+  const one=sel=>{
+    const el=document.querySelector(sel);
+    if(!el)return sel+' — missing';
+    const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+    return `${sel} ${Math.round(r.width)}×${Math.round(r.height)} disp:${cs.display} cols:${(cs.gridTemplateColumns||'-').slice(0,48)} fs:${cs.fontSize}`;
+  };
+  out.textContent=['#app','#listingPage','#filterbar','#listingGrid','#listingGrid .movie-card','#listingGrid .poster','#listingPage h2'].map(one).join('\n');
 }
 if(/[?&]debug(&|=|$)/.test(location.search))addEventListener('load',cineViewportDebug,{once:true});
 // ---- Data Saver: lighter images + calmer home on metered/slow connections.
