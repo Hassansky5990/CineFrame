@@ -917,6 +917,13 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .app-foot{padding:26px 16px 110px;display:flex;gap:8px;justify-content:center;color:var(--muted);font-size:.72rem}
 #playerSeasonSelect{max-width:38%;min-height:34px;padding:0 8px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background-color:#1d1d21;color:#fff;font-size:.74rem}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+/* a11y: comfortable tap targets on touch devices */
+@media (pointer: coarse){.pill{padding:11px 20px}.gchip,.sr-chips [data-q],.filter-control select,.player-status-line button{min-height:40px}.popular-arrow{width:44px;height:44px}.episode-search-wrap input{min-height:42px}}
+/* up-next bar: shown in the player console when VidRift reports an episode ended */
+.player-upnext{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid #ffffff22;border-radius:12px;background:rgba(255,255,255,.06);font-size:.78rem;color:var(--soft);margin-top:8px}
+.player-upnext span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player-upnext button{flex:none;min-height:36px;padding:0 16px;border-radius:999px;border:1px solid #fff;background:#fff;color:#000;font-weight:700;font-size:.78rem;cursor:pointer}
+.player-upnext .upnext-dismiss{border:1px solid var(--hair);background:rgba(255,255,255,.05);color:var(--soft);min-width:36px;padding:0;font-weight:400;font-size:.9rem}
 /* fullscreen + cinema fallback */
 .player-modal.cinema-mode{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0}
 .player-modal.cinema-mode .player-frame{max-height:none;flex:1;aspect-ratio:auto;margin:12px 14px 0;min-height:0}
@@ -1012,6 +1019,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <div class="hero-content"><div class="eyebrow"><span class="dot"></span> Featured today</div><h1 id="heroTitle">Your next obsession starts here.</h1><div class="meta" id="heroMeta"><span>Discover movies and series</span></div><p id="heroOverview">Browse trending stories, discover your next favourite, and keep your watchlist in one place.</p><div class="actions"><button class="primary action-play" id="heroPlay" onclick="playHero()"><svg class="action-icon action-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9.1 6.2a1.1 1.1 0 0 1 0 1.8l-9.1 6.2c-.7.5-1.6-.1-1.6-.9z" fill="currentColor" stroke="none"/></svg><span>Play</span></button><button class="quiet action-info" id="heroInfo" onclick="showHeroDetails()"><svg class="action-icon action-icon-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>More info</span></button></div></div>
   </section>
   <div id="homeSections"><section class="section home-shelf" id="continueSection" hidden><div class="section-heading"><h2>Continue watching</h2><button type="button" class="explore-more" onclick="clearWatchHistory()">Clear history</button><div class="popular-tools" aria-label="continue watching slider controls"><div class="popular-progress" aria-hidden="true"><span class="shelf-progress"></span></div><span class="popular-count shelf-count" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow shelf-prev" onclick="scrollShelf('continueRow',-1)" aria-label="Previous continue watching" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow shelf-next" onclick="scrollShelf('continueRow',1)" aria-label="Next continue watching" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="continueRow"></div></section>
+  <section class="section home-shelf" id="becauseSection" hidden><div class="section-heading"><h2>Because you watched <span id="becauseTitle"></span></h2><div class="popular-tools" aria-label="because you watched slider controls"><div class="popular-progress" aria-hidden="true"><span class="shelf-progress"></span></div><span class="popular-count shelf-count" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow shelf-prev" onclick="scrollShelf('becauseRow',-1)" aria-label="Previous recommendations" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow shelf-next" onclick="scrollShelf('becauseRow',1)" aria-label="Next recommendations" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="becauseRow"></div></section>
   <section class="section home-shelf" id="forYouSection" hidden><div class="section-heading"><h2>Picked for you</h2><div class="popular-tools" aria-label="picked for you slider controls"><div class="popular-progress" aria-hidden="true"><span class="shelf-progress"></span></div><span class="popular-count shelf-count" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow shelf-prev" onclick="scrollShelf('forYouRow',-1)" aria-label="Previous picked for you" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow shelf-next" onclick="scrollShelf('forYouRow',1)" aria-label="Next picked for you" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="forYouRow"></div></section>
   <section class="section home-shelf"><div class="section-heading"><h2>Trending this week</h2><div class="popular-tools" aria-label="trending titles slider controls"><div class="popular-progress" aria-hidden="true"><span class="shelf-progress"></span></div><span class="popular-count shelf-count" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow shelf-prev" onclick="scrollShelf('trendingRow',-1)" aria-label="Previous trending titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow shelf-next" onclick="scrollShelf('trendingRow',1)" aria-label="Next trending titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="trendingRow"></div></section>
   <section class="section home-shelf"><div class="section-heading"><h2>Popular movies</h2><div class="popular-tools" aria-label="popular movies slider controls"><div class="popular-progress" aria-hidden="true"><span class="shelf-progress"></span></div><span class="popular-count shelf-count" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow shelf-prev" onclick="scrollShelf('moviesRow',-1)" aria-label="Previous popular movies" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow shelf-next" onclick="scrollShelf('moviesRow',1)" aria-label="Next popular movies" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="moviesRow" aria-label="Popular movies" tabindex="0"></div></section>
@@ -1040,7 +1048,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
       <button class="close" style="position:static;float:none;margin:0;flex:none" onclick="closePlayer()" aria-label="Close player">×</button>
     </div>
     <div class="player-frame" id="playerFrame"><div class="player-empty"><span class="player-empty-icon" aria-hidden="true">▶</span>Choose a title to start playback</div></div>
-    <div class="player-status-line"><span class="status-indicator" id="playerStatusDotVisible" aria-hidden="true"></span><span id="playerStatusVisible">Waiting for a title</span><button type="button" onclick="tryNextServer()" title="Automatically switch to the next best server">Switch server</button></div>
+    <div class="player-status-line"><span class="status-indicator" id="playerStatusDotVisible" aria-hidden="true"></span><span id="playerStatusVisible" aria-live="polite">Waiting for a title</span><button type="button" onclick="tryNextServer()" title="Automatically switch to the next best server">Switch server</button></div>
     <div class="player-console">
       <div id="playerEpisodeNav" hidden>
         <select id="playerSeasonSelect" aria-label="Season" onchange="onPlayerSeasonChange()" hidden></select>
@@ -1048,6 +1056,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
         <span id="playerEpisodeLabel"></span>
         <button id="nextEpisodeButton" type="button" onclick="navigatePlayerEpisode(1)" aria-label="Next episode">Next ›</button>
       </div>
+      <div id="playerUpNext" class="player-upnext" hidden><span id="playerUpNextLabel"></span><button id="playerUpNextButton" type="button" onclick="playUpNext()">Play next</button><button type="button" class="upnext-dismiss" onclick="dismissUpNext()" aria-label="Dismiss up next">×</button></div>
       <div id="cineControls" hidden>
         <div class="pc-seek-row"><span id="cineCurrentTime">00:00</span><input id="cineSeek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek position"><span id="cineDuration">00:00</span></div>
         <div class="pc-row"><div class="pc-group"><button id="cinePlayPause" type="button">Play</button><input id="cineVolume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume"></div><select id="cineSpeed" aria-label="Playback speed"><option value="1">1×</option></select></div>
@@ -1542,7 +1551,7 @@ async function sendAccountPasswordReset(){if(!state.auth.client||!state.auth.use
 async function sendPasswordReset(){if(!state.auth.client){authFeedback('Supabase is not connected yet.','error');return}const email=$('authEmail').value.trim();if(!email){authFeedback('Enter your email address first.','error');$('authEmail').focus();return}const remaining=authEmailCooldownRemaining();if(remaining){authFeedback(authEmailCooldownMessage(),'error');return}const button=document.querySelector('.auth-link');if(button){button.disabled=true;button.textContent='Sending…'}try{const {error}=await state.auth.client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});if(error)throw error;startAuthEmailCooldown(60);authFeedback('If this address is eligible, password reset instructions have been sent. Check your inbox and spam folder.','success')}catch(error){authFeedback(authEmailErrorMessage(error),'error');if(/rate.?limit|too many requests|over_email_send_rate_limit/i.test(String(error?.message||'')))startAuthEmailCooldown(60)}finally{if(button){button.disabled=false;button.textContent='Forgot password?'}}}
 async function signOutCineFrame(){if(!state.auth.client)return;try{const {error}=await state.auth.client.auth.signOut();if(error)throw error;state.auth.user=null;renderAccountButton();renderAuthPanel();closeOverlay('authOverlay');state.auth.libraryReady=false;if(state.auth.libraryChannel){await state.auth.client.removeChannel(state.auth.libraryChannel);state.auth.libraryChannel=null}safeStore.set('cineframe_watchlist',[]);safeStore.set('cineframe_history',[]);renderLibraryViews();toast('Signed out')}catch(error){$('authAccountFeedback').textContent=error?.message||'Could not sign out. Please try again.'}}
 
-async function init(){initializeAuth();initNetworkGuard();loadProviderStatus();applyDataSaverClass();checkWhatsNew();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{if(document.hidden)return;if(isDataSaver())return;if($('hero')?.matches(':hover,:focus-within'))return;const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);
+async function init(){initializeAuth();initNetworkGuard();loadProviderStatus();applyDataSaverClass();checkWhatsNew();['trendingRow','moviesRow','tvRow','ratedRow'].forEach(id=>setLoadingRow(id));setupHomeSliders();setupRecommendationSlider();loadHomeData();setInterval(()=>{if(document.hidden)return;if(isDataSaver())return;if($('hero')?.matches(':hover,:focus-within'))return;const pool=[...state.trending,...state.movies,...state.tv].filter(x=>x.backdrop_path&&x.overview);if(pool.length){const next=pool[Math.floor(Math.random()*pool.length)];if(next.id!==state.hero?.id)setHero(next)}},9000);updateWatchCount();renderContinue();setupSearch();document.addEventListener('keydown',e=>{if(e.key==='Escape'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top)closeOverlay(top.id)}if(e.key==='Tab'){const top=[...document.querySelectorAll('.overlay.open')].at(-1);if(top){const focusables=overlayFocusables(top);if(!focusables.length)e.preventDefault();else{const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&(document.activeElement===last||!top.contains(document.activeElement))){e.preventDefault();first.focus()}}}}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();$('searchInput').focus()}});document.addEventListener('click',e=>{const overlay=e.target.closest('.overlay.open');if(overlay&&e.target===overlay)closeOverlay(overlay.id)});window.addEventListener('message',handlePlayerMessage);
 {
   const st=$('playerStatusText'),vis=$('playerStatusVisible'),dot=$('playerStatusDot'),vd=$('playerStatusDotVisible');
   if(st&&vis)new MutationObserver(()=>{vis.textContent=st.textContent}).observe(st,{childList:true,characterData:true,subtree:true});
@@ -1550,7 +1559,34 @@ async function init(){initializeAuth();initNetworkGuard();loadProviderStatus();a
 }$('cineSeek').addEventListener('input',e=>{const seconds=Number(e.target.value);$('cineCurrentTime').textContent=formatPlayerTime(seconds)});$('cineSeek').addEventListener('change',e=>seekPlayerTo(Number(e.target.value)));$('cineVolume').addEventListener('input',e=>setPlayerVolume(Number(e.target.value)));$('cineSpeed').addEventListener('change',changePlayerSpeed);document.addEventListener('fullscreenchange',()=>syncVidriftFullscreen(Boolean(document.fullscreenElement)));window.addEventListener('storage',e=>{if(['cineframe_watchlist','cineframe_history'].includes(e.key)){updateWatchCount();renderContinue();if(state.page==='watchlist')renderWatchlistPage();loadPersonalized();if($('authOverlay')?.classList.contains('open')&&state.auth.user)renderAuthPanel()}})}
 async function loadHomeData(){const jobs=[['trending',()=>api('/trending/all/week'),'trendingRow'],['movies',()=>api('/movie/popular',{region:'US'}),'moviesRow'],['tv',()=>api('/tv/popular'),'tvRow'],['rated',()=>api('/movie/top_rated',{region:'US'}),'ratedRow']];let loaded=0,failed=0,heroSet=false;await Promise.all(jobs.map(async([key,load,rowId])=>{try{const data=await load();state[key]=key==='trending'?(data.results||[]).filter(x=>x.media_type!=='person'&&x.poster_path):(data.results||[]).map(x=>normalize(x,key==='movies'?'movie':key==='tv'?'tv':'movie'));loaded++;renderRow(rowId,state[key]);if(!heroSet){const hero=state.trending.find(x=>x.backdrop_path&&x.overview)||state.movies[0]||state.tv[0];if(hero){setHero(hero);heroSet=true}}}catch(error){failed++;state[key]=[];console.warn(`CineFrame ${key} shelf failed`,error);$(rowId).innerHTML='<div class="empty">This shelf could not load.</div>';updateShelfForRow(rowId)}}));if(!loaded)showCatalogError('Could not load TMDB shelves. Check your connection and try again.');else{if(failed)toast('Some shelves could not load. The available titles are still shown.');loadPersonalized()}}
 let personalizedTimer=null;function schedulePersonalized(){clearTimeout(personalizedTimer);personalizedTimer=setTimeout(()=>loadPersonalized(),650)}
-async function loadPersonalized(){const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));if($('forYouSubtitle'))$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);if($('forYouSubtitle'))$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
+// "Because you watched" home shelf: seeded by the most recent history entry,
+// filled from TMDB's recommendations endpoint (similar as fallback). One extra
+// proxy call per history change — negligible JSON next to the image bytes.
+let becauseRequestId=0;
+async function loadBecauseYouWatched(){
+  const section=$('becauseSection');
+  if(!section)return;
+  const history=getHistory();
+  const seed=history.find(x=>Number(x.id)>0);
+  if(!seed){section.hidden=true;return}
+  const requestId=++becauseRequestId;
+  const type=mediaType(seed);
+  try{
+    let data=await api(`/${type}/${Number(seed.id)}/recommendations`);
+    let items=(data.results||[]).map(x=>normalize(x,type));
+    if(!items.length){
+      data=await api(`/${type}/${Number(seed.id)}/similar`);
+      items=(data.results||[]).map(x=>normalize(x,type));
+    }
+    const seen=new Set(history.map(x=>`${mediaType(x)}:${Number(x.id)}`));
+    items=items.filter(x=>x.poster_path&&!seen.has(`${type}:${Number(x.id)}`)).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);
+    if(requestId!==becauseRequestId)return;
+    $('becauseTitle').textContent=titleOf(seed);
+    section.hidden=!items.length;
+    if(items.length)renderRow('becauseRow',items);
+  }catch(e){if(requestId===becauseRequestId)section.hidden=true}
+}
+async function loadPersonalized(){loadBecauseYouWatched();const history=getHistory(),list=getWatchlist();const taste=[...history,...list].flatMap(x=>[...(Array.isArray(x.genre_ids)?x.genre_ids:[]),...(Array.isArray(x.genres)?x.genres.map(g=>g.id).filter(Boolean):[])]);const counts=taste.reduce((m,id)=>(m[id]=(m[id]||0)+1,m),{});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id])=>id);let items=[];try{if(top.length){const [m,t]=await Promise.all([api('/discover/movie',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1}),api('/discover/tv',{with_genres:top.join('|'),sort_by:'popularity.desc',page:1})]);items=[...(m.results||[]).map(x=>normalize(x,'movie')),...(t.results||[]).map(x=>normalize(x,'tv'))].filter(x=>!history.some(h=>Number(h.id)===Number(x.id)&&mediaType(h)===mediaType(x)));if($('forYouSubtitle'))$('forYouSubtitle').textContent='Based on your saved titles and history'}else{items=[...state.trending,...state.movies].slice(0,18);if($('forYouSubtitle'))$('forYouSubtitle').textContent='Popular picks to get you started'}items=items.filter(x=>x.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,18);$('forYouSection').hidden=!items.length;if(items.length)renderRow('forYouRow',items)}catch(e){console.warn('Personalized recommendations unavailable',e)}}
 async function loadGenres(type){if(state.genres[type]?.length)return state.genres[type];try{const data=await api(`/genre/${type}/list`);state.genres[type]=data.genres||[];return state.genres[type]}catch(e){return []}}
 async function populateGenreFilter(type){const select=$('genreFilter');if(!select)return;select.innerHTML='<option value="">All genres</option>';const types=type==='all'?['movie','tv']:[type==='anime'?'tv':type];const lists=await Promise.all(types.map(loadGenres));const map=new Map();lists.flat().forEach(g=>{if(!map.has(g.id))map.set(g.id,g.name)});[...map.entries()].sort((a,b)=>a[1].localeCompare(b[1])).forEach(([id,name])=>select.add(new Option(name,id)));renderGenreChips();}
 // Recent-search chips under the search bar (shown on focus, tapped to rerun).
@@ -1576,8 +1612,24 @@ async function backToPreviousTitle(){
   updateDetailBackButton();
   await openDetails(previous);
 }
-function openOverlay(id){$(id).classList.add('open');document.body.classList.add('locked');try{if(history.state?.cfOverlay!==id)history.pushState({cfOverlay:id},'')}catch(e){}}
-function closeOverlay(id){const el=$(id);if(!el)return;el.classList.remove('open');if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}if(id==='playerOverlay'){const current=Math.max(0,Number($('cineSeek').value)||0),duration=Math.max(0,Number($('cineSeek').max)||0);if(current>0&&duration>0)recordPlayerProgress(current,duration,true);clearTimeout(playerLoadTimer);playerLoadTimer=null;playerLoadAttempt++;clearTimeout(playerHintTimer);playerHintTimer=null;state.playerFailoverTried=[];state.playerGotSignal=false;const frame=$('playerFrame');if(frame){frame.querySelectorAll('iframe,video,audio').forEach(media=>{try{media.pause?.()}catch{};if(media.tagName==='IFRAME')media.src='about:blank'});frame.innerHTML=''}$('playerLoading')?.classList.add('hidden');if(!suppressPopBack&&history.state&&history.state.cfOverlay===id){suppressPopBack=true;try{history.back()}catch(e){}}}}
+function openOverlay(id){$(id).classList.add('open');document.body.classList.add('locked');try{if(history.state?.cfOverlay!==id)history.pushState({cfOverlay:id},'')}catch(e){}trapOverlayFocus(id)}
+// --- Accessibility: keyboard focus management for overlays -----------------
+// Opening an overlay moves focus into it (first focusable); closing returns
+// it to the trigger. Tab is cycled inside the topmost open overlay so keyboard
+// visitors can't tab into the page behind a modal.
+function overlayFocusables(scope){return [...scope.querySelectorAll('a[href],button:not([disabled]),input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.offsetParent!==null)}
+function trapOverlayFocus(id){
+  const overlay=$(id);if(!overlay)return;
+  if(!(state.lastFocusedElement instanceof Element))state.lastFocusedElement=document.activeElement;
+  const target=overlayFocusables(overlay)[0];
+  if(target)target.focus({preventScroll:true});
+}
+function restoreOverlayFocus(){
+  const previous=state.lastFocusedElement;
+  state.lastFocusedElement=null;
+  if(previous&&previous.isConnected&&document.activeElement!==previous){try{previous.focus({preventScroll:true})}catch{}}
+}
+function closeOverlay(id){restoreOverlayFocus();const el=$(id);if(!el)return;el.classList.remove('open');if(!document.querySelector('.overlay.open'))document.body.classList.remove('locked');if(id==='detailOverlay'){state.detailHistory=[];updateDetailBackButton()}if(id==='playerOverlay'){const current=Math.max(0,Number($('cineSeek').value)||0),duration=Math.max(0,Number($('cineSeek').max)||0);if(current>0&&duration>0)recordPlayerProgress(current,duration,true);clearTimeout(playerLoadTimer);playerLoadTimer=null;playerLoadAttempt++;clearTimeout(playerHintTimer);playerHintTimer=null;state.playerFailoverTried=[];state.playerGotSignal=false;const frame=$('playerFrame');if(frame){frame.querySelectorAll('iframe,video,audio').forEach(media=>{try{media.pause?.()}catch{};if(media.tagName==='IFRAME')media.src='about:blank'});frame.innerHTML=''}$('playerLoading')?.classList.add('hidden');dismissUpNext();if(!suppressPopBack&&history.state&&history.state.cfOverlay===id){suppressPopBack=true;try{history.back()}catch(e){}}}}
 async function openDetailsById(type,id){
   const detailIsOpen=$('detailOverlay')?.classList.contains('open');
   if(detailIsOpen&&state.selected){
@@ -1810,8 +1862,30 @@ function launchPlayer(item,season=1,episode=1){buzz(15);state.selected=normalize
 function updatePlayerEpisodeNav(){const isTv=Boolean(state.selected&&mediaType(state.selected)==='tv');$('playerEpisodeNav').hidden=!isTv;if(isTv){$('playerEpisodeLabel').textContent=`Season ${state.currentSeason} · Episode ${state.currentEpisode}`;$('previousEpisodeButton').disabled=state.currentSeason===1&&state.currentEpisode===1;$('nextEpisodeButton').disabled=false;}}
 // Season picker: populated from the show's season list once the player opens
 // for a series; switching remounts at the first episode of that season.
-async function populatePlayerSeasons(){const sel=$('playerSeasonSelect');if(!sel)return;if(!state.selected||mediaType(state.selected)!=='tv'){sel.hidden=true;return}try{const show=await api(`/tv/${Number(state.selected.id)}`);const seasons=(show.seasons||[]).filter(x=>Number(x.episode_count)>0).sort((a,b)=>Number(a.season_number)-Number(b.season_number));sel.innerHTML=seasons.map(x=>`<option value="${Number(x.season_number)}">Season ${Number(x.season_number)}</option>`).join('');sel.hidden=seasons.length<2;const has=[...sel.options].some(o=>Number(o.value)===state.currentSeason);sel.value=String(has?state.currentSeason:(seasons[0]?seasons[0].season_number:state.currentSeason))}catch{sel.hidden=true}}
+async function populatePlayerSeasons(){const sel=$('playerSeasonSelect');if(!sel)return;if(!state.selected||mediaType(state.selected)!=='tv'){sel.hidden=true;return}try{const show=await api(`/tv/${Number(state.selected.id)}`);const seasons=(show.seasons||[]).filter(x=>Number(x.episode_count)>0).sort((a,b)=>Number(a.season_number)-Number(b.season_number));state.seasonList=seasons.map(x=>Number(x.season_number));state.seasonEpisodeCounts=Object.fromEntries(seasons.map(x=>[Number(x.season_number),Number(x.episode_count)]));sel.innerHTML=seasons.map(x=>`<option value="${Number(x.season_number)}">Season ${Number(x.season_number)}</option>`).join('');sel.hidden=seasons.length<2;const has=[...sel.options].some(o=>Number(o.value)===state.currentSeason);sel.value=String(has?state.currentSeason:(seasons[0]?seasons[0].season_number:state.currentSeason))}catch{sel.hidden=true}}
 function onPlayerSeasonChange(){const value=Number($('playerSeasonSelect')?.value)||0;if(!value||!state.selected||value===state.currentSeason)return;state.currentSeason=value;state.currentEpisode=1;state.playerFailoverTried=[];state.playerGotSignal=false;state.playerFailed=false;$('playerSubtitle').textContent=`Season ${value} · Episode 1 · ${state.currentProvider}`;mountPlayer();updatePlayerEpisodeNav();toast(`Season ${value} · Episode 1`)}
+// Up Next: when VidRift signals an episode ended, surface a one-tap
+// "Play next" instead of making the visitor hunt for the Next button.
+// Label comes from the season counts stashed by populatePlayerSeasons();
+// navigatePlayerEpisode(1) handles both intra-season and season rollover.
+function upNextLabel(){
+  const counts=state.seasonEpisodeCounts||{};
+  const total=Number(counts[state.currentSeason])||0;
+  if(total&&state.currentEpisode<total)return `Season ${state.currentSeason} · Episode ${state.currentEpisode+1}`;
+  const next=(state.seasonList||[]).find(s=>Number(s)>state.currentSeason);
+  if(next)return `Season ${Number(next)} · Episode 1`;
+  return '';
+}
+function showUpNext(){
+  const bar=$('playerUpNext');
+  if(!bar||!state.selected||mediaType(state.selected)!=='tv')return;
+  const label=upNextLabel();
+  if(!label)return;
+  $('playerUpNextLabel').textContent=`Up next · ${label}`;
+  bar.hidden=false;
+}
+function dismissUpNext(){const bar=$('playerUpNext');if(bar)bar.hidden=true}
+function playUpNext(){dismissUpNext();navigatePlayerEpisode(1)}
 function formatPlayerTime(value){const n=Math.max(0,Math.floor(Number(value)||0));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
 function sendVidriftCommand(type,extra={}){const frame=$('externalPlayer');if(!frame?.contentWindow||state.currentProvider!=='vidrift')return;frame.contentWindow.postMessage({type,...extra},'https://embed.vidrift.net')}
 function togglePlayerPlayback(){const playing=$('cinePlayPause').dataset.playing==='true';sendVidriftCommand(playing?'vidrift:pause':'vidrift:play');$('cinePlayPause').dataset.playing=playing?'false':'true';$('cinePlayPause').textContent=playing?'Play':'Pause'}
@@ -2008,6 +2082,7 @@ function probeProviderReachable(url){
 }
 function mountPlayer(){
   if(!state.selected)return;
+  dismissUpNext();
   clearTimeout(playerLoadTimer);
   playerLoadTimer=null;
   clearTimeout(playerHintTimer);
@@ -2206,6 +2281,7 @@ function handlePlayerMessage(event){
     recordPlayerProgress(data.duration,data.duration,true);
     $('cinePlayPause').dataset.playing='false';
     $('cinePlayPause').textContent='Play';
+    showUpNext();
     return;
   }
   if(data.type==='vidrift:fullscreen'&&data.on){
