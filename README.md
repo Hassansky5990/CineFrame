@@ -13,7 +13,7 @@ CineFrame is a fast, clean way to watch anything from TMDB's huge catalog — tr
 - **Your list, optionally in the cloud** — sign in with an email account and your watchlist and history follow you between devices. Everything also works fine without ever signing in.
 - **Installable app** — it's a PWA: on Android, use the install prompt or "Add to Home Screen" and CineFrame runs full-screen like a native app, with an offline banner when your connection drops.
 - **Network diagnostics** — one tap in the player (footer → Diagnostics) shows every stream server with its live response time on *your* network, so you always know which servers work where you are.
-- **Small stuff that matters** — Android back button closes menus instead of leaving the app, haptic feedback, instant search, dark UI that's easy at night.
+- **Quality-of-life touches** — Android back button closes menus instead of leaving the app, haptic feedback, a Data Saver toggle for metered connections, instant search, dark UI that's easy at night.
 
 ## How watching works
 
