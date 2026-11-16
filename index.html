@@ -12,7 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CineFrame">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>CineFrame — Movies & Series</title>
+<title>CineFrame — Watch Movies, Series & Anime</title>
+<link rel="canonical" href="https://cineframe-web.vercel.app/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"CineFrame","description":"Discover trending movies, series and anime, keep a personal watchlist and continue watching across devices.","applicationCategory":"EntertainmentApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://cineframe-web.vercel.app/"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://image.tmdb.org">
@@ -323,6 +325,13 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .mobile-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;border:0;border-radius:22px;background:none;color:var(--muted);font-size:.7rem;font-weight:600;transition:background .25s,color .25s}
 .mobile-nav button.active{background:#ffffff24;color:#fff}.mobile-nav-icon{width:22px;height:22px}
 .footer{padding-bottom:130px}.toast{bottom:96px}}
+.episode-card{position:relative}
+.episode-watched{position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:1px solid #ffffff2e;background:#00000080;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;display:grid;place-items:center;cursor:pointer;transition:all .2s}
+.episode-watched svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.episode-watched:hover{border-color:#ffd60a;color:#ffd60a}
+.episode-card.watched .episode-watched{background:#ffd60a;border-color:#ffd60a;color:#111}
+.episode-card.watched .episode-copy{opacity:.55}
+.episode-card.watched .episode-still{opacity:.65;filter:saturate(.7)}
 /* back to top */
 .back-top{position:fixed;z-index:60;right:22px;bottom:28px;width:48px;height:48px;border-radius:50%;border:1px solid #ffffff26;background:#1c1c1eb3;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 12px 30px #000c;opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;transition:opacity .3s,transform .3s var(--ease),background .2s}
 .back-top.show{opacity:1;transform:none;pointer-events:auto}
@@ -330,6 +339,13 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .back-top:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .back-top svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:760px),((max-width:1024px) and (pointer:coarse)){.back-top{right:max(14px,env(safe-area-inset-right));bottom:100px}}
+.install-nudge{position:fixed;z-index:62;left:50%;transform:translate(-50%,24px);bottom:104px;display:flex;align-items:center;gap:10px;max-width:92vw;padding:10px 12px;border-radius:16px;background:#141414f2;border:1px solid #ffd60a3d;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#f2f2f5;font-size:.8rem;font-weight:600;box-shadow:0 18px 50px #000c;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s var(--ease)}
+.install-nudge.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.install-text{line-height:1.3}
+.install-go{flex:none;height:36px;padding:0 16px;border:0;border-radius:10px;background:#ffd60a;color:#111;font-size:.8rem;font-weight:800;cursor:pointer;transition:transform .15s}
+.install-go:active{transform:scale(.96)}
+.install-close{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:#a1a1aa;font-size:1.1rem;cursor:pointer}
+.install-close:hover{background:#ffffff14;color:#fff}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.movie-card:hover,.movie-card:focus-within{transform:none}}
 
 .recommend-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
@@ -1174,7 +1190,8 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.9</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.7.0</span></footer>
+<div class="install-nudge" id="installNudge" hidden role="region" aria-label="Install CineFrame"><span class="install-text">Install CineFrame — full-screen app, works offline</span><button class="install-go" id="installGo" type="button">Install</button><button class="install-close" id="installClose" type="button" aria-label="Dismiss">×</button></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1182,7 +1199,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.9';
+const APP_VERSION = '1.7.0';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1280,6 +1297,9 @@ function pickLaunchProvider(item,season,episode){
   const saved=getHistory().find(x=>Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item));
   const sameEpisode=mediaType(item)!=='tv'||(Number(saved?.season)===Number(season)&&Number(saved?.episode)===Number(episode));
   const resumeSeconds=sameEpisode?Math.max(0,Number(saved?.progressSeconds)||0):0;
+  const preferred=safeStore.get('cineframe_last_good_provider',null);
+  const preferredAlive=preferred&&ranked.includes(preferred)&&providerStatusCache?.[preferred]?.ok!==false;
+  if(resumeSeconds<=15&&preferredAlive)return preferred;
   if(resumeSeconds>15){
     const canResume=ranked.find(p=>STARTAT_PROVIDERS.has(p));
     if(canResume&&canResume!==ranked[0])toast(`Resuming on ${providerLabel(canResume)} — ${providerLabel(ranked[0])} can't skip ahead`);
@@ -1559,7 +1579,7 @@ function setLoadingRow(id,count=7){$(id).innerHTML=Array.from({length:count},()=
 function cardMarkup(item){const id=Number(item.id);const type=mediaType(item);state.itemCache[`${type}:${id}`]=normalize(item,type);const inList=getWatchlist().some(x=>Number(x.id)===id&&mediaType(x)===type);const ds=isDataSaver();const progressSeconds=Math.max(0,Number(item.progressSeconds)||0),durationSeconds=Math.max(0,Number(item.durationSeconds)||0);const progress=durationSeconds>0&&progressSeconds>0?Math.min(100,progressSeconds/durationSeconds*100):0;const subline=type==='tv'&&Number(item.season)>0&&Number(item.episode)>0?`S${Number(item.season)} · E${Number(item.episode)}`:null;return `<article class="movie-card" data-card-id="${id}" data-card-type="${type}"><button class="card-open" type="button" aria-label="Details for ${escapeHtml(titleOf(item))}" onclick="openDetailsById('${type}',${id})"><img class="poster" src="${posterOf(item,ds?'w185':'w342')}" srcset="${item?.poster_path&&!ds?`${IMG}w342${item.poster_path} 342w, ${IMG}w500${item.poster_path} 500w, ${IMG}w780${item.poster_path} 780w`:''}" sizes="${ds?'154px':'(max-width:760px) 44vw, 252px'}" alt="" loading="lazy" decoding="async" fetchpriority="low" onerror="imageFallback(this)"><div class="card-copy"><div class="card-title">${escapeHtml(titleOf(item))}</div><div class="card-meta"><span>${subline||yearOf(item)}</span><span class="score">${subline?'Continue episode':`★ ${ratingOf(item)}`}</span></div>${progress>0?`<div class="card-progress" role="img" aria-label="Watched ${Math.round(progress)} percent"><span style="width:${progress.toFixed(2)}%"></span></div>`:''}</div></button><button class="card-watch" onclick="toggleWatchlist(${id},'${type}',this)" aria-label="${inList?'Remove from':'Add to'} My List">${inList?'✓':'＋'}</button></article>`}
 function renderRow(id,items){const rowEl=$(id);if(!rowEl)return;rowEl.innerHTML=items?.length?items.slice(0,20).map(cardMarkup).join(''):'<div class="empty">No titles found.</div>';updateShelfForRow(id);syncWatchButtons()} 
 function syncWatchButtons(){document.querySelectorAll('.movie-card[data-card-id]').forEach(card=>{const id=card.dataset.cardId,type=card.dataset.cardType;const saved=getWatchlist().some(x=>Number(x.id)===Number(id)&&mediaType(x)===type);const button=card.querySelector('.card-watch');if(button){button.textContent=saved?'✓':'＋';button.setAttribute('aria-label',saved?'Remove from My List':'Add to My List')}})}
-function setHero(item){if(!item)return;state.hero=item;const back=backdropOf(item,isDataSaver()?'w300':isPhoneLayout()?'w780':'w1280');$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">${ratingOf(item)==='NR'?'NR':`★ ${ratingOf(item)}`}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent='Play';}
+function setHero(item){if(!item)return;state.hero=item;const resumeHit=getHistory().find(x=>Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item)&&Number(x.progressSeconds)>15);const resumeLabel=resumeHit?(mediaType(item)==='tv'?`Resume S${Number(resumeHit.season)||1} E${Number(resumeHit.episode)||1}`:'Resume'):null;state.heroResume=resumeHit?{season:Number(resumeHit.season)||1,episode:Number(resumeHit.episode)||1}:null;const back=backdropOf(item,isDataSaver()?'w300':isPhoneLayout()?'w780':'w1280');$('heroBackdrop').style.backgroundImage=back?`url("${back}")`:'';$('heroTitle').textContent=titleOf(item);$('heroOverview').textContent=item.overview||'Discover the details and find your next watch.';$('heroMeta').innerHTML=`<span class="rating">${ratingOf(item)==='NR'?'NR':`★ ${ratingOf(item)}`}</span><span>${yearOf(item)}</span><span class="tag">${mediaType(item)==='tv'?'SERIES':'MOVIE'}</span>${item.adult?'<span class="tag">18+</span>':''}`;$('heroPlay').querySelector('span').textContent=resumeLabel||'Play';}
 function shelfScrollStep(row){
   const card=row?.querySelector('.movie-card');
   const gap=parseFloat(getComputedStyle(row).columnGap)||20;
@@ -1823,6 +1843,35 @@ function showMoreEpisodes(){
   state.episodeVisibleCount+=12;
   renderEpisodeList();
 }
+function getWatchedEps(){const v=safeStore.get('cineframe_watched_eps',{});return (v&&typeof v==='object'&&!Array.isArray(v))?v:{}}
+function watchedEpsKey(){const tvId=Number(state.selected?.id)||0;const season=Number($('seasonSelect')?.value)||1;return tvId+':'+season}
+function watchedEpisodeNumbers(){const arr=getWatchedEps()[watchedEpsKey()];return Array.isArray(arr)?arr:[]}
+function toggleEpisodeWatched(n,button){
+  const key=watchedEpsKey();
+  if(key==='0:1'||!Number(state.selected?.id))return;
+  const store=getWatchedEps();
+  const arr=Array.isArray(store[key])?[...store[key]]:[];
+  const i=arr.indexOf(Number(n));
+  if(i>=0)arr.splice(i,1);else arr.push(Number(n));
+  store[key]=arr;
+  safeStore.set('cineframe_watched_eps',store);
+  const card=button?.closest('.episode-card');
+  const watched=i<0;
+  if(card){card.classList.toggle('watched',watched);card.querySelector('.episode-watched')?.setAttribute('aria-pressed',watched?'true':'false')}
+  buzz(8);
+  updateEpisodeWatchedCount();
+  toast(watched?'Episode '+String(n).padStart(2,'0')+' marked watched':'Episode '+String(n).padStart(2,'0')+' marked unwatched');
+}
+function updateEpisodeWatchedCount(){
+  const count=$('episodeCount');
+  if(!count||!state.selected)return;
+  const episodes=(state.episodeItems||[]).filter(ep=>!ep.air_date||ep.air_date<=new Date().toISOString().slice(0,10));
+  if(!episodes.length)return;
+  const watched=episodes.filter(ep=>watchedEpisodeNumbers().includes(Number(ep.episode_number))).length;
+  const base=count.dataset.base||count.textContent;
+  count.dataset.base=base.replace(/\s*·\s*\d+ watched$/,'');
+  count.textContent=count.dataset.base+(watched?` · ${watched} watched`:'');
+}
 function renderEpisodeList(){
   const list=$('episodeList'),count=$('episodeCount'),more=$('episodeLoadMore');
   if(!list||!count||!more)return;
@@ -1858,11 +1907,14 @@ function renderEpisodeList(){
     const still=ep.still_path?'https://image.tmdb.org/t/p/w300'+ep.still_path:FALLBACK_POSTER;
     const runtime=ep.runtime?` · ${ep.runtime} min`:'';
     const selected=Number(ep.episode_number)===Number(state.currentEpisode);
-    return `<button type="button" class="episode-card${selected?' selected':''}" aria-pressed="${selected?'true':'false'}" onclick="selectEpisode(${Number(ep.episode_number)},this)"><img class="episode-still" src="${still}" alt="" loading="lazy" onerror="imageFallback(this)"><span class="episode-copy"><span class="episode-title">${String(ep.episode_number).padStart(2,'0')} · ${escapeHtml(ep.name||'Episode')}</span><span class="episode-meta" style="display:block">${ep.air_date?escapeHtml(ep.air_date):'Release date unavailable'}${runtime}</span><span class="episode-overview" style="display:block">${escapeHtml(ep.overview||'No episode description available.')}</span></span></button>`;
+    const watched=watchedEpisodeNumbers().includes(Number(ep.episode_number));
+    return `<div class="episode-card${selected?' selected':''}${watched?' watched':''}" role="button" tabindex="0" aria-pressed="${selected?'true':'false'}" onclick="selectEpisode(${Number(ep.episode_number)},this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEpisode(${Number(ep.episode_number)},this)}"><img class="episode-still" src="${still}" alt="" loading="lazy" onerror="imageFallback(this)"><span class="episode-copy"><span class="episode-title">${String(ep.episode_number).padStart(2,'0')} · ${escapeHtml(ep.name||'Episode')}</span><span class="episode-meta" style="display:block">${ep.air_date?escapeHtml(ep.air_date):'Release date unavailable'}${runtime}</span><span class="episode-overview" style="display:block">${escapeHtml(ep.overview||'No episode description available.')}</span></span><button class="episode-watched" type="button" onclick="event.stopPropagation();toggleEpisodeWatched(${Number(ep.episode_number)},this)" aria-pressed="${watched?'true':'false'}" aria-label="${watched?'Mark episode unwatched':'Mark episode watched'}" title="${watched?'Mark unwatched':'Mark watched'}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button></div>`;
   }).join('');
   count.textContent=query?`${filtered.length} match${filtered.length===1?'':'es'}`:`${visible.length} of ${episodes.length} episodes`;
   more.hidden=visible.length>=filtered.length;
   more.textContent=`Show more episodes (${Math.min(12,filtered.length-visible.length)} more)`;
+  count.dataset.base=count.textContent;
+  updateEpisodeWatchedCount();
 }
 function selectEpisode(episodeNumber,button){
   if(!state.selected||mediaType(state.selected)!=='tv')return;
@@ -1879,7 +1931,7 @@ function selectEpisode(episodeNumber,button){
   launchPlayer(state.selected,state.currentSeason,state.currentEpisode);
 }
 function showHeroDetails(){if(state.hero)openDetails(state.hero)}
-function playHero(){if(state.hero)launchPlayer(state.hero,1,1)}
+function playHero(){if(!state.hero)return;const r=state.heroResume;if(r&&state.hero&&Number(r.season)>0)launchPlayer(state.hero,r.season,r.episode);else launchPlayer(state.hero,1,1)}
 function playSelected(){if(!state.selected)return;launchPlayer(state.selected,state.currentSeason,state.currentEpisode)}
 function playTrailerSelected(){const trailer=state.videos.find(v=>v.site==='YouTube'&&v.type==='Trailer')||state.videos.find(v=>v.site==='YouTube');if(trailer)playTrailer(trailer.key,trailer.name||'Trailer');else toast('No YouTube trailer was found for this title.')}
 function buildProviderUrl(item,provider,season=1,episode=1){
@@ -2400,6 +2452,7 @@ function handlePlayerMessage(event){
   const data=event.data;
   if(!data||typeof data!=='object'||typeof data.type!=='string')return;
   state.playerGotSignal=true;
+  try{safeStore.set('cineframe_last_good_provider',state.currentProvider)}catch(_){}
 
   if(data.type==='vidrift:exit'){
     closePlayer();
@@ -2526,6 +2579,25 @@ async function runSearch(reset,requestId=state.searchRequestId){const query=stat
   };
   modal.addEventListener('pointerup',end);
   modal.addEventListener('pointercancel',end);
+})();
+/* install prompt nudge (shown from the 2nd visit, dismissible for 30 days) */
+(function(){
+  const visits=Number(safeStore.get('cineframe_visits',0))+1;
+  safeStore.set('cineframe_visits',visits);
+  let deferred=null;
+  function maybeShow(){
+    if(!deferred||visits<2)return;
+    try{if(matchMedia('(display-mode: standalone)').matches||navigator.standalone)return}catch(_){}
+    const dismissed=Number(safeStore.get('cineframe_install_dismissed',0));
+    if(dismissed&&Date.now()-dismissed<30*86400000)return;
+    const bar=$('installNudge');
+    if(bar){bar.hidden=false;requestAnimationFrame(()=>bar.classList.add('show'))}
+  }
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;maybeShow()});
+  $('installGo')?.addEventListener('click',async()=>{try{if(deferred){deferred.prompt();const r=await deferred.userChoice;if(r&&r.outcome!=='accepted')safeStore.set('cineframe_install_dismissed',Date.now())}}catch(_){}$('installNudge')?.remove()});
+  $('installClose')?.addEventListener('click',()=>{safeStore.set('cineframe_install_dismissed',Date.now());$('installNudge')?.remove()});
+  document.addEventListener('appinstalled',()=>$('installNudge')?.remove());
+  if(deferred)maybeShow();
 })();
 window.addEventListener('scroll',()=>{document.querySelector('.topbar')?.classList.toggle('scrolled',window.scrollY>24);const b=$('backTop');if(b)b.classList.toggle('show',window.scrollY>500)},{passive:true});
 (function(){const b=$('backTop');if(!b)return;b.addEventListener('click',()=>{buzz(8);const smooth=!matchMedia('(prefers-reduced-motion:reduce)').matches;window.scrollTo({top:0,behavior:smooth?'smooth':'auto'})});if(window.scrollY>500)b.classList.add('show')})();

@@ -5,7 +5,9 @@
      from cache and refreshed in the background for the next visit.
    - TMDB, provider embeds, Supabase and every cross-origin request are
      never intercepted. Non-navigation requests pass through untouched. */
-const CACHE = 'cineframe-shell-v14';
+const CACHE = 'cineframe-shell-v15';
+const IMAGES = 'cineframe-images-v1';
+
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -36,7 +38,7 @@ self.addEventListener('activate', (event) => {
     } catch (_) { healthy = false; }
 
     const keys = await caches.keys();
-    const oldKeys = keys.filter((key) => key !== CACHE);
+    const oldKeys = keys.filter((key) => key !== CACHE && key !== IMAGES);
     const isUpgrade = oldKeys.some((key) => key.indexOf('cineframe-shell-') === 0);
 
     if (healthy) {
@@ -59,6 +61,31 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
+
+  // Posters and backdrops come from one immutable origin. Cache-first with
+  // a hard cap so shelves are instant on repeat visits and poor networks.
+  if (request.method === 'GET' && new URL(request.url).origin === 'https://image.tmdb.org') {
+    event.respondWith((async () => {
+      const cache = await caches.open(IMAGES);
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      try {
+        const fresh = await fetch(request);
+        if (fresh && fresh.ok) {
+          cache.put(request, fresh.clone()).catch(() => {});
+          const keys = await cache.keys();
+          if (keys.length > 140) {
+            keys.slice(0, keys.length - 140).forEach((key) => cache.delete(key).catch(() => {}));
+          }
+        }
+        return fresh;
+      } catch (_) {
+        return cached || Response.error();
+      }
+    })());
+    return;
+  }
+
   // App documents only: never touch API calls, media segments or embeds.
   if (request.mode !== 'navigate') return;
   const url = new URL(request.url);
