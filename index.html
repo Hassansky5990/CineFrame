@@ -335,6 +335,32 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .episode-card.watched .episode-watched{background:#ffd60a;border-color:#ffd60a;color:#111}
 .episode-card.watched .episode-copy{opacity:.55}
 .episode-card.watched .episode-still{opacity:.65;filter:saturate(.7)}
+/* cold-start splash */
+#splash{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#000;transition:opacity .5s ease,visibility .5s}
+#splash.done{opacity:0;visibility:hidden;pointer-events:none}
+.splash-mark{width:92px;height:92px;border-radius:22px;background:#e50914;display:grid;place-items:center;box-shadow:0 24px 64px #e5091430;animation:splashPulse 1.5s ease-in-out infinite}
+.splash-mark svg{width:46px;height:46px}
+.splash-word{font-size:1.35rem;font-weight:800;letter-spacing:.015em;color:#fff}
+.splash-word span{color:#e50914}
+@keyframes splashPulse{0%,100%{transform:scale(1);box-shadow:0 24px 60px #e5091422}50%{transform:scale(1.07);box-shadow:0 28px 72px #e5091445}}
+.device-profiles{margin:14px 0 4px}
+.dp-label{margin:0 0 8px;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.device-profiles-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.profile-chip{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:999px;border:1px solid #ffffff22;border-left:4px solid var(--pc,#e50914);background:#ffffff0d;color:#dcdce0;font-size:.79rem;font-weight:650;cursor:pointer;transition:all .2s;white-space:nowrap}
+.profile-chip:hover{border-color:#ffffff44;color:#fff}
+.profile-chip.active{background:#fff;color:#000;border-color:#fff;border-left-color:var(--pc,#e50914)}
+.profile-add{border-style:dashed;border-left:1px dashed #ffffff33;color:#a1a1aa;background:transparent}
+.profile-del{color:#ff9d9d;border-color:#ff9d9d44;border-left-color:#ff9d9d}
+/* zen mode: nothing but the posters */
+.zen-toggle{position:fixed;z-index:61;left:22px;bottom:28px;width:48px;height:48px;border-radius:50%;border:1px solid #ffffff26;background:#1c1c1eb3;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 12px 30px #000c;transition:background .25s,color .25s,transform .2s}
+.zen-toggle svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.zen-toggle:hover{background:#2c2c2ecc}
+.zen-toggle:focus-visible{outline:2px solid #fff;outline-offset:3px}
+body.zen .zen-toggle{background:#ffd60a;border-color:#ffd60a;color:#111}
+body.zen .topbar,body.zen .mobile-nav,body.zen .hero,body.zen .section-heading,body.zen .filterbar,body.zen .app-foot,body.zen .back-top,body.zen .install-nudge,body.zen .net-banner{display:none!important}
+body.zen #app{padding-top:14px}
+body.zen .home-shelf,body.zen .section{margin-top:8px}
+@media(max-width:760px),((max-width:1024px) and (pointer:coarse)){.zen-toggle{left:max(14px,env(safe-area-inset-left));bottom:100px}}
 /* back to top */
 .back-top{position:fixed;z-index:60;right:22px;bottom:28px;width:48px;height:48px;border-radius:50%;border:1px solid #ffffff26;background:#1c1c1eb3;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 12px 30px #000c;opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;transition:opacity .3s,transform .3s var(--ease),background .2s}
 .back-top.show{opacity:1;transform:none;pointer-events:auto}
@@ -1060,6 +1086,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="splash-mark"><svg viewBox="0 0 64 64"><path d="M24 18v28l24-14z" fill="#fff"/></svg></div><div class="splash-word">Cine<span>Frame</span></div></div>
   <div class="net-banner" id="netBanner" role="status"><span class="net-dot" aria-hidden="true"></span>You're offline — shelves and playback recover automatically when you're back</div>
 <header class="topbar">
   <a class="brand" href="#home" aria-label="CineFrame home" onclick="goHome();return false"><span class="brandmark">▶</span><span>CINE<em>FRAME</em></span></a>
@@ -1083,7 +1110,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
   <section id="listingPage" class="section search-page hidden"><div class="section-heading"><h2 id="listingTitle">Explore</h2><span class="section-sub" id="listingCount"></span></div><div class="filterbar" id="filterbar"><div class="pill-row"><button class="pill active" data-filter="all"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg><span>All</span></button><button class="pill" data-filter="movie" ><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button class="pill" data-filter="tv" ><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9.5 5 2.5-5 2.5zM8 2l4 3 4-3"/></svg><span>Shows</span></button><button class="pill" data-filter="anime" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.4L19 10.2l-5.1 1.8L12 17.5l-1.9-5.5L5 10.2l5.1-1.8z"/></svg><span>Anime</span></button></div><label class="filter-control" hidden><span>Genre:</span><select id="genreFilter" aria-label="Filter by genre"><option value="">All genres</option></select></label><div class="genre-chips" id="genreChips" role="group" aria-label="Filter by genre"></div><label class="filter-control"><span>Sort:</span><select id="sortFilter" aria-label="Sort results"><option value="popularity.desc">Most popular</option><option value="vote_average.desc">Highest rated</option><option value="primary_release_date.desc">Newest</option><option value="title.asc">Title A–Z</option></select></label></div><div class="results-grid" id="listingGrid"></div><div style="text-align:center;padding:24px"><button class="quiet" id="loadMore" onclick="loadMoreResults()">Load more</button></div></section>
 </main>
 
-<button class="back-top" id="backTop" type="button" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button><nav class="mobile-nav" aria-label="Mobile navigation"><button class="active" onclick="goHome()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button onclick="showCategory('movie')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button onclick="showCategory('tv')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="mobile-nav-screen" x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button><button onclick="showWatchlist()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>My List</span></button></nav>
+<button class="zen-toggle" id="zenToggle" type="button" aria-label="Toggle Zen mode — hide everything except posters" aria-pressed="false" title="Zen mode — posters only"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="back-top" id="backTop" type="button" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button><nav class="mobile-nav" aria-label="Mobile navigation"><button class="active" onclick="goHome()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button onclick="showCategory('movie')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button onclick="showCategory('tv')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="mobile-nav-screen" x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button><button onclick="showWatchlist()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>My List</span></button></nav>
 <div class="overlay" id="detailOverlay" aria-modal="true" role="dialog" aria-label="Title details"><div class="modal"><div class="detail-grab" aria-hidden="true"></div><button class="close" onclick="closeOverlay('detailOverlay')" aria-label="Close details">×</button><button type="button" id="detailBackButton" class="detail-back" onclick="backToPreviousTitle()" aria-label="Back to previous title" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>Back</span></button><div class="detail-hero" id="detailHero"><img class="detail-hero-artwork" id="detailHeroArtwork" alt="" aria-hidden="true"><div class="detail-copy"><div class="eyebrow"><span class="dot"></span><span id="detailType">FEATURED TITLE</span></div><h2 id="detailTitle">Title</h2><div class="meta" id="detailMeta"></div><div class="actions"><button class="secondary action-play" onclick="playSelected()"><svg class="action-icon action-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9.1 6.2a1.1 1.1 0 0 1 0 1.8l-9.1 6.2c-.7.5-1.6-.1-1.6-.9z" fill="currentColor" stroke="none"/></svg><span>Play</span></button><button class="quiet" id="detailListButton" onclick="toggleSelectedWatchlist()">＋ My List</button><button class="quiet action-info" onclick="playTrailerSelected()"><svg class="action-icon action-icon-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Trailer</span></button></div></div></div><div class="detail-body"><p class="detail-overview" id="detailOverview"></p><div class="tiny-note" id="detailGenres"></div><div id="tvControls" class="hidden"><h3 class="subhead">Episodes</h3><div class="selects"><select id="seasonSelect" aria-label="Season" onchange="loadSeasonEpisodes()"></select></div><div class="episode-tools"><label class="episode-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="episodeSearch" type="search" placeholder="Search episodes by name or number…" aria-label="Search episodes" oninput="searchEpisodes(this.value)" autocomplete="off"></label><span id="episodeCount" class="episode-count">Episodes</span></div><div id="episodeList" class="episode-list" aria-live="polite"><div class="tiny-note">Choose a season to view its episodes.</div></div><button type="button" class="quiet episode-load-more" id="episodeLoadMore" onclick="showMoreEpisodes()" hidden>Show more episodes</button></div><h3 class="subhead">Videos & trailers</h3><div class="video-strip" id="videoStrip"><div class="tiny-note">Loading videos…</div></div><div class="recommend-heading"><h3 class="subhead">More like this</h3><div class="popular-tools recommend-tools" aria-label="Related titles slider controls"><div class="popular-progress" aria-hidden="true"><span id="recommendSliderProgress"></span></div><span class="popular-count" id="recommendSliderCount" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow" id="recommendPrev" onclick="scrollRecommendations(-1)" aria-label="Previous related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow" id="recommendNext" onclick="scrollRecommendations(1)" aria-label="Next related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="recommendRow" aria-label="More like this" tabindex="0"></div></div></div></div>
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player">
   <div class="modal player-modal" id="playerModal">
@@ -1147,6 +1174,10 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-kicker">CineFrame account</p>
     <h2 id="authHeading">Welcome back.</h2>
     <p class="auth-intro" id="authIntro">Sign in to your CineFrame account.</p>
+    <div class="device-profiles">
+      <p class="dp-label">On this device</p>
+      <div class="device-profiles-row" id="deviceProfiles"></div>
+    </div>
     <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Account access">
       <button type="button" id="authSignInTab" class="active" onclick="setAuthMode('signin')" aria-selected="true">Sign in</button>
       <button type="button" id="authSignUpTab" onclick="setAuthMode('signup')" aria-selected="false">Create account</button>
@@ -1193,7 +1224,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.9.0</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.10.0</span></footer>
 <div class="install-nudge" id="installNudge" hidden role="region" aria-label="Install CineFrame"><span class="install-text">Install CineFrame — full-screen app, works offline</span><button class="install-go" id="installGo" type="button">Install</button><button class="install-close" id="installClose" type="button" aria-label="Dismiss">×</button></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -1202,7 +1233,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.9.0';
+const APP_VERSION = '1.10.0';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1319,7 +1350,8 @@ const $ = id => document.getElementById(id);
 // mobile app layout, even if the browser is emulating a desktop viewport
 // (e.g. "Desktop site" mode). Desktop browsers keep the desktop layout.
 function isPhoneLayout(){return matchMedia('(max-width:760px)').matches||matchMedia('(max-width:1024px) and (pointer:coarse)').matches}
-const safeStore = { get(key, fallback){try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}} };
+function profileScopedKey(key){try{const p=safeStore.get('cineframe_active_profile','default');if(p&&p!=='default'&&['cineframe_watchlist','cineframe_history','cineframe_watched_eps'].includes(key))return key+'__'+p}catch(_){}return key}
+const safeStore = { get(key, fallback){try{key=profileScopedKey(key);const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}}, set(key,val){try{localStorage.setItem(profileScopedKey(key),JSON.stringify(val))}catch{}} };
 const getWatchlist = () => { const v=safeStore.get('cineframe_watchlist', []); return Array.isArray(v)?v:[]; };
 const getHistory = () => { const v=safeStore.get('cineframe_history', []); return Array.isArray(v)?v:[]; };
 const libraryKey = (item) => `${mediaType(item)}:${Number(item.id)}`;
@@ -1555,6 +1587,54 @@ function checkVisualZoom(){
 }
 addEventListener('load',()=>setTimeout(checkVisualZoom,1200),{once:true});
 addEventListener('resize',()=>setTimeout(checkVisualZoom,500));
+/* device profiles: separate watchlist/history per profile on this phone */
+const PROFILE_COLORS=['#e50914','#ffd60a','#22c55e','#3b82f6','#a855f7','#ec4899','#14b8a6'];
+function getProfiles(){const v=safeStore.get('cineframe_profiles',[]);return Array.isArray(v)?v:[]}
+function getActiveProfileId(){return safeStore.get('cineframe_active_profile','default')}
+function renderProfileChips(){
+  const host=$('deviceProfiles');if(!host)return;
+  const profiles=getProfiles(),active=getActiveProfileId();
+  const chip=(id,label,color)=>`<button type="button" class="profile-chip${active===id?' active':''}" data-profile="${escapeHtml(id)}" style="--pc:${color}" aria-pressed="${active===id?'true':'false'}">${escapeHtml(label)}</button>`;
+  host.innerHTML=chip('default','Main','#e50914')
+    +profiles.map(p=>chip(p.id,p.name,p.color)).join('')
+    +'<button type="button" class="profile-chip profile-add" id="profileAddBtn">＋ Add</button>'
+    +(active!=='default'?'<button type="button" class="profile-chip profile-del" id="profileDeleteBtn" title="Delete this profile">Delete</button>':'');
+}
+function switchProfile(id){
+  safeStore.set('cineframe_active_profile',id);
+  updateWatchCount();renderContinue();
+  if(state.page==='watchlist')renderWatchlistPage();
+  schedulePersonalized();loadAiringSoon().catch(()=>{});
+  renderProfileChips();
+  const p=getProfiles().find(x=>x.id===id);
+  toast(id==='default'?'Switched to Main profile':'Switched to '+(p?.name||'profile'));
+}
+function addProfile(){
+  const name=String(prompt('Name this profile (e.g. "Kids")','')||'').trim().slice(0,24);
+  if(!name)return;
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const color=PROFILE_COLORS[getProfiles().length%PROFILE_COLORS.length];
+  safeStore.set('cineframe_profiles',[...getProfiles(),{id,name,color}]);
+  switchProfile(id);
+}
+function deleteProfile(id){
+  const profiles=getProfiles(),p=profiles.find(x=>x.id===id);
+  if(!p)return;
+  if(!confirm(`Delete the "${p.name}" profile? Its watchlist and history on this device will be erased.`))return;
+  ['cineframe_watchlist','cineframe_history','cineframe_watched_eps'].forEach(k=>{try{localStorage.removeItem(k+'__'+id)}catch(_){}});
+  safeStore.set('cineframe_profiles',profiles.filter(x=>x.id!==id));
+  if(getActiveProfileId()===id)switchProfile('default');else renderProfileChips();
+}
+document.addEventListener('click',e=>{
+  const chip=e.target.closest('[data-profile]');
+  if(chip){switchProfile(chip.dataset.profile);return}
+  if(e.target.closest('#profileAddBtn')){addProfile();return}
+  if(e.target.closest('#profileDeleteBtn')){deleteProfile(getActiveProfileId());return}
+});
+/* zen mode: persist + toggle */
+function toggleZen(){const on=document.body.classList.toggle('zen');safeStore.set('cineframe_zen',on?1:0);const b=$('zenToggle');if(b)b.setAttribute('aria-pressed',on?'true':'false');buzz(8);toast(on?'Zen mode on — just the posters':'Zen mode off')}
+$('zenToggle')?.addEventListener('click',toggleZen);
+if(Number(safeStore.get('cineframe_zen',0))===1){document.body.classList.add('zen');$('zenToggle')?.setAttribute('aria-pressed','true')}
 // ---- Data Saver: lighter images + calmer home on metered/slow connections.
 // Honors the OS-level saveData hint automatically; manual toggle persists.
 function isDataSaver(){return Boolean(safeStore.get('cineframe_data_saver',false)||navigator.connection?.saveData)}
@@ -1694,7 +1774,7 @@ function initializeAuth(){
 }
 async function initAuthClient(){try{if(state.auth.configured)return;if(!window.supabase?.createClient){console.error('Supabase client library did not load');return}let confirmationReturn=new URLSearchParams(window.location.search).get('auth')==='confirmed';state.auth.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});state.auth.configured=true;state.auth.client.auth.onAuthStateChange((event,session)=>{const previous=state.auth.user?.id;state.auth.user=session?.user||null;renderAccountButton();if(event==='SIGNED_OUT'){state.auth.libraryReady=false;if(state.auth.libraryChannel){state.auth.client.removeChannel(state.auth.libraryChannel);state.auth.libraryChannel=null}safeStore.set('cineframe_watchlist',[]);safeStore.set('cineframe_history',[]);renderLibraryViews()}else if(state.auth.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'||previous!==state.auth.user.id)){state.auth.libraryReady=false;syncCloudLibrary()}if(event==='SIGNED_IN'&&confirmationReturn&&state.auth.user?.email_confirmed_at){confirmationReturn=false;state.auth.mode='signin';openOverlay('authOverlay');renderAuthPanel();$('authHeading').textContent='Email confirmed!';$('authIntro').textContent='Your CineFrame account is ready. You can now enjoy your personal watchlist and Continue Watching across devices.';toast('Email confirmed — welcome to CineFrame');const cleanUrl=new URL(window.location.href);cleanUrl.searchParams.delete('auth');cleanUrl.searchParams.delete('code');window.history.replaceState({},document.title,cleanUrl.pathname+cleanUrl.search+cleanUrl.hash);}if(event==='PASSWORD_RECOVERY'){state.auth.mode='recovery';$('authPassword').value='';$('authConfirmPassword').value='';if(!$('authOverlay')?.classList.contains('open'))openOverlay('authOverlay');renderAuthPanel();$('authPassword').focus({preventScroll:true});}else if($('authOverlay')?.classList.contains('open')&&!(event==='SIGNED_IN'&&state.auth.user?.email_confirmed_at&&$('authHeading').textContent==='Email confirmed!'))renderAuthPanel()});const {data,error}=await state.auth.client.auth.getSession();if(error)throw error;if(!state.auth.user)state.auth.user=data.session?.user||null;renderAccountButton();if(state.auth.user)await syncCloudLibrary();}catch(error){console.error('CineFrame authentication initialization failed:',error);state.auth.configured=false;renderAccountButton()}}
 function togglePasswordVisibility(inputId,button){const input=$(inputId);if(!input)return;const show=input.type==='password';input.type=show?'text':'password';button.setAttribute('aria-label',show?'Hide password':'Show password');button.setAttribute('aria-pressed',String(show));button.innerHTML=show?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.8M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 3-.5"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';}
-async function openAuthModal(){state.auth.mode='signin';$('authEmail').value='';$('authPassword').value='';$('authConfirmPassword').value='';renderAuthPanel();openOverlay('authOverlay');if(authIsConfigured()&&!state.auth.configured){try{await ensureSupabaseSdk();initAuthClient()}catch(error){authFeedback('Could not reach the account service. Check your connection and try again.','error')}}}
+async function openAuthModal(){renderProfileChips();state.auth.mode='signin';$('authEmail').value='';$('authPassword').value='';$('authConfirmPassword').value='';renderAuthPanel();openOverlay('authOverlay');if(authIsConfigured()&&!state.auth.configured){try{await ensureSupabaseSdk();initAuthClient()}catch(error){authFeedback('Could not reach the account service. Check your connection and try again.','error')}}}
 function setAuthMode(mode){if(!['signin','signup'].includes(mode)||state.auth.user)return;state.auth.mode=mode;authFeedback();renderAuthPanel();$('authPassword').value='';$('authConfirmPassword').value=''}
 function setAuthBusy(busy){state.auth.busy=busy;$('authSubmit').disabled=busy;$('authSubmit').textContent=busy?'Please wait…':state.auth.mode==='recovery'?'Update password':state.auth.mode==='signup'?'Create account':'Sign in'}
 async function submitAuth(event){event.preventDefault();if(state.auth.busy)return;if(!state.auth.client){if(!authIsConfigured()){authFeedback('Supabase is not connected yet. Add the project publishable key first.','error');return}try{await ensureSupabaseSdk();initAuthClient()}catch(error){}if(!state.auth.client){authFeedback('Account service is still connecting — try again in a moment.','error');return}}const mode=state.auth.mode;const email=$('authEmail').value.trim();const password=$('authPassword').value;if(mode!=='recovery'&&!email){authFeedback('Enter your email address.','error');return}if(!password){authFeedback('Enter your password.','error');return}if(['signup','recovery'].includes(mode)&&password!==$('authConfirmPassword').value){authFeedback('The passwords do not match.','error');return}setAuthBusy(true);authFeedback();try{if(mode==='recovery'){const {error}=await state.auth.client.auth.updateUser({password});if(error)throw error;state.auth.mode='signin';renderAuthPanel();$('authAccountFeedback').textContent='Your password has been updated.';toast('Password updated');}else if(mode==='signup'){const {data,error}=await state.auth.client.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+'/?auth=confirmed'}});if(error)throw error;if(data.session){state.auth.user=data.user;renderAccountButton();renderAuthPanel();toast('CineFrame account created');await syncCloudLibrary();}else{authFeedback('Account created. Check your email for the confirmation link, then sign in.','success');$('authPassword').value='';$('authConfirmPassword').value='';}}else{const {data,error}=await state.auth.client.auth.signInWithPassword({email,password});if(error)throw error;state.auth.user=data.user;renderAccountButton();renderAuthPanel();toast('Signed in to CineFrame');await syncCloudLibrary();}}catch(error){authFeedback(error?.message||'Authentication failed. Please try again.','error')}finally{setAuthBusy(false)}}
@@ -2637,6 +2717,9 @@ async function runSearch(reset,requestId=state.searchRequestId){const query=stat
 window.addEventListener('scroll',()=>{document.querySelector('.topbar')?.classList.toggle('scrolled',window.scrollY>24);const b=$('backTop');if(b)b.classList.toggle('show',window.scrollY>500)},{passive:true});
 (function(){const b=$('backTop');if(!b)return;b.addEventListener('click',()=>{buzz(8);const smooth=!matchMedia('(prefers-reduced-motion:reduce)').matches;window.scrollTo({top:0,behavior:smooth?'smooth':'auto'})});if(window.scrollY>500)b.classList.add('show')})();
 document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest('.movie-card');if(!c)return;const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/(r.width*1.5);c.style.setProperty('--mx',(px*100)+'%');c.style.setProperty('--my',(py*100)+'%');c.style.setProperty('--ry',((px-.5)*8)+'deg');c.style.setProperty('--rx',((.5-Math.min(py,1))*6)+'deg')},{passive:true});
+function hideSplash(){const s=$('splash');if(!s)return;s.classList.add('done');setTimeout(()=>s.remove(),650)}
+addEventListener('load',()=>setTimeout(hideSplash,250),{once:true});
+setTimeout(hideSplash,4500);
 init();
 // App-shell service worker: on flaky networks the app opens instantly from
 // cache and refreshes in the background (see sw.js). Never intercepts TMDB,
