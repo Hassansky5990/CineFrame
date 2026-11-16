@@ -1160,7 +1160,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.2</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.3</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1168,7 +1168,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.2';
+const APP_VERSION = '1.6.3';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1474,9 +1474,24 @@ function cineDebugMeasure(){
     const el=document.querySelector(sel);
     if(!el)return sel+' — missing';
     const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
-    return `${sel} ${Math.round(r.width)}×${Math.round(r.height)} disp:${cs.display} cols:${(cs.gridTemplateColumns||'-').slice(0,48)} fs:${cs.fontSize}`;
+    const vis=r.width>0&&r.height>0;
+    return `${vis?'':'(hidden) '}${sel} ${Math.round(r.width)}×${Math.round(r.height)} disp:${cs.display} cols:${(cs.gridTemplateColumns||'-').slice(0,48)} fs:${cs.fontSize}`;
   };
-  out.textContent=['#app','#listingPage','#filterbar','#listingGrid','#listingGrid .movie-card','#listingGrid .poster','#listingPage h2'].map(one).join('\n');
+  const visible=list=>list.map(one).join('\n');
+  const home=$('hero')&&!$('hero').classList.contains('hidden');
+  const shelfRow=document.querySelector('#homeSections .home-shelf:not([hidden]) .row-scroll');
+  let lines;
+  if(home||shelfRow){
+    lines=visible(['#app','#hero','#hero .hero-content','#homeSections .home-shelf:not([hidden])',
+      '#homeSections .row-scroll','#homeSections .row-scroll .movie-card','#homeSections .poster',
+      '#listingPage']);
+  }else{
+    lines=visible(['#app','#listingPage','#filterbar','#listingGrid','#listingGrid .movie-card',
+      '#listingGrid .poster','#listingPage h2']);
+  }
+  out.textContent=lines
+    +'\n\nviewport: '+innerWidth+'×'+innerHeight+' CSS px · dpr '+devicePixelRatio
+    +(window.visualViewport?' · vv '+Math.round(visualViewport.width)+'×'+Math.round(visualViewport.height)+' @'+visualViewport.scale.toFixed(2):'');
 }
 if(/[?&]debug(&|=|$)/.test(location.search))addEventListener('load',cineViewportDebug,{once:true});
 // If the browser is pinch-zoomed out, the page looks "desktop-sized" even
