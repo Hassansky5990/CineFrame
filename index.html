@@ -1160,7 +1160,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.3</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.4</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1168,7 +1168,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.3';
+const APP_VERSION = '1.6.4';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1443,14 +1443,15 @@ function cineViewportDebug(){
   d.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:56px;background:#111;border:1px solid #ffffff55;border-radius:12px;padding:10px 12px;font:11px/1.4 ui-monospace,monospace;color:#fff;max-height:74vh;overflow:auto';
   d.innerHTML=`<b style="color:#ffd60a;font-size:13px">${verdict}</b>`
     +row('innerWidth × innerHeight',innerWidth+' × '+innerHeight+' CSS px')
-    +row('screen · dpr · pinch scale',screen.width+' · '+devicePixelRatio+' · '+(window.visualViewport?visualViewport.scale.toFixed(2):'-'))
+    +row('screen · dpr · pinch scale',screen.width+' · '+devicePixelRatio+' · '+(window.visualViewport?visualViewport.scale.toFixed(2):'-')+' (may lie)')
+    +row('REAL page zoom (clientWidth/innerWidth)',Math.round(pageZoomLevel()*100)+'%')
     +row('coarse pointer · mobile MQ',(coarse?'yes':'no')+' · '+(mqMobile?'yes':'no'))
     +row('mobile-nav visible · ua',(navShown?'yes':'no')+' · '+navigator.userAgent.slice(0,52))
     +`<div style="margin-top:6px;border-top:1px solid #ffffff2a;padding-top:6px">ruler (CSS px):</div>`
     +bar(100,'#ffd60a')+bar(200,'#30d158')+bar(300,'#0a84ff')
     +`<div id="cineDebugOut" style="white-space:pre-line;margin-top:8px;color:#c7ffb2">— open Movies/Shows/Search, then tap Measure —</div>`
     +`<button type="button" onclick="cineDebugMeasure()" style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Measure page</button>`
-    +`<div style="margin-top:10px;border-top:1px solid #ffffff2a;padding-top:8px;line-height:1.45">If these ruler bars end near the <b>middle</b> of the screen (they should reach ~83% of the width at 300px) while everything on the right stays empty, the browser is painting the page into only half the screen. The layout above is correct — that is a device/browser drawing fault, not a page bug. Rotate the phone to landscape and back once; if that does not clear it, fully close the browser from Recents (or reboot).`
+    +`<div style="margin-top:10px;border-top:1px solid #ffffff2a;padding-top:8px;line-height:1.45">If <b>REAL page zoom</b> above is under 100%, the browser is pinch-zoomed out — the page is laid out correctly but painted smaller, which no stylesheet can change. <b>Spread two fingers apart</b> on the page to zoom back to 100% (or fully close the browser from Recents and reopen). Browsers like Brave can report pinch scale as 1.00 even while zoomed out, so trust the REAL line, not the pinch scale one.`
     +`<button type="button" onclick="cineDebugFixSurface()" style="display:block;margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Force surface resize</button></div>`;
   document.body.appendChild(d);
 }
@@ -1491,21 +1492,30 @@ function cineDebugMeasure(){
   }
   out.textContent=lines
     +'\n\nviewport: '+innerWidth+'×'+innerHeight+' CSS px · dpr '+devicePixelRatio
+    +' · real zoom '+Math.round(pageZoomLevel()*100)+'%'
     +(window.visualViewport?' · vv '+Math.round(visualViewport.width)+'×'+Math.round(visualViewport.height)+' @'+visualViewport.scale.toFixed(2):'');
 }
 if(/[?&]debug(&|=|$)/.test(location.search))addEventListener('load',cineViewportDebug,{once:true});
 // If the browser is pinch-zoomed out, the page looks "desktop-sized" even
 // though the layout is correctly mobile. The site can't change browser zoom,
 // but it can say so — once per day per session.
+function pageZoomLevel(){
+  // Chromium on Android: innerWidth tracks the visual viewport when the
+  // page is pinch-zoomed, while documentElement.clientWidth stays at the
+  // layout width. Their ratio is the real page zoom — unlike
+  // visualViewport.scale, which some browsers report as 1.00 even when
+  // the page is zoomed out.
+  const layout=document.documentElement.clientWidth||innerWidth;
+  return Math.min(1,layout/Math.max(innerWidth,1));
+}
 function checkVisualZoom(){
-  const vv=window.visualViewport;
-  if(!vv||typeof vv.scale!=='number')return;
   try{
-    if(vv.scale<0.9){
+    const z=pageZoomLevel();
+    if(z<0.9&&innerWidth>document.documentElement.clientWidth*1.05){
       const last=Number(sessionStorage.getItem('cineframe_zoom_hint')||0);
       if(Date.now()-last>86400000){
         sessionStorage.setItem('cineframe_zoom_hint',String(Date.now()));
-        toast('Your browser is zoomed out ('+Math.round(vv.scale*100)+'%) — pinch in to fill the screen');
+        toast('Your browser is zoomed out ('+Math.round(z*100)+'%) — spread two fingers apart to fill the screen');
       }
     }
   }catch(_){}
