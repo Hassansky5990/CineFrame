@@ -5,7 +5,7 @@
      from cache and refreshed in the background for the next visit.
    - TMDB, provider embeds, Supabase and every cross-origin request are
      never intercepted. Non-navigation requests pass through untouched. */
-const CACHE = 'cineframe-shell-v16';
+const CACHE = 'cineframe-shell-v17';
 const IMAGES = 'cineframe-images-v1';
 
 
