@@ -262,6 +262,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 #authOverlay{align-items:center;justify-content:center;padding:16px}
 #authOverlay .auth-modal{width:min(460px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px);border-radius:24px}
 .close{position:absolute;top:16px;right:16px;z-index:90;float:none;margin:0;width:36px;height:36px;border:1px solid var(--hair);border-radius:50%;background:#00000073;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .2s}.close:hover{background:#ffffff40}.close:hover{background:#ffffff40}
+.detail-grab{position:absolute;top:12px;left:50%;width:44px;height:5px;border-radius:99px;background:#ffffff45;transform:translateX(-50%);z-index:6;pointer-events:none;box-shadow:0 1px 4px #0007}
 .detail-hero{position:relative;isolation:isolate;overflow:hidden;height:clamp(360px,54vw,500px);min-height:360px;padding:0 48px 38px;display:flex;align-items:flex-end;background:var(--panel2) center/cover no-repeat}
 .detail-hero-artwork{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center center;pointer-events:none;max-width:none;transform:none;clip-path:none}
 .detail-hero:before{content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(28,28,30,.82) 0%,rgba(28,28,30,.30) 18%,transparent 42%)}
@@ -1064,7 +1065,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 </main>
 
 <button class="back-top" id="backTop" type="button" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button><nav class="mobile-nav" aria-label="Mobile navigation"><button class="active" onclick="goHome()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></button><button onclick="showCategory('movie')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span>Movies</span></button><button onclick="showCategory('tv')"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="mobile-nav-screen" x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>Shows/Anime</span></button><button onclick="showWatchlist()"><svg class="mobile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>My List</span></button></nav>
-<div class="overlay" id="detailOverlay" aria-modal="true" role="dialog" aria-label="Title details"><div class="modal"><button class="close" onclick="closeOverlay('detailOverlay')" aria-label="Close details">×</button><button type="button" id="detailBackButton" class="detail-back" onclick="backToPreviousTitle()" aria-label="Back to previous title" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>Back</span></button><div class="detail-hero" id="detailHero"><img class="detail-hero-artwork" id="detailHeroArtwork" alt="" aria-hidden="true"><div class="detail-copy"><div class="eyebrow"><span class="dot"></span><span id="detailType">FEATURED TITLE</span></div><h2 id="detailTitle">Title</h2><div class="meta" id="detailMeta"></div><div class="actions"><button class="secondary action-play" onclick="playSelected()"><svg class="action-icon action-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9.1 6.2a1.1 1.1 0 0 1 0 1.8l-9.1 6.2c-.7.5-1.6-.1-1.6-.9z" fill="currentColor" stroke="none"/></svg><span>Play</span></button><button class="quiet" id="detailListButton" onclick="toggleSelectedWatchlist()">＋ My List</button><button class="quiet action-info" onclick="playTrailerSelected()"><svg class="action-icon action-icon-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Trailer</span></button></div></div></div><div class="detail-body"><p class="detail-overview" id="detailOverview"></p><div class="tiny-note" id="detailGenres"></div><div id="tvControls" class="hidden"><h3 class="subhead">Episodes</h3><div class="selects"><select id="seasonSelect" aria-label="Season" onchange="loadSeasonEpisodes()"></select></div><div class="episode-tools"><label class="episode-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="episodeSearch" type="search" placeholder="Search episodes by name or number…" aria-label="Search episodes" oninput="searchEpisodes(this.value)" autocomplete="off"></label><span id="episodeCount" class="episode-count">Episodes</span></div><div id="episodeList" class="episode-list" aria-live="polite"><div class="tiny-note">Choose a season to view its episodes.</div></div><button type="button" class="quiet episode-load-more" id="episodeLoadMore" onclick="showMoreEpisodes()" hidden>Show more episodes</button></div><h3 class="subhead">Videos & trailers</h3><div class="video-strip" id="videoStrip"><div class="tiny-note">Loading videos…</div></div><div class="recommend-heading"><h3 class="subhead">More like this</h3><div class="popular-tools recommend-tools" aria-label="Related titles slider controls"><div class="popular-progress" aria-hidden="true"><span id="recommendSliderProgress"></span></div><span class="popular-count" id="recommendSliderCount" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow" id="recommendPrev" onclick="scrollRecommendations(-1)" aria-label="Previous related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow" id="recommendNext" onclick="scrollRecommendations(1)" aria-label="Next related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="recommendRow" aria-label="More like this" tabindex="0"></div></div></div></div>
+<div class="overlay" id="detailOverlay" aria-modal="true" role="dialog" aria-label="Title details"><div class="modal"><div class="detail-grab" aria-hidden="true"></div><button class="close" onclick="closeOverlay('detailOverlay')" aria-label="Close details">×</button><button type="button" id="detailBackButton" class="detail-back" onclick="backToPreviousTitle()" aria-label="Back to previous title" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>Back</span></button><div class="detail-hero" id="detailHero"><img class="detail-hero-artwork" id="detailHeroArtwork" alt="" aria-hidden="true"><div class="detail-copy"><div class="eyebrow"><span class="dot"></span><span id="detailType">FEATURED TITLE</span></div><h2 id="detailTitle">Title</h2><div class="meta" id="detailMeta"></div><div class="actions"><button class="secondary action-play" onclick="playSelected()"><svg class="action-icon action-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9.1 6.2a1.1 1.1 0 0 1 0 1.8l-9.1 6.2c-.7.5-1.6-.1-1.6-.9z" fill="currentColor" stroke="none"/></svg><span>Play</span></button><button class="quiet" id="detailListButton" onclick="toggleSelectedWatchlist()">＋ My List</button><button class="quiet action-info" onclick="playTrailerSelected()"><svg class="action-icon action-icon-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Trailer</span></button></div></div></div><div class="detail-body"><p class="detail-overview" id="detailOverview"></p><div class="tiny-note" id="detailGenres"></div><div id="tvControls" class="hidden"><h3 class="subhead">Episodes</h3><div class="selects"><select id="seasonSelect" aria-label="Season" onchange="loadSeasonEpisodes()"></select></div><div class="episode-tools"><label class="episode-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="episodeSearch" type="search" placeholder="Search episodes by name or number…" aria-label="Search episodes" oninput="searchEpisodes(this.value)" autocomplete="off"></label><span id="episodeCount" class="episode-count">Episodes</span></div><div id="episodeList" class="episode-list" aria-live="polite"><div class="tiny-note">Choose a season to view its episodes.</div></div><button type="button" class="quiet episode-load-more" id="episodeLoadMore" onclick="showMoreEpisodes()" hidden>Show more episodes</button></div><h3 class="subhead">Videos & trailers</h3><div class="video-strip" id="videoStrip"><div class="tiny-note">Loading videos…</div></div><div class="recommend-heading"><h3 class="subhead">More like this</h3><div class="popular-tools recommend-tools" aria-label="Related titles slider controls"><div class="popular-progress" aria-hidden="true"><span id="recommendSliderProgress"></span></div><span class="popular-count" id="recommendSliderCount" aria-live="polite">01 / 01</span><div class="popular-arrows"><button type="button" class="popular-arrow" id="recommendPrev" onclick="scrollRecommendations(-1)" aria-label="Previous related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><button type="button" class="popular-arrow" id="recommendNext" onclick="scrollRecommendations(1)" aria-label="Next related titles" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div></div></div><div class="row-scroll" id="recommendRow" aria-label="More like this" tabindex="0"></div></div></div></div>
 <div class="overlay" id="playerOverlay" aria-modal="true" role="dialog" aria-label="Video player">
   <div class="modal player-modal" id="playerModal">
     <div id="playerLoading" class="hidden" aria-hidden="true"></div>
@@ -1173,7 +1174,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.8</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.9</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1181,7 +1182,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.8';
+const APP_VERSION = '1.6.9';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -2483,6 +2484,49 @@ function setupSearch(){$('searchInput').addEventListener('input',e=>{clearTimeou
 async function startSearch(query){const normalizedQuery=String(query||'').trim();if(!normalizedQuery)return;rememberSearch(normalizedQuery);const requestId=++state.searchRequestId;state.page='search';state.searchQuery=normalizedQuery;state.searchPage=1;state.searchType='all';state.searchTotalPages=1;await populateGenreFilter('all');if(requestId!==state.searchRequestId)return;$('hero').classList.add('hidden');$('homeSections').classList.add('hidden');$('listingPage').classList.remove('hidden');$('filterbar').classList.remove('hidden');$('loadMore').classList.remove('hidden');$('listingTitle').textContent=`Search: “${query}”`;document.querySelectorAll('#filterbar .pill').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));$('listingGrid').innerHTML='<div class="loading-line" style="grid-column:1/-1"></div>';setNavActive('');await runSearch(true,requestId)}
 async function runSearch(reset,requestId=state.searchRequestId){const query=state.searchQuery;const page=state.searchPage;try{const data=await api('/search/multi',{query,page,include_adult:false});if(requestId!==state.searchRequestId||query!==state.searchQuery)return;state.searchTotalPages=data.total_pages||1;let items=(data.results||[]).filter(x=>['movie','tv'].includes(x.media_type)&&x.poster_path);if(reset)state.searchResults=items;else state.searchResults=[...(state.searchResults||[]),...items];state.categoryItems=state.searchResults;$('listingTitle').textContent=`Search: “${state.searchQuery}”`;$('listingCount').textContent=`${data.total_results||state.searchResults.length} results`;renderSearchResults();$('loadMore').hidden=state.searchPage>=state.searchTotalPages;return true}catch(e){if(requestId===state.searchRequestId)$('listingGrid').innerHTML=`<div class="error-box" style="grid-column:1/-1">Search failed: ${escapeHtml(e.message)}</div>`;return requestId===state.searchRequestId?false:undefined}}
 
+/* swipe-down-to-dismiss for the detail sheet (touch only) */
+(function(){
+  const modal=document.querySelector('#detailOverlay .modal');
+  if(!modal)return;
+  let startX=0,startY=0,dragY=0,dragging=false,active=false;
+  modal.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch')return;
+    if(modal.scrollTop>0)return;
+    if(e.target.closest('button,input,select,a,iframe,video'))return;
+    startX=e.clientX;startY=e.clientY;dragY=0;dragging=true;active=false;
+  },{passive:true});
+  modal.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const dy=e.clientY-startY,dx=e.clientX-startX;
+    if(!active){
+      if(dy>14&&Math.abs(dy)>Math.abs(dx)*1.2&&modal.scrollTop<=0){
+        active=true;modal.style.transition='none';
+      }else if(Math.abs(dx)>Math.abs(dy)){dragging=false;return}
+      else return;
+    }
+    dragY=Math.max(0,dy);
+    modal.style.transform='translateY('+dragY+'px)';
+    const ov=$('detailOverlay');
+    if(ov)ov.style.background='rgba(0,0,0,'+Math.max(0.25,0.55-dragY/600).toFixed(3)+')';
+  },{passive:true});
+  const end=()=>{
+    if(!dragging)return;
+    dragging=false;
+    const dismiss=active&&dragY>110;
+    modal.style.transition='transform .32s var(--ease)';
+    const ov=$('detailOverlay');
+    if(dismiss){
+      modal.style.transform='translateY(100dvh)';
+      setTimeout(()=>{closeOverlay('detailOverlay');modal.style.transform='';modal.style.transition='';if(ov)ov.style.background='';},190);
+    }else{
+      modal.style.transform='';
+      setTimeout(()=>{modal.style.transition='';if(ov)ov.style.background='';},320);
+    }
+    active=false;dragY=0;
+  };
+  modal.addEventListener('pointerup',end);
+  modal.addEventListener('pointercancel',end);
+})();
 window.addEventListener('scroll',()=>{document.querySelector('.topbar')?.classList.toggle('scrolled',window.scrollY>24);const b=$('backTop');if(b)b.classList.toggle('show',window.scrollY>500)},{passive:true});
 (function(){const b=$('backTop');if(!b)return;b.addEventListener('click',()=>{buzz(8);const smooth=!matchMedia('(prefers-reduced-motion:reduce)').matches;window.scrollTo({top:0,behavior:smooth?'smooth':'auto'})});if(window.scrollY>500)b.classList.add('show')})();
 document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest('.movie-card');if(!c)return;const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/(r.width*1.5);c.style.setProperty('--mx',(px*100)+'%');c.style.setProperty('--my',(py*100)+'%');c.style.setProperty('--ry',((px-.5)*8)+'deg');c.style.setProperty('--rx',((.5-Math.min(py,1))*6)+'deg')},{passive:true});
