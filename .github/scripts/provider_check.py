@@ -83,15 +83,36 @@ for name, (mv, tv) in PROVIDERS.items():
 
 json.dump(out, open("provider-status.json", "w"), indent=2)
 
+# --- publish the refreshed status first: this is the one artifact the client
+# actually needs; issue management is best effort and must never block it ---
+if TOKEN:
+    git("config", "user.name", "cineframe-watchdog")
+    git("config", "user.email", "actions@github.com")
+    git("add", "provider-status.json")
+    subprocess.run(["git", "commit", "-m", f"chore(watchdog): provider status {now}"], capture_output=True)
+    try:
+        git("push", "origin", f"HEAD:{MAIN}")
+        print("status committed to main")
+    except subprocess.CalledProcessError:
+        print("status push to main failed (non-fast-forward?) — continuing with issue management")
+    try:
+        git("push", "origin", f"HEAD:{APP_BRANCH}")
+        print("status fast-forwarded to app branch")
+    except subprocess.CalledProcessError:
+        print("app branch not fast-forwardable — client falls back to raw.githubusercontent")
+
 # --- outage issue management (only with a token, i.e. inside Actions) ---
 if TOKEN:
     down_now = sorted(n for n, v in out["providers"].items() if not v["ok"])
     down_before = sorted(n for n, v in prev.items() if v.get("ok") is False)
     try:
-        open_issues = api("GET", "/issues?labels=provider-watchdog&state=open&per_page=10")
+        open_issues = [i for i in api("GET", "/issues?labels=provider-watchdog&state=open&per_page=10") if "pull_request" not in i]
     except Exception:
-        open_issues = []
-    if down_now and down_now != down_before:
+        print("could not list open issues — skipping issue management this run")
+        open_issues = None
+    if open_issues is None:
+        pass
+    elif down_now and down_now != down_before:
         body = ("The scheduled probe (movie + TV embed route per provider) reports these providers as unreachable from GitHub Actions:\n\n"
                 + "\n".join(f"- **{n}**" for n in down_now)
                 + "\n\nThey keep their code slots, but the client auto-deprioritizes them via `provider-status.json`.\n"
@@ -102,6 +123,10 @@ if TOKEN:
             for extra in open_issues[1:]:
                 api("PATCH", f"/issues/{extra['number']}", {"state": "closed", "state_reason": "not_planned"})
         else:
+            try:
+                api("POST", "/labels", {"name": "provider-watchdog", "color": "e11d48"})
+            except Exception:
+                pass  # label already exists (or lacks permission) — use it anyway
             api("POST", "/issues", {"title": title, "body": body, "labels": ["provider-watchdog"]})
         print("outage issue updated:", title)
     elif not down_now and open_issues:
@@ -109,15 +134,3 @@ if TOKEN:
             api("PATCH", f"/issues/{issue['number']}", {"state": "closed", "state_reason": "completed"})
         print("all providers back — watchdog issue(s) closed")
 
-    # commit the refreshed status to main, and fast-forward the app branch so
-    # the deployed site serves the same file same-origin.
-    git("config", "user.name", "cineframe-watchdog")
-    git("config", "user.email", "actions@github.com")
-    git("add", "provider-status.json")
-    subprocess.run(["git", "commit", "-m", f"chore(watchdog): provider status {now}"], capture_output=True)
-    git("push", "origin", f"HEAD:{MAIN}")
-    try:
-        git("push", "origin", f"HEAD:{APP_BRANCH}")
-        print("status fast-forwarded to app branch")
-    except subprocess.CalledProcessError:
-        print("app branch not fast-forwardable — client falls back to raw.githubusercontent")
