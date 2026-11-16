@@ -1463,6 +1463,24 @@ function cineDebugMeasure(){
   out.textContent=['#app','#listingPage','#filterbar','#listingGrid','#listingGrid .movie-card','#listingGrid .poster','#listingPage h2'].map(one).join('\n');
 }
 if(/[?&]debug(&|=|$)/.test(location.search))addEventListener('load',cineViewportDebug,{once:true});
+// If the browser is pinch-zoomed out, the page looks "desktop-sized" even
+// though the layout is correctly mobile. The site can't change browser zoom,
+// but it can say so — once per day per session.
+function checkVisualZoom(){
+  const vv=window.visualViewport;
+  if(!vv||typeof vv.scale!=='number')return;
+  try{
+    if(vv.scale<0.9){
+      const last=Number(sessionStorage.getItem('cineframe_zoom_hint')||0);
+      if(Date.now()-last>86400000){
+        sessionStorage.setItem('cineframe_zoom_hint',String(Date.now()));
+        toast('Your browser is zoomed out ('+Math.round(vv.scale*100)+'%) — pinch in to fill the screen');
+      }
+    }
+  }catch(_){}
+}
+addEventListener('load',()=>setTimeout(checkVisualZoom,1200),{once:true});
+addEventListener('resize',()=>setTimeout(checkVisualZoom,500));
 // ---- Data Saver: lighter images + calmer home on metered/slow connections.
 // Honors the OS-level saveData hint automatically; manual toggle persists.
 function isDataSaver(){return Boolean(safeStore.get('cineframe_data_saver',false)||navigator.connection?.saveData)}
