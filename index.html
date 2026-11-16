@@ -1160,7 +1160,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.1</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.6.2</span></footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 'use strict';
@@ -1168,7 +1168,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.6.1';
+const APP_VERSION = '1.6.2';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1449,8 +1449,24 @@ function cineViewportDebug(){
     +`<div style="margin-top:6px;border-top:1px solid #ffffff2a;padding-top:6px">ruler (CSS px):</div>`
     +bar(100,'#ffd60a')+bar(200,'#30d158')+bar(300,'#0a84ff')
     +`<div id="cineDebugOut" style="white-space:pre-line;margin-top:8px;color:#c7ffb2">— open Movies/Shows/Search, then tap Measure —</div>`
-    +`<button type="button" onclick="cineDebugMeasure()" style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Measure page</button>`;
+    +`<button type="button" onclick="cineDebugMeasure()" style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Measure page</button>`
+    +`<div style="margin-top:10px;border-top:1px solid #ffffff2a;padding-top:8px;line-height:1.45">If these ruler bars end near the <b>middle</b> of the screen (they should reach ~83% of the width at 300px) while everything on the right stays empty, the browser is painting the page into only half the screen. The layout above is correct — that is a device/browser drawing fault, not a page bug. Rotate the phone to landscape and back once; if that does not clear it, fully close the browser from Recents (or reboot).`
+    +`<button type="button" onclick="cineDebugFixSurface()" style="display:block;margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #ffffff55;background:#2c2c2e;color:#fff;font:600 12px system-ui;cursor:pointer">Force surface resize</button></div>`;
   document.body.appendChild(d);
+}
+async function cineDebugFixSurface(){
+  try{
+    const el=document.documentElement;
+    if(!document.fullscreenElement){
+      await el.requestFullscreen();
+      setTimeout(()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(_){} },450);
+    }else{
+      await document.exitFullscreen();
+    }
+    toast('Surface resize forced — check the ruler bars');
+  }catch(_){
+    toast('Fullscreen refused — rotate the phone once instead');
+  }
 }
 function cineDebugMeasure(){
   const out=document.getElementById('cineDebugOut');if(!out)return;
