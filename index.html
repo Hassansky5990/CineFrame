@@ -284,6 +284,8 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 .video-strip{display:flex;gap:14px;overflow:auto;padding:4px 0 14px}
 .video-item{flex:0 0 250px;border:0;border-radius:16px;background:var(--panel2);color:#fff;text-align:left;overflow:hidden;padding:0;box-shadow:inset 0 0 0 1px var(--hair);transition:transform .35s var(--ease),background .2s}.video-item:hover{transform:scale(1.03);background:#3a3a3c}
 .video-thumb{position:relative;display:grid;place-items:center;aspect-ratio:16/9;font-size:0;background:linear-gradient(135deg,#48484a,#1c1c1e)}
+.video-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.video-thumb-play{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#00000090;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;font-size:17px}
 .video-thumb:after{content:"";width:48px;height:48px;border-radius:50%;border:1px solid #ffffff33;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9.5 6v12l9-6z'/%3E%3C/svg%3E") center/22px no-repeat,#ffffff2e;backdrop-filter:blur(14px)}
 .video-label{display:block;padding:12px 14px 14px;font-size:.84rem}
 .detail-body .row-scroll{grid-auto-columns:minmax(0,58%);grid-auto-rows:min-content;gap:18px;padding:20px 4px 34px;margin:0;scroll-padding-inline:4px}
@@ -959,10 +961,9 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
    genre chips get their own full-width line, count sits beside the heading */
 @media(max-width:760px),((max-width:1024px) and (pointer:coarse)){
   .filterbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:16px 0 24px}
-  .pill-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0}
-  .pill-row::-webkit-scrollbar{display:none}
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
   .pill-row .pill{flex:none;width:auto;white-space:nowrap}
-  .genre-chips{flex:none;overflow-x:auto;scrollbar-width:none;min-width:0}
+  .genre-chips{flex:none;flex-wrap:wrap;overflow:visible;scrollbar-width:none;min-width:0}
   .genre-chips::-webkit-scrollbar{display:none}
   .gchip{min-height:36px}
   .search-page .section-heading{grid-template-columns:minmax(0,1fr) auto;gap:10px}
@@ -1192,7 +1193,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
     <p class="auth-footnote">Your account is managed securely by Supabase. Never share your password or verification links.</p>
   </section>
 </div>
-<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.8.0</span></footer>
+<footer class="app-foot"><span>CineFrame</span><span aria-hidden="true">·</span><span id="versionBadge">v1.9.0</span></footer>
 <div class="install-nudge" id="installNudge" hidden role="region" aria-label="Install CineFrame"><span class="install-text">Install CineFrame — full-screen app, works offline</span><button class="install-go" id="installGo" type="button">Install</button><button class="install-close" id="installClose" type="button" aria-label="Dismiss">×</button></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -1201,7 +1202,7 @@ button,input,select{font:inherit;letter-spacing:inherit}button{cursor:pointer}a{
 const API_BASE = '/api/tmdb-proxy';
 const IMG = 'https://image.tmdb.org/t/p/';
 const VIDRIFT_BASE = 'https://embed.vidrift.net/embed';
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.9.0';
 // Provider lineup — bench-verified in TWO network regimes (healthy morning round
 // and a degraded round where several servers failed outright, i.e. garbage-wifi
 // conditions). Composite score = route success + speed + stability (jitter) +
@@ -1422,12 +1423,8 @@ async function ageRatingOf(item){
       if(!grouped.has(code))grouped.set(code,new Set());
       grouped.get(code).add(value);
     });
-    const preferred=['PK','US','GB','AU','CA'];
-    const countries=[...grouped.keys()].sort((a,b)=>{
-      const ai=preferred.indexOf(a),bi=preferred.indexOf(b);
-      return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b);
-    });
-    const ratings=countries.map(country=>({country,cert:[...grouped.get(country)].join(' / ')}));
+    const us=grouped.get('US');
+    const ratings=us?[{country:'US',cert:[...us].join(' / ')}]:[];
     ageRatingCache.set(key,ratings);
     return ratings;
   }catch(error){console.warn('Could not load age certifications',error);ageRatingCache.set(key,[]);return []}
@@ -1840,7 +1837,7 @@ async function openDetailsById(type,id){
 }
 async function openDetails(item){const requestId=++state.detailRequestId;state.selected=normalize(item,mediaType(item));updateDetailBackButton();const detailModal=$('detailOverlay').querySelector('.modal');if(detailModal)detailModal.scrollTop=0;const resumeEntry=getHistory().find(x=>Number(x.id)===Number(item.id)&&mediaType(x)===mediaType(item));state.currentSeason=Number(resumeEntry?.season)||1;state.currentEpisode=Number(resumeEntry?.episode)||1;$('detailTitle').textContent=titleOf(item);$('detailType').textContent=mediaType(item)==='tv'&&item.original_language==='ja'&&((item.genre_ids||[]).includes(16)||(item.genres||[]).some(g=>Number(g.id)===16))?'ANIME':mediaType(item)==='tv'?'SERIES':'MOVIE';const detailHero=$('detailHero');const detailArtwork=$('detailHeroArtwork');detailHero.style.backgroundImage='none';detailHero.style.backgroundColor='#1c1c1e';const setHeroArtwork=(data)=>{if(!detailArtwork||state.selected?.id!==item.id)return;detailArtwork.onload=null;detailArtwork.onerror=null;detailArtwork.removeAttribute('src');detailArtwork.style.display='block';detailArtwork.style.width='100%';detailArtwork.style.height='100%';detailArtwork.style.objectFit='cover';detailArtwork.style.objectPosition='center';const paths=[data?.backdrop_path,data?.poster_path].filter(Boolean);const candidates=paths.flatMap((path,i)=>i===0?[IMG+'w1280'+path,IMG+'original'+path,IMG+'w780'+path]:[IMG+'w500'+path,IMG+'w342'+path]);let index=0;if(!candidates.length){detailArtwork.style.display='none';return}detailArtwork.onerror=()=>{index++;if(index<candidates.length){detailArtwork.src=candidates[index]}else{detailArtwork.onerror=null;detailArtwork.style.display='none'}};detailArtwork.src=candidates[0]};setHeroArtwork(item);$('detailMeta').innerHTML=`<span class="rating">★ ${ratingOf(item)}</span><span class="age-rating" id="detailAgeRating" hidden></span><span>${yearOf(item)}</span><span>${mediaType(item)==='tv'?(item.number_of_seasons?`${item.number_of_seasons} seasons`:'TV series'):(item.runtime?`${item.runtime} min`:'Movie')}</span><span class="tag">${item.status||'TITLE'}</span>`;
   const ageElement=$('detailAgeRating');if(ageElement){ageElement.hidden=true;ageElement.textContent='';ageRatingOf(item).then(ratings=>{if(requestId!==state.detailRequestId||Number(state.selected?.id)!==Number(item.id)||!ratings.length)return;ageElement.innerHTML=ratings.map(({country,cert})=>`<span class="age-rating-item"><span class="age-rating-country">${escapeHtml(country)}</span>: ${escapeHtml(cert)}</span>`).join('');ageElement.hidden=false})}$('detailOverview').textContent=item.overview||'No synopsis is available for this title.';$('detailGenres').textContent=(item.genres||[]).map(g=>g.name).join(' · ');updateDetailListButton();$('videoStrip').innerHTML='<div class="tiny-note">Loading videos…</div>';$('recommendRow').innerHTML='';$('tvControls').classList.toggle('hidden',mediaType(item)!=='tv');openOverlay('detailOverlay');const type=mediaType(item);const id=item.id;
-  const tasks=[api(`/${type}/${id}/videos`).catch(()=>({results:[]})),api(`/${type}/${id}/recommendations`).catch(()=>({results:[]})),api(`/${type}/${id}`).catch(()=>item)];const [videos,recs,full]=await Promise.all(tasks);if(requestId!==state.detailRequestId||Number(state.selected?.id)!==Number(id))return;if(state.selected?.id===id){state.selected=normalize({...state.selected,...(full||{})},type);setHeroArtwork(state.selected)}state.videos=videos.results||[];state.recommendations=(recs.results||[]).map(x=>normalize(x,type));$('videoStrip').innerHTML=state.videos.length?state.videos.slice(0,12).map(v=>`<button class="video-item" onclick="playTrailer(decodeURIComponent('${safeArg(v.key)}'),decodeURIComponent('${safeArg(v.name||'Trailer')}'))"><span class="video-thumb">▶</span><span class="video-label"><b>${escapeHtml(v.name||'Video')}</b><br><span class="tiny-note">${escapeHtml(v.site||'Video')} · ${escapeHtml(v.type||'Clip')}</span></span></button>`).join(''):'<div class="tiny-note">No videos available from TMDB for this title.</div>';renderRow('recommendRow',state.recommendations.slice(0,10));requestAnimationFrame(updateRecommendationSlider);if(type==='tv'){const shows=full?.seasons||item.seasons||[];const seasonSelect=$('seasonSelect');seasonSelect.innerHTML=shows.filter(s=>s.season_number!==0).map(s=>`<option value="${s.season_number}">${escapeHtml(s.name||`Season ${s.season_number}`)}</option>`).join('')||'<option value="1">Season 1</option>';const requestedSeason=Number(state.currentSeason)||1;if([...seasonSelect.options].some(option=>Number(option.value)===requestedSeason))seasonSelect.value=String(requestedSeason);state.currentSeason=Number(seasonSelect.value||1);await loadSeasonEpisodes()}}
+  const tasks=[api(`/${type}/${id}/videos`).catch(()=>({results:[]})),api(`/${type}/${id}/recommendations`).catch(()=>({results:[]})),api(`/${type}/${id}`).catch(()=>item)];const [videos,recs,full]=await Promise.all(tasks);if(requestId!==state.detailRequestId||Number(state.selected?.id)!==Number(id))return;if(state.selected?.id===id){state.selected=normalize({...state.selected,...(full||{})},type);setHeroArtwork(state.selected)}state.videos=videos.results||[];state.recommendations=(recs.results||[]).map(x=>normalize(x,type));$('videoStrip').innerHTML=state.videos.length?state.videos.slice(0,12).map(v=>`<button class="video-item" onclick="playTrailer(decodeURIComponent('${safeArg(v.key)}'),decodeURIComponent('${safeArg(v.name||'Trailer')}'))"><span class="video-thumb"><img src="https://img.youtube.com/vi/${encodeURIComponent(v.key)}/mqdefault.jpg" alt="" loading="lazy" onerror="this.style.display='none'"><span class="video-thumb-play">▶</span></span><span class="video-label"><b>${escapeHtml(v.name||'Video')}</b><br><span class="tiny-note">${escapeHtml(v.site||'Video')} · ${escapeHtml(v.type||'Clip')}</span></span></button>`).join(''):'<div class="tiny-note">No videos available from TMDB for this title.</div>';renderRow('recommendRow',state.recommendations.slice(0,10));requestAnimationFrame(updateRecommendationSlider);if(type==='tv'){const shows=full?.seasons||item.seasons||[];const seasonSelect=$('seasonSelect');seasonSelect.innerHTML=shows.filter(s=>s.season_number!==0).map(s=>`<option value="${s.season_number}">${escapeHtml(s.name||`Season ${s.season_number}`)}</option>`).join('')||'<option value="1">Season 1</option>';const requestedSeason=Number(state.currentSeason)||1;if([...seasonSelect.options].some(option=>Number(option.value)===requestedSeason))seasonSelect.value=String(requestedSeason);state.currentSeason=Number(seasonSelect.value||1);await loadSeasonEpisodes()}}
 async function loadSeasonEpisodes(){
   if(!state.selected||mediaType(state.selected)!=='tv')return;
   const tvId=Number(state.selected.id);
