@@ -5,7 +5,7 @@
      from cache and refreshed in the background for the next visit.
    - TMDB, provider embeds, Supabase and every cross-origin request are
      never intercepted. Non-navigation requests pass through untouched. */
-const CACHE = 'cineframe-shell-v6';
+const CACHE = 'cineframe-shell-v7';
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -44,7 +44,15 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   // App documents only: never touch API calls, media segments or embeds.
   if (request.mode !== 'navigate') return;
-  if (new URL(request.url).origin !== self.location.origin) return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Shell caching covers only the app document itself. Any other
+  // same-origin document (test pages, future routes) loads from the
+  // network untouched so it can never be answered with the shell.
+  const path = url.pathname.replace(/\/+$/, '');
+  const shellPath = new URL('./', self.location.origin).pathname.replace(/\/+$/, '');
+  if (path !== shellPath && !path.endsWith('/index.html')) return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
