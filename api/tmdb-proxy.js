@@ -45,7 +45,8 @@ export default async function handler(req, res) {
       headers: { Accept: 'application/json' }
     });
     const body = await response.text();
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', response.ok ? 'public, s-maxage=60, stale-while-revalidate=300' : 'no-store');
     return res.status(response.status).send(body);
   } catch (error) {

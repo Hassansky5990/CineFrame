@@ -5,7 +5,7 @@
      from cache and refreshed in the background for the next visit.
    - TMDB, provider embeds, Supabase and every cross-origin request are
      never intercepted. Non-navigation requests pass through untouched. */
-const CACHE = 'cineframe-shell-v11';
+const CACHE = 'cineframe-shell-v12';
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -27,16 +27,33 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    // Verify this version actually precached the shell BEFORE deleting
+    // the old caches — never wipe the last-known-good shell.
+    let healthy = false;
+    try {
+      const cache = await caches.open(CACHE);
+      healthy = Boolean(await cache.match('./') || await cache.match('index.html'));
+    } catch (_) { healthy = false; }
+
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
+    const oldKeys = keys.filter((key) => key !== CACHE);
+    const isUpgrade = oldKeys.some((key) => key.indexOf('cineframe-shell-') === 0);
+
+    if (healthy) {
+      await Promise.all(oldKeys.map((key) => caches.delete(key)));
+    } else {
+      console.warn('[sw] new cache is empty; keeping old shells for rollback');
+    }
     await self.clients.claim();
-    // One-time refresh on update: the just-installed worker already precached
-    // the current shell, so reloading open tabs here means a deploy lands on
-    // the first visit instead of the visit after next. Runs once per version.
-    const windows = await self.clients.matchAll({ type: 'window' });
-    windows.forEach((client) => {
-      try { client.navigate(client.url).catch(() => {}); } catch (_) {}
-    });
+
+    // Reload open tabs only on a genuine upgrade with a healthy cache.
+    // Never on first install, never when this version failed to precache.
+    if (healthy && isUpgrade) {
+      const windows = await self.clients.matchAll({ type: 'window' });
+      windows.forEach((client) => {
+        try { client.navigate(client.url).catch(() => {}); } catch (_) {}
+      });
+    }
   })());
 });
 
@@ -47,26 +64,29 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Shell caching covers only the app document itself. Any other
-  // same-origin document (test pages, future routes) loads from the
-  // network untouched so it can never be answered with the shell.
+  // Shell caching covers only the app document itself. Anything else loads
+  // from the network untouched so it can never be answered with the shell.
+  const shellUrl = new URL('./', self.registration.scope);
   const path = url.pathname.replace(/\/+$/, '');
-  const shellPath = new URL('./', self.location.origin).pathname.replace(/\/+$/, '');
-  if (path !== shellPath && !path.endsWith('/index.html')) return;
+  const shellPath = shellUrl.pathname.replace(/\/+$/, '');
+  const isShell = path === shellPath
+    || path === (shellPath + '/index.html')
+    || path === '/index.html';
+  if (!isShell) return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached =
       await cache.match(request, { ignoreSearch: true }) ||
       await cache.match('./', { ignoreSearch: true });
-    const shellUrl = new URL('./', self.location.origin).href;
+    const shellUrl = new URL('./', self.registration.scope).href;
 
+    // Only cache clean, successful responses — never error pages or
+    // opaque redirects, which would poison the offline shell forever.
     const refresh = fetch(request).then((response) => {
-      if (response && (response.ok || response.type === 'opaqueredirect')) {
-        cache.put(request, response.clone()).catch(() => {});
-        if (new URL(request.url).href !== shellUrl) {
-          cache.put(shellUrl, response.clone()).catch(() => {});
-        }
+      if (response && response.ok) {
+        const shellHref = new URL('./', self.registration.scope).href;
+        cache.put(shellHref, response.clone()).catch(() => {});
       }
       return response;
     }).catch(() => null);

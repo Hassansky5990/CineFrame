@@ -9,6 +9,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT) || 3000;
 
 app.disable('x-powered-by');
+app.use((_req, res, next) => { res.setHeader('X-Content-Type-Options', 'nosniff'); next(); });
 
 app.get(['/api/tmdb/*', '/api/tmdb-proxy'], async (req, res) => {
   const apiKey = process.env.TMDB_API_KEY?.trim();
@@ -20,7 +21,9 @@ app.get(['/api/tmdb/*', '/api/tmdb-proxy'], async (req, res) => {
 
   // Two accepted transports: the original /api/tmdb/<path> segments and the
   // flat /api/tmdb-proxy?path=<path> used by the deployed Vercel function.
-  const rawPath = String(req.query.path || req.params[0] || '').replace(/^\/+/, '');
+  const rawPath = (Array.isArray(req.query.path)
+    ? req.query.path.join('/')
+    : String(req.query.path || req.params[0] || '')).replace(/^\/+/, '');
   if (!isAllowedTmdbPath(rawPath)) {
     return res.status(400).json({ error: 'TMDB endpoint is not available through CineFrame.' });
   }
@@ -50,7 +53,7 @@ app.get(['/api/tmdb/*', '/api/tmdb-proxy'], async (req, res) => {
     });
     const body = await response.text();
     res.status(response.status);
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', response.ok ? 'public, s-maxage=60, stale-while-revalidate=300' : 'no-store');
     return res.send(body);
   } catch (error) {
@@ -67,8 +70,20 @@ app.get(['/', '/index.html'], (_req, res) => {
   res.sendFile(path.join(root, 'index.html'));
 });
 
+// PWA assets and the watchdog status file the client fetches same-origin.
+app.use(express.static(root, { index: false, fallthrough: true, dotfiles: 'deny' }));
+
 app.use((_req, res) => {
   res.status(404).type('text').send('Not found');
+});
+
+// A rejected promise in any route lands here instead of hanging the request
+// or killing the process (Express 4 does not forward async rejections).
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled route error:', err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(port, '0.0.0.0', () => {
