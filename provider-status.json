@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-19T13:50:34Z",
+  "generated": "2026-11-20T13:32:57Z",
   "movie_id": 27205,
   "tv_id": 32118,
   "providers": {
@@ -8,17 +8,17 @@
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 380,
+        "latency_ms": 242,
         "blocking": "advisory"
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 143,
+        "latency_ms": 201,
         "blocking": "advisory"
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 380,
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 242,
       "blocking": "advisory"
     },
     "2embedskin": {
@@ -26,168 +26,168 @@
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 466,
+        "latency_ms": 734,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 851,
+        "latency_ms": 1099,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 851
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 1099
     },
     "vidlink": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 218,
+        "latency_ms": 494,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 323,
+        "latency_ms": 276,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 323
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 494
     },
     "vidsrcsu": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 295,
+        "latency_ms": 387,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 283,
+        "latency_ms": 229,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 295
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 387
     },
     "vixsrc": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 244,
+        "latency_ms": 303,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 218,
+        "latency_ms": 296,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 244
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 303
     },
     "2embedcc": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 816,
+        "latency_ms": 909,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 546,
+        "latency_ms": 584,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 816
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 909
     },
     "vidnest": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 194,
+        "latency_ms": 641,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 208,
+        "latency_ms": 321,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 208
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 641
     },
     "vidfast": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 334,
+        "latency_ms": 471,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 356,
+        "latency_ms": 406,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 356
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 471
     },
     "vidsrcto": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 306,
+        "latency_ms": 403,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 312,
+        "latency_ms": 365,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 312
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 403
     },
     "vidrift": {
       "ok": true,
       "movie": {
         "ok": true,
         "status": 200,
-        "latency_ms": 537,
+        "latency_ms": 304,
         "blocking": ""
       },
       "tv": {
         "ok": true,
         "status": 200,
-        "latency_ms": 1350,
+        "latency_ms": 4254,
         "blocking": ""
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 1350
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 4254
     },
     "multiembed": {
       "ok": false,
       "movie": {
         "ok": false,
         "status": 403,
-        "latency_ms": 475
+        "latency_ms": 593
       },
       "tv": {
         "ok": false,
         "status": 403,
-        "latency_ms": 262
+        "latency_ms": 320
       },
-      "checked_at": "2026-11-19T13:50:34Z",
-      "latency_ms": 475
+      "checked_at": "2026-11-20T13:32:57Z",
+      "latency_ms": 593
     }
   }
 }
